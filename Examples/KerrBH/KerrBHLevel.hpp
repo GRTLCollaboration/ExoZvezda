@@ -6,6 +6,7 @@
 #ifndef KERRBHLEVEL_HPP_
 #define KERRBHLEVEL_HPP_
 
+#include "BHAMR.hpp"
 #include "DefaultLevelFactory.hpp"
 #include "GRAMRLevel.hpp"
 
@@ -14,6 +15,8 @@ class KerrBHLevel : public GRAMRLevel
     friend class DefaultLevelFactory<KerrBHLevel>;
     // Inherit the contructors from GRAMRLevel
     using GRAMRLevel::GRAMRLevel;
+
+    BHAMR &m_bh_amr = dynamic_cast<BHAMR &>(m_gr_amr);
 
     /// Things to do at every full timestep
     ///(might include several substeps, e.g. in RK4)
@@ -39,9 +42,11 @@ class KerrBHLevel : public GRAMRLevel
     /// Things to do before tagging cells (i.e. filling ghosts)
     virtual void preTagCells() override;
 
-    virtual void
-    computeTaggingCriterion(FArrayBox &tagging_criterion,
-                            const FArrayBox &current_state) override;
+    virtual void computeTaggingCriterion(
+        FArrayBox &tagging_criterion, const FArrayBox &current_state,
+        const FArrayBox &current_state_diagnostics) override;
+
+    virtual void specificPostTimeStep() override;
 };
 
 #endif /* KERRBHLEVEL_HPP_ */

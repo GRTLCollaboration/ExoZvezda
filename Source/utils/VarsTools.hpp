@@ -45,24 +45,16 @@ void define_symmetric_enum_mapping(
     static_assert(interval.size() ==
                       DEFAULT_TENSOR_DIM * (DEFAULT_TENSOR_DIM + 1) / 2,
                   "Interval has wrong size");
-#if DEFAULT_TENSOR_DIM == 3
-    mapping_function(start_var, tensor[0][0]);
-
-    mapping_function(start_var + 1, tensor[0][1]);
-    mapping_function(start_var + 1, tensor[1][0]);
-
-    mapping_function(start_var + 2, tensor[0][2]);
-    mapping_function(start_var + 2, tensor[2][0]);
-
-    mapping_function(start_var + 3, tensor[1][1]);
-
-    mapping_function(start_var + 4, tensor[1][2]);
-    mapping_function(start_var + 4, tensor[2][1]);
-
-    mapping_function(start_var + 5, tensor[2][2]);
-#else
-#error DEFAULT_TENSOR_DIM not equal to three not implemented yet...
-#endif
+    int idx = 0;
+    FOR(idir1)
+    {
+        for (int idir2 = idir1; idir2 < DEFAULT_TENSOR_DIM; ++idir2, ++idx)
+        {
+            mapping_function(start_var + idx, tensor[idir1][idir2]);
+            if (idir1 != idir2)
+                mapping_function(start_var + idx, tensor[idir2][idir1]);
+        }
+    }
 }
 
 //--> Begin: Helper for the assign function
@@ -87,9 +79,8 @@ ALWAYS_INLINE void assign(vars_t &vars, const value_t &value)
     // assign(vars, 0.)  and 0. gets correctly cast from double to simd<double>
     // if necessary.
     using data_t = typename strip_nested_template<vars_t>::type;
-    vars.enum_mapping([&value](const int &ivar, data_t &var) {
-        var = static_cast<data_t>(value);
-    });
+    vars.enum_mapping([&value](const int &ivar, data_t &var)
+                      { var = static_cast<data_t>(value); });
 }
 
 /// Prints all elements of the vars element with component names
@@ -97,9 +88,11 @@ ALWAYS_INLINE void assign(vars_t &vars, const value_t &value)
 template <template <typename> class vars_t, typename data_t>
 void print(const vars_t<data_t> &vars)
 {
-    vars.enum_mapping([](const int &ivar, data_t &var) {
-        pout() << UserVariables::variable_names[ivar] << ": " << var << "\n";
-    });
+    vars.enum_mapping(
+        [](const int &ivar, data_t &var) {
+            pout() << UserVariables::variable_names[ivar] << ": " << var
+                   << "\n";
+        });
 }
 } // namespace VarsTools
 

@@ -34,6 +34,7 @@ src_dirs := $(GRCHOMBO_SOURCE)/utils \
             $(GRCHOMBO_SOURCE)/GRChomboCore  \
             $(GRCHOMBO_SOURCE)/AMRInterpolator  \
             $(GRCHOMBO_SOURCE)/TaggingCriteria  \
+            $(GRCHOMBO_SOURCE)/ApparentHorizonFinder  \
             $(GRCHOMBO_SOURCE)/InitialConditions/BlackHoles \
             $(GRCHOMBO_SOURCE)/BlackHoles
 
@@ -42,3 +43,11 @@ ifeq ($(USE_TWOPUNCTURES),TRUE)
 endif
 
 include $(CHOMBO_HOME)/mk/Make.test
+
+ifdef TWOPUNCTURES_SOURCE
+all-tp: all-test
+	$(ECHO)mv $(_app_configs) $(ebase)_TP.$(config).ex
+else
+all-tp:
+	@echo "Set TWOPUNCTURES_SOURCE environment variable to build BinaryBH example with TwoPunctures.";
+endif
