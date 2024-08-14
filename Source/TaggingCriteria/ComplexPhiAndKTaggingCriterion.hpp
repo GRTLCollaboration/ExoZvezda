@@ -20,7 +20,8 @@ class ComplexPhiAndKTaggingCriterion
     const double m_threshold_K;
 
   public:
-    ComplexPhiAndKTaggingCriterion(double dx, double threshold_phi, double threshold_K)
+    ComplexPhiAndKTaggingCriterion(double dx, double threshold_phi,
+                                   double threshold_K)
         : m_dx(dx), m_deriv(dx), m_threshold_phi(threshold_phi),
           m_threshold_K(threshold_K){};
 
@@ -39,8 +40,8 @@ class ComplexPhiAndKTaggingCriterion
         data_t mod_d1_K = 0;
         FOR1(idir)
         {
-            mod_d1_phi += d1_phi_Re[idir] * d1_phi_Re[idir]
-                        + d1_phi_Im[idir] * d1_phi_Im[idir];
+            mod_d1_phi += d1_phi_Re[idir] * d1_phi_Re[idir] +
+                          d1_phi_Im[idir] * d1_phi_Im[idir];
             mod_d1_K += d1_K[idir] * d1_K[idir];
         }
 

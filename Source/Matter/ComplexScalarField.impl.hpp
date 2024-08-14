@@ -29,7 +29,7 @@ emtensor_t<data_t> ComplexScalarField<potential_t>::compute_emtensor(
 
     // call the function which computes the em tensor excluding the potential
     emtensor_excl_potential(out, vars, vars_csf, d1.phi_Re, d1.phi_Im, h_UU,
-        chris_ULL);
+                            chris_ULL);
 
     // set the default potential values
     data_t V_of_modulus_phi_squared = 0.0;
@@ -37,7 +37,7 @@ emtensor_t<data_t> ComplexScalarField<potential_t>::compute_emtensor(
 
     // compute potential and add constributions to EM Tensor
     my_potential.compute_potential(V_of_modulus_phi_squared,
-        dVdmodulus_phi_squared, vars);
+                                   dVdmodulus_phi_squared, vars);
 
     out.rho += 0.5 * V_of_modulus_phi_squared;
     out.S += -1.5 * V_of_modulus_phi_squared;
@@ -59,15 +59,15 @@ void ComplexScalarField<potential_t>::emtensor_excl_potential(
     const Tensor<1, data_t> &d1_phi_Im, const Tensor<2, data_t> &h_UU,
     const Tensor<3, data_t> &chris_ULL)
 {
-    //initialise some useful quantities
+    // initialise some useful quantities
     data_t modulus_d1_phi_squared = 0.;
     data_t modulus_Pi_squared =
         vars_csf.Pi_Re * vars_csf.Pi_Re + vars_csf.Pi_Im * vars_csf.Pi_Im;
     FOR2(i, j)
     {
         modulus_d1_phi_squared +=
-            vars.chi * h_UU[i][j] * (d1_phi_Re[i] * d1_phi_Re[j]
-            + d1_phi_Im[i] * d1_phi_Im[j]);
+            vars.chi * h_UU[i][j] *
+            (d1_phi_Re[i] * d1_phi_Re[j] + d1_phi_Im[i] * d1_phi_Im[j]);
     }
 
     // Calculate components of EM Tensor
@@ -75,9 +75,9 @@ void ComplexScalarField<potential_t>::emtensor_excl_potential(
     FOR2(i, j)
     {
         out.Sij[i][j] =
-            d1_phi_Re[i] * d1_phi_Re[j] + d1_phi_Im[i] * d1_phi_Im[j]
-            - 0.5 * (vars.h[i][j] * (modulus_d1_phi_squared - modulus_Pi_squared)
-            / vars.chi);
+            d1_phi_Re[i] * d1_phi_Re[j] + d1_phi_Im[i] * d1_phi_Im[j] -
+            0.5 * (vars.h[i][j] *
+                   (modulus_d1_phi_squared - modulus_Pi_squared) / vars.chi);
     }
 
     // S = Tr_S_ij
@@ -122,15 +122,15 @@ void ComplexScalarField<potential_t>::add_matter_rhs(
 
     // call the function for the rhs excluding the potential
     matter_rhs_excl_potential(rhs_csf, vars, vars_csf, d1, d1.phi_Re, d1.phi_Im,
-         d2.phi_Re, d2.phi_Im, advec_csf);
+                              d2.phi_Re, d2.phi_Im, advec_csf);
 
-     // set the default potential values
-     data_t V_of_modulus_phi_squared = 0.0;
-     data_t dVdmodulus_phi_squared = 0.0;
+    // set the default potential values
+    data_t V_of_modulus_phi_squared = 0.0;
+    data_t dVdmodulus_phi_squared = 0.0;
 
-     // compute potential and add constributions to EM Tensor
-     my_potential.compute_potential(V_of_modulus_phi_squared,
-         dVdmodulus_phi_squared, vars);
+    // compute potential and add constributions to EM Tensor
+    my_potential.compute_potential(V_of_modulus_phi_squared,
+                                   dVdmodulus_phi_squared, vars);
 
     // adjust RHS for the potential term
     total_rhs.phi_Re = rhs_csf.phi_Re;
@@ -172,12 +172,14 @@ void ComplexScalarField<potential_t>::matter_rhs_excl_potential(
 
     FOR2(k, l)
     {
-        rhs_csf.Pi_Re += h_UU[k][l] * (-vars.chi * d1.lapse[k] * d1_phi_Re[l]
-                                + vars.lapse * (0.5 * d1.chi[k] * d1_phi_Re[l]
-                                - vars.chi * d2_phi_Re[k][l]));
-        rhs_csf.Pi_Im += h_UU[k][l] * (-vars.chi * d1.lapse[k] * d1_phi_Im[l]
-                                + vars.lapse * (0.5 * d1.chi[k] * d1_phi_Im[l]
-                                - vars.chi * d2_phi_Im[k][l]));
+        rhs_csf.Pi_Re +=
+            h_UU[k][l] * (-vars.chi * d1.lapse[k] * d1_phi_Re[l] +
+                          vars.lapse * (0.5 * d1.chi[k] * d1_phi_Re[l] -
+                                        vars.chi * d2_phi_Re[k][l]));
+        rhs_csf.Pi_Im +=
+            h_UU[k][l] * (-vars.chi * d1.lapse[k] * d1_phi_Im[l] +
+                          vars.lapse * (0.5 * d1.chi[k] * d1_phi_Im[l] -
+                                        vars.chi * d2_phi_Im[k][l]));
     }
 }
 

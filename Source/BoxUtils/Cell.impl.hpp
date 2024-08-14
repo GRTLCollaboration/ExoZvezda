@@ -49,8 +49,8 @@ template <class data_t>
 template <template <typename> class vars_t>
 auto Cell<data_t>::load_vars() const
 {
-    <data_t> vars;
-    lovars_tad_vars(vars);
+    vars_t<data_t> vars;
+    load_vars(vars);
     return vars;
 }
 
