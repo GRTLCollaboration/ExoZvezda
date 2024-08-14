@@ -7,13 +7,13 @@
 #define COMPLEXPHIANDCHIEXTRACTIONTAGGINGCRITERION_HPP_
 
 #include "Cell.hpp"
-#include "DimensionDefinitions.hpp"
-#include "FourthOrderDerivatives.hpp"
 #include "ComplexScalarField.hpp"
-#include "SimulationParametersBase.hpp"
-#include "Tensor.hpp"
 #include "Coordinates.hpp"
 #include "DebuggingTools.hpp"
+#include "DimensionDefinitions.hpp"
+#include "FourthOrderDerivatives.hpp"
+#include "SimulationParametersBase.hpp"
+#include "Tensor.hpp"
 
 class ComplexPhiAndChiExtractionTaggingCriterion
 {
@@ -28,7 +28,7 @@ class ComplexPhiAndChiExtractionTaggingCriterion
     template <class data_t>
     using MatterVars = typename ComplexScalarField<>::template Vars<data_t>;
 
-    //Vars object for chi
+    // Vars object for chi
     template <class data_t> struct Vars
     {
         data_t chi; //!< Conformal factor
@@ -43,11 +43,12 @@ class ComplexPhiAndChiExtractionTaggingCriterion
     };
 
   public:
-    ComplexPhiAndChiExtractionTaggingCriterion(const double a_dx,
-        const int a_level, const extraction_params_t a_params,
-        const double a_threshold_phi, const double a_threshold_chi)
+    ComplexPhiAndChiExtractionTaggingCriterion(
+        const double a_dx, const int a_level,
+        const extraction_params_t a_params, const double a_threshold_phi,
+        const double a_threshold_chi)
         : m_dx(a_dx), m_deriv(a_dx), m_params(a_params), m_level(a_level),
-        m_threshold_phi(a_threshold_phi), m_threshold_chi(a_threshold_chi) {};
+          m_threshold_phi(a_threshold_phi), m_threshold_chi(a_threshold_chi){};
 
     template <class data_t> void compute(Cell<data_t> current_cell) const
     {
@@ -62,20 +63,21 @@ class ComplexPhiAndChiExtractionTaggingCriterion
 
         FOR2(idir, jdir)
         {
-            data_t mod_d2_Pi_ij = d2.Pi_Re[idir][jdir] * d2.Pi_Re[idir][jdir]
-                                + d2.Pi_Im[idir][jdir] * d2.Pi_Im[idir][jdir];
-            data_t mod_d2_phi_ij = d2.phi_Re[idir][jdir] * d2.phi_Re[idir][jdir]
-                                + d2.phi_Im[idir][jdir] * d2.phi_Im[idir][jdir];
-            data_t abs_d1d1_Pi_ij = abs(d1.Pi_Re[idir] * d1.Pi_Re[jdir]
-                                        + d1.Pi_Im[idir] * d1.Pi_Im[jdir]);
-            data_t abs_d1d1_phi_ij = abs(d1.phi_Re[idir] * d1.phi_Re[jdir]
-                                        + d1.phi_Im[idir] * d1.phi_Im[jdir]);
-            d2_phi_ratio += mod_d2_Pi_ij / (abs_d1d1_Pi_ij + 1e-5)
-                            + mod_d2_phi_ij / (abs_d1d1_phi_ij + 1e-5);
+            data_t mod_d2_Pi_ij = d2.Pi_Re[idir][jdir] * d2.Pi_Re[idir][jdir] +
+                                  d2.Pi_Im[idir][jdir] * d2.Pi_Im[idir][jdir];
+            data_t mod_d2_phi_ij =
+                d2.phi_Re[idir][jdir] * d2.phi_Re[idir][jdir] +
+                d2.phi_Im[idir][jdir] * d2.phi_Im[idir][jdir];
+            data_t abs_d1d1_Pi_ij = abs(d1.Pi_Re[idir] * d1.Pi_Re[jdir] +
+                                        d1.Pi_Im[idir] * d1.Pi_Im[jdir]);
+            data_t abs_d1d1_phi_ij = abs(d1.phi_Re[idir] * d1.phi_Re[jdir] +
+                                         d1.phi_Im[idir] * d1.phi_Im[jdir]);
+            d2_phi_ratio += mod_d2_Pi_ij / (abs_d1d1_Pi_ij + 1e-5) +
+                            mod_d2_phi_ij / (abs_d1d1_phi_ij + 1e-5);
             d2_chi_ratio += d2chi.chi[idir][jdir] * d2chi.chi[idir][jdir] /
-                          (1e-2 + abs(d1chi.chi[idir] * d1chi.chi[jdir]));
+                            (1e-2 + abs(d1chi.chi[idir] * d1chi.chi[jdir]));
         }
-	
+
         data_t criterion_phi = m_dx * sqrt(d2_phi_ratio) / m_threshold_phi;
         data_t criterion_chi = m_dx * sqrt(d2_chi_ratio) / m_threshold_chi;
 

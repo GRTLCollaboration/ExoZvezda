@@ -9,17 +9,17 @@
 #include "AMRInterpolator.hpp"
 #include "InterpolationQuery.hpp"
 #include "Lagrange.hpp"
-#include "SmallDataIO.hpp" // for writing data
-#include "UserVariables.hpp" // Needs c_mod_phi etc
 #include "SimulationParametersBase.hpp"
+#include "SmallDataIO.hpp"   // for writing data
+#include "UserVariables.hpp" // Needs c_mod_phi etc
 
 #include "SphericalExtraction.hpp"
 
 //////
+#include <cmath> // for NAN
 #include <fstream>
 #include <string>
 #include <vector>
-#include <cmath> // for NAN
 //////
 class AngMomFlux : SphericalExtraction
 {
@@ -31,25 +31,22 @@ class AngMomFlux : SphericalExtraction
     spherical_extraction_params_t m_params;
 
   public:
-
-      AngMomFlux(spherical_extraction_params_t &a_params, double a_time,
-                         double a_dt, double a_restart_time, bool a_first_step)
-                         : SphericalExtraction(a_params, a_dt, a_time, a_first_step,
-                                               a_restart_time),
-                            m_params(a_params),
-                            m_time(a_time), m_dt(a_dt), m_restart_time(m_restart_time),
-                            m_first_step(a_first_step)
-      {
-          add_var(c_Fphi_flux, VariableType::diagnostic);
-      }
+    AngMomFlux(spherical_extraction_params_t &a_params, double a_time,
+               double a_dt, double a_restart_time, bool a_first_step)
+        : SphericalExtraction(a_params, a_dt, a_time, a_first_step,
+                              a_restart_time),
+          m_params(a_params), m_time(a_time), m_dt(a_dt),
+          m_restart_time(m_restart_time), m_first_step(a_first_step)
+    {
+        add_var(c_Fphi_flux, VariableType::diagnostic);
+    }
 
     void run(AMRInterpolator<Lagrange<4>> *a_interpolator)
     {
         std::vector<double> integrals;
         auto integrand = [](std::vector<double> mom_flux_vals, double r,
-                                                     double theta, double phi){
-            return mom_flux_vals[0];
-        };
+                            double theta, double phi)
+        { return mom_flux_vals[0]; };
 
         // extract the values of the Weyl scalars on the spheres
         extract(a_interpolator);
@@ -63,18 +60,17 @@ class AngMomFlux : SphericalExtraction
 
         std::vector<string> title_line(m_params.num_extraction_radii);
         string dummy_string;
-        for (int i=0; i<m_params.num_extraction_radii; i++)
+        for (int i = 0; i < m_params.num_extraction_radii; i++)
         {
             dummy_string = "r = " + to_string(m_params.extraction_radii[i]);
             title_line[i] = dummy_string;
         }
 
-        SmallDataIO flux_file(m_filename, m_dt, m_time,
-                                      m_restart_time,
-                                      SmallDataIO::APPEND,
-                                      m_first_step);
+        SmallDataIO flux_file(m_filename, m_dt, m_time, m_restart_time,
+                              SmallDataIO::APPEND, m_first_step);
 
-        if (m_time > 0) flux_file.remove_duplicate_time_data();
+        if (m_time > 0)
+            flux_file.remove_duplicate_time_data();
 
         if (m_time == 0.)
         {
@@ -82,19 +78,17 @@ class AngMomFlux : SphericalExtraction
         }
 
         flux_file.write_time_data_line(vals);
-
     }
 
-    ~AngMomFlux(){;}
+    ~AngMomFlux() { ; }
 
     /*void setup_integration_surface();
-    void interpolate_over_surface(double r, AMRInterpolator<Lagrange<4>> *a_interpolator);
-    void integrate_over_surface(int index);
-    void write_to_dat();*/
+    void interpolate_over_surface(double r, AMRInterpolator<Lagrange<4>>
+    *a_interpolator); void integrate_over_surface(int index); void
+    write_to_dat();*/
 
   public:
-
-    //void run(AMRInterpolator<Lagrange<4>> *a_interpolator);
+    // void run(AMRInterpolator<Lagrange<4>> *a_interpolator);
 };
 
 #endif /* ANGMOMFLUX_HPP_ */

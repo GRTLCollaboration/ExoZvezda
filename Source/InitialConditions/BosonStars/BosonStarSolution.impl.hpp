@@ -10,113 +10,160 @@
 #ifndef BOSONSTARSOLUTION_IMPL_HPP_
 #define BOSONSTARSOLUTION_IMPL_HPP_
 
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+
 BosonStarSolution::BosonStarSolution() {}
 
 void BosonStarSolution::main()
 {
-    // finds the eigenvalue corresponding to intitial metric central values.
-    // WW is big then it descends to the correct w+ and w- then uses interval
-    // bisection to find best ww to machine precision
-
-    WW = find_WW_soliton();
-    ww = ww_IB_soliton(0, WW);
-    mid_int = find_midint();
-
-    // force the scalar field to zero after the turning point and reintegrate
-    // the lapse and shift
-    force_flat(mid_int);
-    rk4_asymp(mid_int - 1, false, ww);
-    //fix();
-    rk4_asymp(mid_int, true,
-              ww); // (true) uses large radius adaptive stepsize to get
-                   // asymptotics (integrates vacuum metric out to huge radius ~
-                   // 10^10 to measure asymptotics).
-    PSI_INF = psi[gridsize - 1];
-    OM_INF = omega[gridsize - 1];
-
-    for (int q = 0; q < 2; q++)
+    for (int iter = 0; iter < 17; iter++)
     {
-        PSC /= PSI_INF;
-        OMC /= OM_INF;
-        WW = find_WW_soliton();
-        ww = ww_IB_soliton(0, WW);
-        mid_int = find_midint();
-        fix();
-        force_flat(mid_int);
-        rk4_asymp(mid_int - 1, false, ww);
-        // calculate the ADM mass and aspect mass at the edge of physical
-        // domain. Aspect is more accurate but ADM should be relativiely
-        // similar.
-        adm_mass = -psi[gridsize - 1] * dpsi[gridsize - 1] *
-                   radius_array[gridsize - 1] * radius_array[gridsize - 1];
-        aspect_mass =
-            2. * radius_array[gridsize - 1] * (sqrt(psi[gridsize - 1]) - 1.);
-        // std::cout << "Central Density : " << p[0] << ", ADM mass : " <<
-        // adm_mass << ", aspect mass : "  << aspect_mass << ", w : "  <<
-        // sqrt(ww) << std::endl;
+
+        pout() << "-----------------------------------------------" << endl;
+        pout() << "I am running iteration # " << iter << endl;
+        pout() << "-----------------------------------------------" << endl;
+
+        // Set the initial conditions
         initialise();
-        rk4_asymp(mid_int, true, ww);
+
+        // The bosonic frequency of a ground state almost inevitably lies
+        // between 0 and 1. Check this by finding the number of zero crossings
+        // for omega ansatz of unity. If we have a zero crossing, then the upper
+        // bound will be omega_upper = 1.
+        omega_ansatz = find_upper_omega();
+        // Apply bisection algorithm to find the right frequency of the BS
+        omega_true = bisect_omega(0, omega_ansatz);
+        // Determine the matching index
+        matching_index = find_matching_index();
+
+        if (BS_verbosity)
+        {
+            pout() << "I will use the matching index of " << matching_index
+                   << " and the matching radius at " << matching_index * dx
+                   << endl;
+        }
+
+        // Force the scalar field to zero after the point the amplitude diverges
+        force_flat(matching_index);
+        rk4_asymp(matching_index, false, omega_true);
+        rk4_asymp(
+            matching_index, true,
+            omega_true); // (true) uses large radius adaptive stepsize to get
+                         // asymptotics (integrates vacuum metric out to huge
+                         // radius ~ 10^10 to measure asymptotics).
+
         PSI_INF = psi[gridsize - 1];
         OM_INF = omega[gridsize - 1];
 
-        /*PSC/=PSI_INF;
-        OMC/=OM_INF;
-        ww/=OM_INF*OM_INF;
-        initialise();
-        rk4(ww);
-        mid_int = find_midint();
-        rk4_asymp(mid_int,true,ww);
-        PSI_INF = psi[gridsize-1];
-        OM_INF = omega[gridsize-1];*/
+        if (BS_verbosity)
+        {
+            pout() << "PSI_INF " << PSI_INF << endl;
+            pout() << "OM_INF " << OM_INF << endl;
+        }
+
+        // if (fabs(PSI_INF - 1.) < 1e-05)
+        // {
+        // 	double domega = par.omega0 - 1e-14;
+
+        //   	converged = calcExtAsym(domega, par.phigrav0);
+
+        //   	double criterion_A_v2 = calculate_criterion_A(converged,
+        //   domega);
+
+        //   	criterion_derivative_A = (criterion_A_v2 - criterion_A) /
+        //   (-1e-14);
+
+        //   	printf("criterion derivative A now: %g \n",
+        //   criterion_derivative_A);
+
+        //   	printf("The bosonic scalar field is not matched smoothly enough.
+        //   Updating omega...\n");
+        // }
+
+        // Have some stopping criterion for hard-to-compute solutions.
+        // Useful, when you may want to iterate through the for loop a few
+        // times.
+        if (fabs(PSI_INF - 1.) < 1e-05 && fabs(OM_INF - 1.) < 1e-05)
+        {
+            pout() << "Central Density : " << A[0] << ", PSI0 : " << psi[0]
+                   << ", OM0 : " << omega[0] << ", w : " << sqrt(omega_true)
+                   << endl;
+            break;
+        }
+
+        // Update initial guesses
+        PSC /= PSI_INF;
+        OMC /= OM_INF;
+
+        pout() << "Central Density : " << A[0] << ", PSI0 : " << PSC
+               << ", OM0 : " << OMC << ", w : " << sqrt(omega_true) << endl;
+
+        if (iter == 16)
+        {
+            pout() << "Ooopsies... I have reached 16 iterations now, did not "
+                      "find a BS solution  ¯|_(ツ)_|¯ "
+                   << endl;
+            exit(0);
+        }
     }
 
-    rk4_asymp(mid_int - 1, false, ww);
-    // calculate the ADM mass and aspect mass at the edge of physical domain.
-    // Aspect is more accurate but ADM should be relativiely similar.
-    adm_mass = -psi[gridsize - 1] * dpsi[gridsize - 1] *
-               radius_array[gridsize - 1] * radius_array[gridsize - 1];
-    aspect_mass =
-        2. * radius_array[gridsize - 1] * (sqrt(psi[gridsize - 1]) - 1.);
-    std::cout << "Central Density : " << p[0] << ", ADM mass : " << adm_mass
-              << ", aspect mass : " << aspect_mass << ", w : " << sqrt(ww)
-              << ", r99 : " << get_r(0.99) << ", mass error : "
-              << fabs(2. * (aspect_mass - adm_mass) / (adm_mass + aspect_mass))
-              << std::endl;
+    pout() << "-----------------------------------------------" << endl;
+    pout() << "Computing the diagnostics of the solution" << endl;
+    pout() << "-----------------------------------------------" << endl;
+    rk4_match(matching_index, false, omega_true);
+
+    // Calculate the aspect mass and the ADM mass at the boundary of the
+    // physical domain. They shoud be similar, but not equal!
+    calculate_aspect_mass();
+    calculate_adm_mass();
+    radius = calculate_radius();
+    compactness_value = boson_mass[gridsize - 1] / radius;
+
+    pout() << "-----------------------------------------------" << endl;
+    pout() << "Central Density : " << A[0] << endl;
+    pout() << "ADM mass : " << adm_mass[gridsize - 1] << endl;
+    pout() << "Aspect mass : " << boson_mass[gridsize - 1] << endl;
+    pout() << "Radius : " << radius << endl;
+    pout() << "Compactness : " << compactness_value << endl;
+    pout() << "W : " << sqrt(omega_true) << endl;
 }
 
-// initiaalises the 5 filed variables with their central values
+// Initialise the 5 filed variables with their central values
 void BosonStarSolution::initialise()
 {
-    p[0] = PC;
-    omega[0] = OMC;
-    psi[0] = PSC;
-    // field gradients must be zero at zero radius for physical solutions
-    dp[0] = 0.;
-    dpsi[0] = 0.;
-    radius_array[0] = 0.;
+    A[0] = A0;            // initial central amplitude
+    omega[0] = OMC;       // initial lapse
+    psi[0] = PSC;         // initial conformal factor
+    dA[0] = 0.;           // amplitude derivate
+    dpsi[0] = 0.;         // conformal factor derivative
+    radius_array[0] = 0.; // isotropic radius
 }
 
-// if the scalar field diverges it rounds down to a value wiht the same sign.
-// This is to not affect axis crossings function (crossings) and let it
-// accurately deal with inf/nan
-void BosonStarSolution::fix()
+// If the scalar field diverges, then we rounds down the amplitude solution to a
+// value where it starts to diverge. This does not affect the zero crossings but
+// allows to systematically deal with infinite and diverging values.
+void BosonStarSolution::truncate_solution()
 {
-    bool borked = false; // turns true if function gets over twice as large as
-                         // central (r=0) value
-    double truncation;
+    bool diverges = false; // a flag to see whether the amplitude gets twice as
+                           // large as the central value
+    double truncation;     // value of the scalar field at which we truncate the
+                           // solution
+
     for (int i = 0; i < gridsize; ++i)
     {
-        if (not borked)
+        if (!diverges)
         {
-            if (fabs(p[i]) > 1.01 * p[0])
+            if (fabs(A[i]) > 1.01 * A[0])
             {
-                borked = true;
-                truncation = p[i];
+                diverges = true;
+                truncation = A[i];
             }
         }
-        if (borked)
+        if (diverges)
         {
-            p[i] = truncation;
+            A[i] = truncation;
         }
     }
 }
@@ -127,223 +174,142 @@ void BosonStarSolution::force_flat(const int iter_crit)
 {
     for (int i = iter_crit + 1; i < gridsize; ++i)
     {
-        p[i] = 0.;
-        dp[i] = 0.;
+        A[i] = 0.;
+        dA[i] = 0.;
     }
 }
 
-// finds the integer index at which the scalar field needs to be truncated
-int BosonStarSolution::find_midint()
+// Find the index (radius) where the amplitude starts to diverge, this be used
+// for matching in the asymptotic regime
+int BosonStarSolution::find_matching_index()
 {
-    int crossings = 0, mid_int;
+    int matching_index;
 
-    // follow the correct amount of crossings
     for (int i = 0; i < gridsize - 1; ++i)
     {
-        if (crossings == EIGEN)
+        if (fabs(A[i]) < fabs(A[i + 1]) && fabs(A[i]) < fabs(A[i - 1]))
         {
-            mid_int = i;
-            break;
-        }
-        if (p[i] * p[i + 1] < 0.)
-        {
-            crossings += 1;
+            matching_index = iofr(radius_array[i] * 0.9);
+            return matching_index;
         }
     }
 
-    // climb the hill if crossings != 0, this will exit loop immediately if
-    // there is no crossings
-    for (int i = mid_int + 5; i < gridsize - 1; ++i)
-    {
-        if (fabs(p[i + 1]) < fabs(p[i]))
-        {
-            mid_int = i;
-            break;
-        }
-    }
-
-    for (int i = mid_int + 5; i < gridsize - 1; ++i)
-    {
-        if (fabs(p[i + 1]) > fabs(p[i]))
-        {
-            mid_int = i;
-            // std::cout << "Truncation error: " << p[i]/PC << std::endl;
-            return mid_int;
-        }
-    }
     return gridsize - 1;
 }
 
-// finds an eigenvalue with a lot of nodes, (20 + desired eigenstate) by defualt
-double BosonStarSolution::find_WW()
+// Find the largest index for a give radius r
+int BosonStarSolution::iofr(double rtarget)
 {
-    int eigenstate;
-    double WW_ = 1.;
-    while (true)
+    int i;
+
+    i = 0;
+    for (i = 1; i < gridsize - 1; i++)
     {
-        initialise();
-        rk4(WW_);
-        fix();
-        eigenstate = crossings();
-        if (eigenstate >= 20 + EIGEN)
+        if (radius_array[i - 1] <= rtarget && radius_array[i] > rtarget)
         {
-            return WW_;
+            break;
         }
-        WW_ *= 2.;
     }
+
+    return i;
 }
 
-double BosonStarSolution::find_WW_soliton()
+// Find the upper value of omega to be used in the bisection algorithm -- for
+// groudn states this is usually upper_omega = 1.
+double BosonStarSolution::find_upper_omega()
 {
     bool crossed;
-    double WW_ = 1.;
+    double omega = 1.; // ansatz
     while (true)
     {
-        initialise();
-        rk4(WW_);
-        fix();
-        crossed = soliton_eigen();
+        // initialise();
+        rk4(omega); // integrate
+        truncate_solution();
+        crossed = found_zero_crossing();
         if (crossed)
-            return WW_;
-        if (WW_>10e10)
-        {
-            return WW_;
-        }
-        WW_ *= 2.;
+            return omega;
+        omega *= 2.;
     }
 }
 
-// calculates the lower limit for eigenvalue to be used in interval bisection
-double BosonStarSolution::ww_min(const double WW_)
+// Bisection algorithm for narrowing down the frequency solution.
+// The bisection checks for zero crossings and narrows down the range
+// [lower_omega;upper omega] until a desired difference between upper_omega and
+// lower_omega is reached (user specifiable).
+double BosonStarSolution::bisect_omega(double omega_min, double omega_max)
 {
-    int accuracy = 400, eigenstate;
-    double ww_, lower_ww_;
-    for (int i = 0; i < accuracy; i++)
-    {
-        ww_ = WW_ * (double)(accuracy - i) / (double)accuracy;
-        initialise();
-        rk4(ww_);
-        fix();
-        eigenstate = crossings();
-        if (eigenstate <= EIGEN)
-        {
-            lower_ww_ = ww_;
-            return lower_ww_;
-        }
-    }
-    return 0.;
-}
+    int iter = 0;
+    double lower_omega, middle_omega, upper_omega;
+    bool crossed;
 
-// calculates the upper value for eigenvalue to be used in interval bisection
-double BosonStarSolution::ww_max(const double WW_, const double lower_ww_)
-{
-    int accuracy = 400, eigenstate;
-    double ww_, upper_ww_;
-    for (int i = 0; i < accuracy; i++)
-    {
-        ww_ = lower_ww + WW_ * ((double)i) / ((double)accuracy);
-        initialise();
-        rk4(ww_);
-        fix();
-        eigenstate = crossings();
-        if (eigenstate > EIGEN)
-        {
-            upper_ww_ = ww_;
-            return upper_ww_;
-        }
-    }
-    return 0.;
-}
+    lower_omega = omega_min;
+    upper_omega = omega_max;
 
-// takes in an upper and lower eigenvalue and uses interval bisection to find
-// the solution inbetween
-double BosonStarSolution::ww_IB(double lower_ww_, double upper_ww_)
-{
-    int iter = 0, itermax, eigenstate, decimal_places_of_omega = 25.;
-    double middle_ww_;
-
-    itermax = (int)((log(upper_ww_) + decimal_places_of_omega * log(10.)) /
-                    log(2.)); // calculate number of bisections needed (simple
-                              // pen and paper calculation)
     while (true)
     {
         iter++;
-        middle_ww_ = 0.5 * (upper_ww_ + lower_ww_);
-        initialise();
-        rk4(middle_ww_);
-        fix();
-        eigenstate = crossings();
-        if (eigenstate > EIGEN)
-        {
-            upper_ww_ = middle_ww_;
-        }
-        else
-        {
-            lower_ww_ = middle_ww_;
-        }
-        if ((upper_ww_ - lower_ww_) < ww_tolerance)
-            return upper_ww_;
-        if (upper_ww_ == lower_ww_)
-            return upper_ww_;
-        if (iter > 65)
-            return upper_ww_;
-    }
-}
-
-double BosonStarSolution::ww_IB_soliton(double lower_ww_, double upper_ww_)
-{
-    int iter = 0, itermax, eigenstate, decimal_places_of_omega = 25.;
-    double middle_ww_;
-    bool crossed;
-
-    itermax = (int)((log(upper_ww_) + decimal_places_of_omega * log(10.)) /
-                    log(2.)); // calculate number of bisections needed (simple
-                              // pen and paper calculation)
-    while (true)
-    {
-        iter++;
-        middle_ww_ = 0.5 * (upper_ww_ + lower_ww_);
-        initialise();
-        rk4(middle_ww_);
-        fix();
-        crossed = soliton_eigen();
+        middle_omega = 0.5 * (lower_omega + upper_omega);
+        //   initialise();
+        rk4(middle_omega);
+        truncate_solution();
+        crossed = found_zero_crossing();
         if (crossed)
         {
-            upper_ww_ = middle_ww_;
+            upper_omega = middle_omega; // if crossed, then the upper_omega is
+                                        // too large, set it to middle_omega
         }
         else
         {
-            lower_ww_ = middle_ww_;
+            lower_omega = middle_omega; // if did not cross, then lower_omega
+                                        // may be increased to middle_omega
         }
-        if ((upper_ww_ - lower_ww_) < ww_tolerance)
-            return upper_ww_;
-        if (upper_ww_ == lower_ww_)
-            return upper_ww_;
+        if (fabs(upper_omega - lower_omega) < omega_tolerance)
+            return upper_omega;
+        if (upper_omega == lower_omega)
+            return upper_omega;
         if (iter > 100)
-            return upper_ww_;
+        {
+            if (BS_verbosity)
+            {
+                pout()
+                    << "BosonStarSolution::bisect_omega -- I have reached the "
+                       "maximum number of iterations in the bisection algorithm"
+                    << endl;
+            }
+            return upper_omega;
+        }
     }
 }
 
-bool BosonStarSolution::soliton_eigen()
+// Check is the amplitudes has a zero crossing
+int BosonStarSolution::found_zero_crossing()
 {
-    for (int i = 2; i < gridsize-6; i++)
+    int any_zero_crossings;
+
+    for (int i = 1; i < gridsize; i++)
     {
-        if (p[i] * p[i + 1] < 0.)
-            return true;
-        if (p[i-2] * p[i + 2] < 0.)
-            return true;
-        if (p[i] > p[i - 1])
-            return false;
+        if (A[i] * A[i + 1] < 0.)
+        {
+            any_zero_crossings = 1;
+            break;
+        }
+        if (A[i] > A[i - 1])
+        {
+            any_zero_crossings = 0;
+            break;
+        }
     }
-    return false;
+
+    return any_zero_crossings;
 }
 
-// integrate the full ODE system from r=0 to dx*gridsize, this may (probably
-// will) blow up at laarge raadius, but it is fixed by other functions
-// aafterwards. it has smaller stepsize for the first (adaptive_buffer) steps.
+// Integrate the full ODE system from r=0 to dx*gridsize.
+// The solution almost inevitable blows up, but we remedy this by matching the
+// asumptotics later in the main().
 void BosonStarSolution::rk4(const double ww_)
 {
-    double k1, k2, k3, k4, q1, q2, q3, q4, x_ = 0., h = dx / 2.;
+    double k1 = 0, k2 = 0, k3 = 0, k4 = 0, q1 = 0, q2 = 0, q3 = 0, q4 = 0,
+           x_ = 0., h = dx / 2.;
     const double DX = dx;
     double DX_ = DX;
     double o1, o2, o3, o4, s1, s2, s3, s4, r1, r2, r3, r4;
@@ -364,64 +330,64 @@ void BosonStarSolution::rk4(const double ww_)
             h = DX_ / 2.;
             x_ = (i - 1) * dx + j * DX_;
 
-            k1 = DX_ * P_RHS(x_, p[i - 1], dp[i - 1], psi[i - 1], dpsi[i - 1],
+            k1 = DX_ * A_RHS(x_, A[i - 1], dA[i - 1], psi[i - 1], dpsi[i - 1],
                              omega[i - 1], ww_);
-            q1 = DX_ * DP_RHS(x_, p[i - 1], dp[i - 1], psi[i - 1], dpsi[i - 1],
+            q1 = DX_ * DA_RHS(x_, A[i - 1], dA[i - 1], psi[i - 1], dpsi[i - 1],
                               omega[i - 1], ww_);
-            o1 = DX_ * OMEGA_RHS(x_, p[i - 1], dp[i - 1], psi[i - 1],
+            o1 = DX_ * OMEGA_RHS(x_, A[i - 1], dA[i - 1], psi[i - 1],
                                  dpsi[i - 1], omega[i - 1], ww_);
-            s1 = DX_ * PSI_RHS(x_, p[i - 1], dp[i - 1], psi[i - 1], dpsi[i - 1],
+            s1 = DX_ * PSI_RHS(x_, A[i - 1], dA[i - 1], psi[i - 1], dpsi[i - 1],
                                omega[i - 1], ww_);
-            r1 = DX_ * DPSI_RHS(x_, p[i - 1], dp[i - 1], psi[i - 1],
+            r1 = DX_ * DPSI_RHS(x_, A[i - 1], dA[i - 1], psi[i - 1],
                                 dpsi[i - 1], omega[i - 1], ww_);
 
-            k2 = DX_ * P_RHS(x_ + h, p[i - 1] + k1 / 2., dp[i - 1] + q1 / 2.,
+            k2 = DX_ * A_RHS(x_ + h, A[i - 1] + k1 / 2., dA[i - 1] + q1 / 2.,
                              psi[i - 1] + s1 / 2., dpsi[i - 1] + r1 / 2.,
                              omega[i - 1] + o1 / 2., ww_);
-            q2 = DX_ * DP_RHS(x_ + h, p[i - 1] + k1 / 2., dp[i - 1] + q1 / 2.,
+            q2 = DX_ * DA_RHS(x_ + h, A[i - 1] + k1 / 2., dA[i - 1] + q1 / 2.,
                               psi[i - 1] + s1 / 2., dpsi[i - 1] + r1 / 2.,
                               omega[i - 1] + o1 / 2., ww_);
             o2 =
-                DX_ * OMEGA_RHS(x_ + h, p[i - 1] + k1 / 2., dp[i - 1] + q1 / 2.,
+                DX_ * OMEGA_RHS(x_ + h, A[i - 1] + k1 / 2., dA[i - 1] + q1 / 2.,
                                 psi[i - 1] + s1 / 2., dpsi[i - 1] + r1 / 2.,
                                 omega[i - 1] + o1 / 2., ww_);
-            s2 = DX_ * PSI_RHS(x_ + h, p[i - 1] + k1 / 2., dp[i - 1] + q1 / 2.,
+            s2 = DX_ * PSI_RHS(x_ + h, A[i - 1] + k1 / 2., dA[i - 1] + q1 / 2.,
                                psi[i - 1] + s1 / 2., dpsi[i - 1] + r1 / 2.,
                                omega[i - 1] + o1 / 2., ww_);
-            r2 = DX_ * DPSI_RHS(x_ + h, p[i - 1] + k1 / 2., dp[i - 1] + q1 / 2.,
+            r2 = DX_ * DPSI_RHS(x_ + h, A[i - 1] + k1 / 2., dA[i - 1] + q1 / 2.,
                                 psi[i - 1] + s1 / 2., dpsi[i - 1] + r1 / 2.,
                                 omega[i - 1] + o1 / 2., ww_);
 
-            k3 = DX_ * P_RHS(x_ + h, p[i - 1] + k2 / 2., dp[i - 1] + q2 / 2.,
+            k3 = DX_ * A_RHS(x_ + h, A[i - 1] + k2 / 2., dA[i - 1] + q2 / 2.,
                              psi[i - 1] + s2 / 2., dpsi[i - 1] + r2 / 2.,
                              omega[i - 1] + o2 / 2., ww_);
-            q3 = DX_ * DP_RHS(x_ + h, p[i - 1] + k2 / 2., dp[i - 1] + q2 / 2.,
+            q3 = DX_ * DA_RHS(x_ + h, A[i - 1] + k2 / 2., dA[i - 1] + q2 / 2.,
                               psi[i - 1] + s2 / 2., dpsi[i - 1] + r2 / 2.,
                               omega[i - 1] + o2 / 2., ww_);
             o3 =
-                DX_ * OMEGA_RHS(x_ + h, p[i - 1] + k2 / 2., dp[i - 1] + q2 / 2.,
+                DX_ * OMEGA_RHS(x_ + h, A[i - 1] + k2 / 2., dA[i - 1] + q2 / 2.,
                                 psi[i - 1] + s2 / 2., dpsi[i - 1] + r2 / 2.,
                                 omega[i - 1] + o2 / 2., ww_);
-            s3 = DX_ * PSI_RHS(x_ + h, p[i - 1] + k2 / 2., dp[i - 1] + q2 / 2.,
+            s3 = DX_ * PSI_RHS(x_ + h, A[i - 1] + k2 / 2., dA[i - 1] + q2 / 2.,
                                psi[i - 1] + s2 / 2., dpsi[i - 1] + r2 / 2.,
                                omega[i - 1] + o2 / 2., ww_);
-            r3 = DX_ * DPSI_RHS(x_ + h, p[i - 1] + k2 / 2., dp[i - 1] + q2 / 2.,
+            r3 = DX_ * DPSI_RHS(x_ + h, A[i - 1] + k2 / 2., dA[i - 1] + q2 / 2.,
                                 psi[i - 1] + s2 / 2., dpsi[i - 1] + r2 / 2.,
                                 omega[i - 1] + o2 / 2., ww_);
 
-            k4 = DX_ * P_RHS(x_ + 2. * h, p[i - 1] + k3, dp[i - 1] + q3,
+            k4 = DX_ * A_RHS(x_ + 2. * h, A[i - 1] + k3, dA[i - 1] + q3,
                              psi[i - 1] + s3, dpsi[i - 1] + r3,
                              omega[i - 1] + o3, ww_);
-            q4 = DX_ * DP_RHS(x_ + 2. * h, p[i - 1] + k3, dp[i - 1] + q3,
+            q4 = DX_ * DA_RHS(x_ + 2. * h, A[i - 1] + k3, dA[i - 1] + q3,
                               psi[i - 1] + s3, dpsi[i - 1] + r3,
                               omega[i - 1] + o3, ww_);
-            o4 = DX_ * OMEGA_RHS(x_ + 2. * h, p[i - 1] + k3, dp[i - 1] + q3,
+            o4 = DX_ * OMEGA_RHS(x_ + 2. * h, A[i - 1] + k3, dA[i - 1] + q3,
                                  psi[i - 1] + s3, dpsi[i - 1] + r3,
                                  omega[i - 1] + o3, ww_);
-            s4 = DX_ * PSI_RHS(x_ + 2. * h, p[i - 1] + k3, dp[i - 1] + q3,
+            s4 = DX_ * PSI_RHS(x_ + 2. * h, A[i - 1] + k3, dA[i - 1] + q3,
                                psi[i - 1] + s3, dpsi[i - 1] + r3,
                                omega[i - 1] + o3, ww_);
-            r4 = DX_ * DPSI_RHS(x_ + 2. * h, p[i - 1] + k3, dp[i - 1] + q3,
+            r4 = DX_ * DPSI_RHS(x_ + 2. * h, A[i - 1] + k3, dA[i - 1] + q3,
                                 psi[i - 1] + s3, dpsi[i - 1] + r3,
                                 omega[i - 1] + o3, ww_);
 
@@ -431,8 +397,8 @@ void BosonStarSolution::rk4(const double ww_)
                 index = i;
             }
 
-            p[index] = p[i - 1] + (k1 + 2. * k2 + 2. * k3 + k4) / 6.;
-            dp[index] = dp[i - 1] + (q1 + 2. * q2 + 2. * q3 + q4) / 6.;
+            A[index] = A[i - 1] + (k1 + 2. * k2 + 2. * k3 + k4) / 6.;
+            dA[index] = dA[i - 1] + (q1 + 2. * q2 + 2. * q3 + q4) / 6.;
             psi[index] = psi[i - 1] + (s1 + 2. * s2 + 2. * s3 + s4) / 6.;
             dpsi[index] = dpsi[i - 1] + (r1 + 2. * r2 + 2. * r3 + r4) / 6.;
             omega[index] = omega[i - 1] + (o1 + 2. * o2 + 2. * o3 + o4) / 6.;
@@ -450,8 +416,8 @@ void BosonStarSolution::rk4(const double ww_)
 void BosonStarSolution::rk4_asymp(const int iter, const bool adaptive,
                                   const double ww_)
 {
-    double k1=0., k2=0., k3=0., k4=0., q1=0., q2=0., q3=0., q4=0., x_ = iter * dx, h,
-                                           delta = (double)gridsize;
+    double k1 = 0, k2 = 0, k3 = 0, k4 = 0, q1 = 0, q2 = 0, q3 = 0, q4 = 0,
+           x_ = iter * dx, h, delta = (double)gridsize;
     const double DX = dx;
     double DX_ = DX;
     double o1, o2, o3, o4, s1, s2, s3, s4, r1, r2, r3, r4;
@@ -479,24 +445,24 @@ void BosonStarSolution::rk4_asymp(const int iter, const bool adaptive,
         // k1 =
         // dx*small_P_RHS(x_,p[i-1],dp[i-1],psi[i-1],dpsi[i-1],omega[i-1],ww_);
         // q1 = dx*DP_RHS(x_,p[i-1],dp[i-1],psi[i-1],dpsi[i-1],omega[i-1],ww_);
-        o1 = DX_ * OMEGA_RHS(x_, p[i - 1], dp[i - 1], psi[i - 1], dpsi[i - 1],
+        o1 = DX_ * OMEGA_RHS(x_, A[i - 1], dA[i - 1], psi[i - 1], dpsi[i - 1],
                              omega[i - 1], ww_);
-        s1 = DX_ * PSI_RHS(x_, p[i - 1], dp[i - 1], psi[i - 1], dpsi[i - 1],
+        s1 = DX_ * PSI_RHS(x_, A[i - 1], dA[i - 1], psi[i - 1], dpsi[i - 1],
                            omega[i - 1], ww_);
-        r1 = DX_ * DPSI_RHS(x_, p[i - 1], dp[i - 1], psi[i - 1], dpsi[i - 1],
+        r1 = DX_ * DPSI_RHS(x_, A[i - 1], dA[i - 1], psi[i - 1], dpsi[i - 1],
                             omega[i - 1], ww_);
 
         // k2 = dx*small_P_RHS(x_ + h,p[i-1] + k1/2.,dp[i-1] + q1/2.,psi[i-1] +
         // s1/2.,dpsi[i-1] + r1/2.,omega[i-1] + o1/2.,ww_); q2 = dx*DP_RHS(x_ +
         // h,p[i-1] + k1/2.,dp[i-1] + q1/2.,psi[i-1] + s1/2.,dpsi[i-1] +
         // r1/2.,omega[i-1] + o1/2.,ww_);
-        o2 = DX_ * OMEGA_RHS(x_ + h, p[i - 1] + k1 / 2., dp[i - 1] + q1 / 2.,
+        o2 = DX_ * OMEGA_RHS(x_ + h, A[i - 1] + k1 / 2., dA[i - 1] + q1 / 2.,
                              psi[i - 1] + s1 / 2., dpsi[i - 1] + r1 / 2.,
                              omega[i - 1] + o1 / 2., ww_);
-        s2 = DX_ * PSI_RHS(x_ + h, p[i - 1] + k1 / 2., dp[i - 1] + q1 / 2.,
+        s2 = DX_ * PSI_RHS(x_ + h, A[i - 1] + k1 / 2., dA[i - 1] + q1 / 2.,
                            psi[i - 1] + s1 / 2., dpsi[i - 1] + r1 / 2.,
                            omega[i - 1] + o1 / 2., ww_);
-        r2 = DX_ * DPSI_RHS(x_ + h, p[i - 1] + k1 / 2., dp[i - 1] + q1 / 2.,
+        r2 = DX_ * DPSI_RHS(x_ + h, A[i - 1] + k1 / 2., dA[i - 1] + q1 / 2.,
                             psi[i - 1] + s1 / 2., dpsi[i - 1] + r1 / 2.,
                             omega[i - 1] + o1 / 2., ww_);
 
@@ -504,13 +470,13 @@ void BosonStarSolution::rk4_asymp(const int iter, const bool adaptive,
         // s2/2.,dpsi[i-1] + r2/2.,omega[i-1] + o2/2.,ww_); q3 = dx*DP_RHS(x_ +
         // h,p[i-1] + k2/2.,dp[i-1] + q2/2.,psi[i-1] + s2/2.,dpsi[i-1] +
         // r2/2.,omega[i-1] + o2/2.,ww_);
-        o3 = DX_ * OMEGA_RHS(x_ + h, p[i - 1] + k2 / 2., dp[i - 1] + q2 / 2.,
+        o3 = DX_ * OMEGA_RHS(x_ + h, A[i - 1] + k2 / 2., dA[i - 1] + q2 / 2.,
                              psi[i - 1] + s2 / 2., dpsi[i - 1] + r2 / 2.,
                              omega[i - 1] + o2 / 2., ww_);
-        s3 = DX_ * PSI_RHS(x_ + h, p[i - 1] + k2 / 2., dp[i - 1] + q2 / 2.,
+        s3 = DX_ * PSI_RHS(x_ + h, A[i - 1] + k2 / 2., dA[i - 1] + q2 / 2.,
                            psi[i - 1] + s2 / 2., dpsi[i - 1] + r2 / 2.,
                            omega[i - 1] + o2 / 2., ww_);
-        r3 = DX_ * DPSI_RHS(x_ + h, p[i - 1] + k2 / 2., dp[i - 1] + q2 / 2.,
+        r3 = DX_ * DPSI_RHS(x_ + h, A[i - 1] + k2 / 2., dA[i - 1] + q2 / 2.,
                             psi[i - 1] + s2 / 2., dpsi[i - 1] + r2 / 2.,
                             omega[i - 1] + o2 / 2., ww_);
 
@@ -518,18 +484,18 @@ void BosonStarSolution::rk4_asymp(const int iter, const bool adaptive,
         // s3,dpsi[i-1] + r3,omega[i-1] + o3,ww_); q4 = dx*DP_RHS(x_
         // + 2.*h,p[i-1] + k3,dp[i-1] + q3,psi[i-1] + s3,dpsi[i-1] +
         // r3,omega[i-1] + o3,ww_);
-        o4 = DX_ * OMEGA_RHS(x_ + 2. * h, p[i - 1] + k3, dp[i - 1] + q3,
+        o4 = DX_ * OMEGA_RHS(x_ + 2. * h, A[i - 1] + k3, dA[i - 1] + q3,
                              psi[i - 1] + s3, dpsi[i - 1] + r3,
                              omega[i - 1] + o3, ww_);
-        s4 = DX_ * PSI_RHS(x_ + 2. * h, p[i - 1] + k3, dp[i - 1] + q3,
+        s4 = DX_ * PSI_RHS(x_ + 2. * h, A[i - 1] + k3, dA[i - 1] + q3,
                            psi[i - 1] + s3, dpsi[i - 1] + r3, omega[i - 1] + o3,
                            ww_);
-        r4 = DX_ * DPSI_RHS(x_ + 2. * h, p[i - 1] + k3, dp[i - 1] + q3,
+        r4 = DX_ * DPSI_RHS(x_ + 2. * h, A[i - 1] + k3, dA[i - 1] + q3,
                             psi[i - 1] + s3, dpsi[i - 1] + r3,
                             omega[i - 1] + o3, ww_);
 
-        p[i] = 0.;  // p[i-1] + (k1 + 2.*k2 + 2.*k3 + k4)/6.;
-        dp[i] = 0.; // dp[i-1] + (q1 + 2.*q2 + 2.*q3 + q4)/6.;
+        A[i] = 0.;  // p[i-1] + (k1 + 2.*k2 + 2.*k3 + k4)/6.;
+        dA[i] = 0.; // dp[i-1] + (q1 + 2.*q2 + 2.*q3 + q4)/6.;
         psi[i] = psi[i - 1] + (s1 + 2. * s2 + 2. * s3 + s4) / 6.;
         dpsi[i] = dpsi[i - 1] + (r1 + 2. * r2 + 2. * r3 + r4) / 6.;
         omega[i] = omega[i - 1] + (o1 + 2. * o2 + 2. * o3 + o4) / 6.;
@@ -542,46 +508,165 @@ void BosonStarSolution::rk4_asymp(const int iter, const bool adaptive,
 
     if (adaptive and x_ < 8e7)
     {
-        std::cout << "\33[30;41m"
-                  << " Asymptotic Radius Too Small"
-                  << "\x1B[0m" << std::endl;
-        std::cout << x_ << std::endl;
+        pout() << "\33[30;41m"
+               << " Asymptotic Radius Too Small"
+               << "\x1B[0m" << endl;
+        pout() << x_ << endl;
+    }
+}
+
+// takes an integrated ODE system and starts at point (iter) and re-integrates
+// but enforcing scalara field to decaay or be in vacuum the integral is
+// adaptive in that it aaccelerates ar later radius in order to find correct
+// asymptotic behaviour. It will shout if the radius reached is below 10e10 bool
+// adaaptive is true if stepsize is supposed to be adaptive aat large radius and
+// false for constant stepsize
+void BosonStarSolution::rk4_match(const int iter, const bool adaptive,
+                                  const double ww_)
+{
+    double x_, h;
+    const double DX = dx;
+    double DX_ = DX;
+    double o1, o2, o3, o4, s1, s2, s3, s4, r1, r2, r3, r4;
+    double N_ = gridsize - iter, L_ = pow(9., 9);
+    int i_;
+
+    double k_ = log(L_) / N_;
+
+    double r, dr;
+    double c1, c2;
+    double Amp, eta, mass, arealr, om0, epsilon;
+
+    om0 = pow(1 / omega[iter], 2);
+    mass = -psi[iter] * dpsi[iter] * radius_array[iter] * radius_array[iter];
+    epsilon = mass * (1 - 2 * ww_) / sqrt(1 - ww_ / om0);
+
+    r = radius_array[iter];
+    arealr = r + mass + mass * mass / (4 * r);
+
+    c1 = A[iter] * pow(r, 1 + epsilon) * exp(r * sqrt(1 - ww_ / om0));
+    c2 = dA[iter] * pow(r, 1 + epsilon) * exp(r * sqrt(1 - ww_ / om0));
+
+    if (BS_verbosity)
+    {
+        pout() << "Constant A " << c1 << endl;
+        pout() << "Constant B " << c2 << endl;
+    }
+
+    for (int i = iter + 1; i < gridsize; ++i)
+    {
+        dr = radius_array[i] - radius_array[i - 1];
+
+        h = DX_ / 2.;
+
+        // 1st RK step
+        r = radius_array[i - 1];
+        om0 = pow(1 / omega[i - 1], 2);
+        mass = -psi[i - 1] * dpsi[i - 1] * radius_array[i - 1] *
+               radius_array[i - 1];
+        epsilon = mass * (1 - 2 * ww_) / sqrt(1 - ww_ / om0);
+        arealr = r + mass + mass * mass / (4 * r);
+        Amp = c1 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
+        eta = c2 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
+        o1 = dr *
+             OMEGA_RHS(r, Amp, eta, psi[i - 1], dpsi[i - 1], omega[i - 1], ww_);
+        s1 = dr *
+             PSI_RHS(r, Amp, eta, psi[i - 1], dpsi[i - 1], omega[i - 1], ww_);
+        r1 = dr *
+             DPSI_RHS(r, Amp, eta, psi[i - 1], dpsi[i - 1], omega[i - 1], ww_);
+
+        // 2nd RK step
+        r = radius_array[i - 1] + 0.5 * dr;
+        om0 = pow(1 / (omega[i - 1] + o1 / 2.), 2);
+        mass = -(psi[i - 1] + s1 / 2.) * (dpsi[i - 1] + r1 / 2.) * r * r;
+        epsilon = mass * (1 - 2 * ww_) / sqrt(1 - ww_ / om0);
+        arealr = r + mass + mass * mass / (4 * r);
+        Amp = c1 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
+        eta = c2 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
+        o2 = dr * OMEGA_RHS(r, Amp, eta, psi[i - 1] + s1 / 2.,
+                            dpsi[i - 1] + r1 / 2., omega[i - 1] + o1 / 2., ww_);
+        s2 = dr * PSI_RHS(r, Amp, eta, psi[i - 1] + s1 / 2.,
+                          dpsi[i - 1] + r1 / 2., omega[i - 1] + o1 / 2., ww_);
+        r2 = dr * DPSI_RHS(r, Amp, eta, psi[i - 1] + s1 / 2.,
+                           dpsi[i - 1] + r1 / 2., omega[i - 1] + o1 / 2., ww_);
+
+        // 3rd RK step
+        r = radius_array[i - 1] + 0.5 * dr;
+        om0 = pow(1 / (omega[i - 1] + o2 / 2.), 2);
+        mass = -(psi[i - 1] + s2 / 2.) * (dpsi[i - 1] + r2 / 2.) * r * r;
+        epsilon = mass * (1 - 2 * ww_) / sqrt(1 - ww_ / om0);
+        arealr = r + mass + mass * mass / (4 * r);
+        Amp = c1 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
+        eta = c2 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
+        o3 = dr * OMEGA_RHS(r, Amp, eta, psi[i - 1] + s2 / 2.,
+                            dpsi[i - 1] + r2 / 2., omega[i - 1] + o2 / 2., ww_);
+        s3 = dr * PSI_RHS(r, Amp, eta, psi[i - 1] + s2 / 2.,
+                          dpsi[i - 1] + r2 / 2., omega[i - 1] + o2 / 2., ww_);
+        r3 = dr * DPSI_RHS(r, Amp, eta, psi[i - 1] + s2 / 2.,
+                           dpsi[i - 1] + r2 / 2., omega[i - 1] + o2 / 2., ww_);
+
+        // 4th RK step
+        r = radius_array[i];
+        om0 = pow(1 / (omega[i - 1] + o3), 2);
+        mass = -(psi[i - 1] + s3) * (dpsi[i - 1] + r3) * r * r;
+        epsilon = mass * (1 - 2 * ww_) / sqrt(1 - ww_ / om0);
+        arealr = r + mass + mass * mass / (4 * r);
+        Amp = c1 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
+        eta = c2 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
+        o4 = dr * OMEGA_RHS(r, Amp, eta, psi[i - 1] + s3, dpsi[i - 1] + r3,
+                            omega[i - 1] + o3, ww_);
+        s4 = dr * PSI_RHS(r, Amp, eta, psi[i - 1] + s3, dpsi[i - 1] + r3,
+                          omega[i - 1] + o3, ww_);
+        r4 = dr * DPSI_RHS(r, Amp, eta, psi[i - 1] + s3, dpsi[i - 1] + r3,
+                           omega[i - 1] + o3, ww_);
+
+        // Update variables
+        psi[i] = psi[i - 1] + (s1 + 2. * s2 + 2. * s3 + s4) / 6.;
+        dpsi[i] = dpsi[i - 1] + (r1 + 2. * r2 + 2. * r3 + r4) / 6.;
+        omega[i] = omega[i - 1] + (o1 + 2. * o2 + 2. * o3 + o4) / 6.;
+        r = radius_array[i];
+        om0 = pow(1 / omega[i], 2);
+        mass = -psi[i] * dpsi[i] * r * r;
+        epsilon = mass * (1 - 2 * ww_) / sqrt(1 - ww_ / om0);
+        arealr = r + mass + mass * mass / (4 * r);
+        A[i] = c1 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
+        dA[i] = c2 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
     }
 }
 
 // these functions return the right hand side of the ode's
 // small_P_RHS is valid for large redius when the scalar field is small.
 
-double BosonStarSolution::small_P_RHS(const double x, const double P,
-                                      const double DP, const double PSI,
+double BosonStarSolution::small_A_RHS(const double x, const double A,
+                                      const double DA, const double PSI,
                                       const double DPSI, const double OM,
                                       const double ww_)
 {
-    double RHS = -P * PSI * sqrt(DV(P) - ww_ / (OM * OM));
+    double RHS = -A * PSI * sqrt(DV(A) - ww_ / (OM * OM));
     return RHS;
 }
 
-double BosonStarSolution::P_RHS(const double x, const double P, const double DP,
+double BosonStarSolution::A_RHS(const double x, const double A, const double DA,
                                 const double PSI, const double DPSI,
                                 const double OM, const double ww_)
 {
-    double RHS = DP;
+    double RHS = DA;
     return RHS;
 }
 
-double BosonStarSolution::DP_RHS(const double x, const double P,
-                                 const double DP, const double PSI,
+double BosonStarSolution::DA_RHS(const double x, const double A,
+                                 const double DA, const double PSI,
                                  const double DPSI, const double OM,
                                  const double ww_)
 {
     double r = ((x == 0.) ? eps : x);
-    double DOM = OMEGA_RHS(x, P, DP, PSI, DPSI, OM, ww_);
-    return P * PSI * PSI * (DV(P) - ww_ / (OM * OM)) -
-           DP * (DOM / OM + DPSI / PSI + 2. / r);
+    double DOM = OMEGA_RHS(x, A, DA, PSI, DPSI, OM, ww_);
+    return A * PSI * PSI * (DV(A) - ww_ / (OM * OM)) -
+           DA * (DOM / OM + DPSI / PSI + 2. / r);
 }
 
-double BosonStarSolution::PSI_RHS(const double x, const double P,
-                                  const double DP, const double PSI,
+double BosonStarSolution::PSI_RHS(const double x, const double A,
+                                  const double DA, const double PSI,
                                   const double DPSI, const double OM,
                                   const double ww_)
 {
@@ -589,54 +674,83 @@ double BosonStarSolution::PSI_RHS(const double x, const double P,
     return RHS;
 }
 
-double BosonStarSolution::DPSI_RHS(const double x, const double P,
-                                   const double DP, const double PSI,
+double BosonStarSolution::DPSI_RHS(const double x, const double A,
+                                   const double DA, const double PSI,
                                    const double DPSI, const double OM,
                                    const double ww_)
 {
     double r = ((x == 0.) ? eps : x);
     return 0.5 * DPSI * DPSI / PSI - 2. * DPSI / r -
-           2. * M_PI * G * PSI *
-               (PSI * PSI * V(P) + DP * DP +
-                ww_ * P * P * PSI * PSI / (OM * OM));
+           2. * M_PI * PSI *
+               (PSI * PSI * V(A) + DA * DA +
+                ww_ * A * A * PSI * PSI / (OM * OM));
 }
 
-double BosonStarSolution::OMEGA_RHS(const double x, const double P,
-                                    const double DP, const double PSI,
+double BosonStarSolution::OMEGA_RHS(const double x, const double A,
+                                    const double DA, const double PSI,
                                     const double DPSI, const double OM,
                                     const double ww_)
 {
     double r = ((x == 0.) ? eps : x);
     return (OM / (x * DPSI + PSI)) *
-           (2. * M_PI * G * x * PSI *
-                (DP * DP - PSI * PSI * V(P) +
-                 ww_ * P * P * PSI * PSI / (OM * OM)) -
+           (2. * M_PI * x * PSI *
+                (DA * DA - PSI * PSI * V(A) +
+                 ww_ * A * A * PSI * PSI / (OM * OM)) -
             DPSI - 0.5 * x * DPSI * DPSI / PSI);
 }
 
 // V is klein gordon potential and DV is its gradient. Depends on #define
 // star_type at top
-double BosonStarSolution::V(const double P)
+double BosonStarSolution::V(const double A)
 {
     if (!solitonic)
     {
-        return MM * P * P + 0.5 * lambda * P * P * P * P;
+        return MM * A * A + 0.5 * lambda * A * A * A * A;
     }
     else
     {
-        return MM * P * P * pow((1. - 2. * pow(P / sigma, 2)), 2);
+        return MM * A * A * pow((1. - 2. * pow(A / sigma, 2)), 2);
     }
 }
-double BosonStarSolution::DV(const double P)
+double BosonStarSolution::DV(const double A)
 {
     if (!solitonic)
     {
-        return MM + lambda * P * P;
+        return MM + lambda * A * A;
     }
     else
     {
-        return MM - 8. * MM * pow(P / sigma, 2) + 12. * MM * pow(P / sigma, 4);
+        return MM - 8. * MM * pow(A / sigma, 2) + 12. * MM * pow(A / sigma, 4);
     }
+}
+
+void BosonStarSolution::calculate_aspect_mass()
+{
+    for (int i = 0; i < gridsize; ++i)
+    {
+        boson_mass[i] = 2. * radius_array[i] * (sqrt(psi[i]) - 1.);
+    }
+}
+
+void BosonStarSolution::calculate_adm_mass()
+{
+    for (int i = 0; i < gridsize; ++i)
+    {
+        adm_mass[i] = -psi[i] * dpsi[i] * radius_array[i] * radius_array[i];
+    }
+}
+
+double BosonStarSolution::calculate_radius()
+{
+    int i;
+
+    for (i = gridsize - 2; i >= 0; i--)
+        if (boson_mass[i] < 99.9 / 100.0 * boson_mass[gridsize - 1])
+            break;
+
+    pout() << "radius = " << radius_array[i + 1] << endl;
+
+    return radius_array[i + 1];
 }
 
 // counts how many times the function crosses the axis
@@ -645,7 +759,7 @@ int BosonStarSolution::crossings()
     int number = 0;
     for (int i = 0; i < gridsize - 1; ++i)
     {
-        if (p[i] * p[i + 1] < 0)
+        if (A[i] * A[i + 1] < 0)
         {
             number += 1;
         }
@@ -655,7 +769,7 @@ int BosonStarSolution::crossings()
 
 // 4th order error (cubic interpolation) for field. shouts if asked to fetch a
 // value outside the ode solution
-double BosonStarSolution::get_p_interp(const double r) const
+double BosonStarSolution::get_A_interp(const double r) const
 {
     int iter = (int)floor(
         r / dx); // index of 2nd (out of 4) gridpoints used for interpolation
@@ -665,16 +779,15 @@ double BosonStarSolution::get_p_interp(const double r) const
     double interpolated_value = 0, f1, f2, f3, f4;
     f1 =
         ((iter == 0)
-             ? p[1]
-             : p[iter - 1]); // conditionl/ternary imposing zero gradeint at r=0
-    f2 = p[iter];
-    f3 = p[iter + 1];
-    f4 = p[iter + 2];
+             ? A[1]
+             : A[iter - 1]); // conditionl/ternary imposing zero gradeint at r=0
+    f2 = A[iter];
+    f3 = A[iter + 1];
+    f4 = A[iter + 2];
 
     if (iter > gridsize - 3)
     {
-        std::cout << "Requested Value outside BS initial data domain!"
-                  << std::endl;
+        pout() << "FArrayBox domain exceeding star radius!" << endl;
     }
 
     // do the cubic spline, from mathematica script written by Robin
@@ -688,7 +801,7 @@ double BosonStarSolution::get_p_interp(const double r) const
     return interpolated_value;
 }
 
-double BosonStarSolution::get_dp_interp(const double r) const
+double BosonStarSolution::get_dA_interp(const double r) const
 {
     int iter = (int)floor(
         r / dx); // index of 2nd (out of 4) gridpoints used for interpolation
@@ -696,16 +809,15 @@ double BosonStarSolution::get_dp_interp(const double r) const
         (r / dx) - floor(r / dx) - 0.5; // fraction from midpoint of two values,
                                         // a = +- 1/2 is the nearest gridpoints
     double interpolated_value = 0, f1, f2, f3, f4;
-    f1 = ((iter == 0) ? dp[1] : dp[iter - 1]); // conditionl/ternary imposing
+    f1 = ((iter == 0) ? dA[1] : dA[iter - 1]); // conditionl/ternary imposing
                                                // zero gradeint at r=0
-    f2 = dp[iter];
-    f3 = dp[iter + 1];
-    f4 = dp[iter + 2];
+    f2 = dA[iter];
+    f3 = dA[iter + 1];
+    f4 = dA[iter + 2];
 
     if (iter > gridsize - 3)
     {
-        std::cout << "Requested Value outside BS initial data domain!"
-                  << std::endl;
+        pout() << "FArrayBox domain exceeding star radius!" << endl;
     }
 
     // do the cubic spline, from mathematica script written by Robin
@@ -736,8 +848,7 @@ double BosonStarSolution::get_lapse_interp(const double r) const
 
     if (iter > gridsize - 3)
     {
-        std::cout << "Requested Value outside BS initial data domain!"
-                  << std::endl;
+        pout() << "FArrayBox domain exceeding star radius!" << endl;
     }
 
     // do the cubic spline, from mathematica script written by Robin
@@ -767,8 +878,7 @@ double BosonStarSolution::get_psi_interp(const double r) const
 
     if (iter > gridsize - 3)
     {
-        std::cout << "Requested Value outside BS initial data domain!"
-                  << std::endl;
+        pout() << "FArrayBox domain exceeding star radius!" << endl;
     }
 
     // do the cubic spline, from mathematica script written by Robin
@@ -799,8 +909,7 @@ double BosonStarSolution::get_dpsi_interp(const double r) const
 
     if (iter > gridsize - 3)
     {
-        std::cout << "Requested Value outside BS initial data domain!"
-                  << std::endl;
+        pout() << "FArrayBox domain exceeding star radius!" << endl;
     }
 
     // do the cubic spline, from mathematica script written by Robin
@@ -829,8 +938,7 @@ double BosonStarSolution::get_dlapse_interp(const double r) const
 
     if (iter > gridsize - 3)
     {
-        std::cout << "Requested Value outside BS initial data domain!"
-                  << std::endl;
+        pout() << "FArrayBox domain exceeding star radius!" << endl;
     }
 
     // do the cubic spline (for gradient now), from mathematica script written
@@ -842,30 +950,9 @@ double BosonStarSolution::get_dlapse_interp(const double r) const
     return interpolated_value;
 }
 
-// returns the aspect mass, i.e. comparing the large radius metric to
-// Schwarzschild and using a differential realtion to return M (NOT an ADM mass
-// calc)
-double BosonStarSolution::get_mass() const { return aspect_mass; }
+double BosonStarSolution::get_mass() const { return boson_mass[gridsize - 1]; }
 
-// returns the eigenvalue
-double BosonStarSolution::get_w() const { return sqrt(ww); }
-
-double BosonStarSolution::get_r(const double frac) const
-{
-    if ((frac - 0.5) * (frac - 0.5) >= 0.25)
-    {
-        return -1.;
-    }
-
-    for (int i = 0; i < gridsize; ++i)
-    {
-        if (p[i] / p[0] < frac)
-        {
-            return radius_array[i];
-        }
-    }
-    return -1.;
-}
+double BosonStarSolution::get_w() const { return sqrt(omega_true); }
 
 void BosonStarSolution::set_initialcondition_params(
     BosonStar_params_t m_params_BosonStar,
@@ -874,28 +961,62 @@ void BosonStarSolution::set_initialcondition_params(
     gridsize = m_params_BosonStar.gridpoints;
     adaptive_buffer =
         0.; // gridsize/10; // numer of gridpoints to intergate more carefully
-    p.resize(gridsize);            // scalar field modulus
-    dp.resize(gridsize);           // scalar field modulus gradient
-    psi.resize(gridsize);          // conformal factor
-    dpsi.resize(gridsize);         // conformal factor gradient
-    omega.resize(gridsize);        // lapse
-    radius_array.resize(gridsize); // radius
+    A.resize(gridsize);                  // scalar field modulus
+    dA.resize(gridsize);                 // scalar field modulus gradient
+    psi.resize(gridsize);                // conformal factor
+    dpsi.resize(gridsize);               // conformal factor gradient
+    omega.resize(gridsize);              // lapse
+    radius_array.resize(gridsize);       // isotropic radius
+    areal_radius_array.resize(gridsize); // arealradius
+    boson_mass.resize(gridsize);         // mass of the BS
+    adm_mass.resize(gridsize);           // ADM BS mass
+    compactness.resize(gridsize);        // compactness of a BS
 
-    G = m_params_BosonStar.Newtons_constant;
-    PC = m_params_BosonStar.central_amplitude_CSF;
-    EIGEN = m_params_BosonStar.eigen;
+    A0 = m_params_BosonStar.central_amplitude_CSF;
     MM = m_params_potential.scalar_mass * m_params_potential.scalar_mass;
     lambda = m_params_potential.phi4_coeff;
     solitonic = m_params_potential.solitonic;
-    sigma = m_params_potential.sigma_soliton;
+    sigma = m_params_potential.sigma_solitonic;
+    BS_verbosity = m_params_BosonStar.BS_solver_verbosity;
+    PSC = m_params_BosonStar.PSC;
+    OMC = m_params_BosonStar.OMC;
     L = max_r * 1.05; // just to make sure the function domain is slightly
                       // larger than the required cube
-    dx = L / (gridsize - 1);
+    dx = L / double((gridsize - 1));
 }
 
-void BosonStarSolution::shout() const
+void BosonStarSolution::shout() const { pout() << "Haliboombah!" << endl; }
+
+void BosonStarSolution::output_csv()
 {
-    std::cout << "Haliboombah!" << std::endl;
+    std::ofstream A_file, dA_file, psi_file, dpsi_file, omega_file, r_file,
+        mass_file;
+    A_file.open("A.csv");
+    dA_file.open("dA.csv");
+    psi_file.open("psi.csv");
+    dpsi_file.open("dpsi.csv");
+    omega_file.open("omega.csv");
+    r_file.open("r.csv");
+    mass_file.open("mass.csv");
+
+    for (int i = 0; i < gridsize; i++)
+    {
+        A_file << A[i] << "," << endl;
+        dA_file << dA[i] << "," << endl;
+        psi_file << psi[i] << "," << endl;
+        dpsi_file << dpsi[i] << "," << endl;
+        omega_file << omega[i] << "," << endl;
+        r_file << radius_array[i] << "," << endl;
+        mass_file << boson_mass[i] << "," << endl;
+    }
+
+    A_file.close();
+    dA_file.close();
+    psi_file.close();
+    dpsi_file.close();
+    omega_file.close();
+    r_file.close();
+    mass_file.close();
 }
 
 #endif /* BOSONSTARSOLUTION_IMPL_HPP_ */

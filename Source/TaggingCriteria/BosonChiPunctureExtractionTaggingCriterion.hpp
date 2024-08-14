@@ -50,25 +50,23 @@ class BosonChiPunctureExtractionTaggingCriterion
     // The constructor
     BosonChiPunctureExtractionTaggingCriterion(
         const double dx, const int a_level,
-	const std::array<int, 2> a_horizon_max_levels,
+        const std::array<int, 2> a_horizon_max_levels,
         const std::array<int, 2> a_puncture_max_levels,
         const spherical_extraction_params_t a_params,
         const std::vector<double> &a_puncture_coords,
         const bool activate_extraction = false,
         const bool track_punctures = false,
-        const std::vector<double> a_puncture_radii = {4.0, 4.0}, 
-        const std::vector<double> a_puncture_masses = {1.0, 1.0}, 
+        const std::vector<double> a_puncture_radii = {4.0, 4.0},
+        const std::vector<double> a_puncture_masses = {1.0, 1.0},
         const double a_buffer = 0.5)
-        : m_dx(dx), m_level(a_level), m_horizon_max_levels(a_horizon_max_levels),
+        : m_dx(dx), m_level(a_level),
+          m_horizon_max_levels(a_horizon_max_levels),
           m_puncture_max_levels(a_puncture_max_levels),
           m_track_punctures(track_punctures),
           m_activate_extraction(activate_extraction), m_deriv(dx),
-          m_params(a_params), m_puncture_radii(a_puncture_radii), 
+          m_params(a_params), m_puncture_radii(a_puncture_radii),
           m_puncture_masses(a_puncture_masses),
-          m_puncture_coords(a_puncture_coords),
-          m_buffer(a_buffer)
-    {
-    };
+          m_puncture_coords(a_puncture_coords), m_buffer(a_buffer){};
 
     template <class data_t> void compute(Cell<data_t> current_cell) const
     {
@@ -106,49 +104,57 @@ class BosonChiPunctureExtractionTaggingCriterion
 
         if (m_track_punctures == 1)
         {
-	    double puncture_separation2 = 0.0;
+            double puncture_separation2 = 0.0;
 
             std::array<double, CH_SPACEDIM> puncture_centre1;
-	    std::array<double, CH_SPACEDIM> puncture_centre2;
+            std::array<double, CH_SPACEDIM> puncture_centre2;
 
-            FOR1(i) {puncture_centre1[i] =  m_puncture_coords[i];
-		    puncture_centre2[i] =  m_puncture_coords[3 + i];}
-            
-	    FOR1(idir)
+            FOR1(i)
+            {
+                puncture_centre1[i] = m_puncture_coords[i];
+                puncture_centre2[i] = m_puncture_coords[3 + i];
+            }
+
+            FOR1(idir)
             {
                 double displacement =
                     puncture_centre1[idir] - puncture_centre2[idir];
                 puncture_separation2 += displacement * displacement;
-	    }
+            }
 
-	    double puncture_separation = sqrt(puncture_separation2);
+            double puncture_separation = sqrt(puncture_separation2);
 
             const int merger_horizon_max_level =
                 min(m_horizon_max_levels[0], m_horizon_max_levels[1]);
 
             const int merger_puncture_max_level =
                 min(m_puncture_max_levels[0], m_puncture_max_levels[1]);
-	
-	    
-	    if (puncture_separation > (m_puncture_radii[1] + m_puncture_radii[0]))
+
+            if (puncture_separation >
+                (m_puncture_radii[1] + m_puncture_radii[0]))
             {
                 // punctures still far enough apart so tag around each one
                 // separately
-		//
-		for (int ipuncture = 0; ipuncture < 2; ++ipuncture)
-            	{
-                std::array<double, CH_SPACEDIM> puncture_centre;
+                //
+                for (int ipuncture = 0; ipuncture < 2; ++ipuncture)
+                {
+                    std::array<double, CH_SPACEDIM> puncture_centre;
 
-                FOR1(i) {puncture_centre[i] =  m_puncture_coords[3 * ipuncture + i];}
-                // where am i?
-                const Coordinates<data_t> coords(current_cell, m_dx, puncture_centre);
+                    FOR1(i)
+                    {
+                        puncture_centre[i] =
+                            m_puncture_coords[3 * ipuncture + i];
+                    }
+                    // where am i?
+                    const Coordinates<data_t> coords(current_cell, m_dx,
+                                                     puncture_centre);
 
-		const data_t max_abs_xy =
+                    const data_t max_abs_xy =
                         simd_max(abs(coords.x), abs(coords.y));
-                const data_t max_abs_xyz =
+                    const data_t max_abs_xyz =
                         simd_max(max_abs_xy, abs(coords.z));
-		
-		if (m_level < m_horizon_max_levels[ipuncture])
+
+                    if (m_level < m_horizon_max_levels[ipuncture])
                     {
                         // we want the 2nd and 3rd levels above
                         // puncture_max_level to be twice the size of the next
@@ -160,14 +166,16 @@ class BosonChiPunctureExtractionTaggingCriterion
 
                         auto regrid = simd_compare_lt(
                             max_abs_xyz,
-                            factor * (m_puncture_radii[ipuncture] / 2. +
-                                      m_buffer));
-			// NOTE: you can also use factor * (m_puncture_masses[ipuncture] * 2. +
-                        // m_buffer) in the simd_compare_lt call; this would result in milder tagging. 
-			
+                            factor *
+                                (m_puncture_radii[ipuncture] / 2. + m_buffer));
+                        // NOTE: you can also use factor *
+                        // (m_puncture_masses[ipuncture] * 2. + m_buffer) in the
+                        // simd_compare_lt call; this would result in milder
+                        // tagging.
+
                         criterion = simd_conditional(regrid, 100.0, criterion);
                     }
-		else if (m_level < m_puncture_max_levels[ipuncture])
+                    else if (m_level < m_puncture_max_levels[ipuncture])
                     {
                         // make the first level below horizon_max_level
                         // 1/4 the length across and levels below that
@@ -176,24 +184,25 @@ class BosonChiPunctureExtractionTaggingCriterion
                             2.0, m_horizon_max_levels[ipuncture] - m_level - 2);
 
                         auto regrid = simd_compare_lt(
-                            max_abs_xyz, factor * m_puncture_radii[ipuncture] / 2.);
+                            max_abs_xyz,
+                            factor * m_puncture_radii[ipuncture] / 2.);
 
                         criterion = simd_conditional(regrid, 100.0, criterion);
                     }
-		else
+                    else
                     {
                         // remove any finer levels for BHs with
                         // puncture_max_level < max_level
                         auto dont_regrid = simd_compare_lt(
-                            max_abs_xyz, m_puncture_radii[ipuncture] / 2. +
-                                             m_buffer);
+                            max_abs_xyz,
+                            m_puncture_radii[ipuncture] / 2. + m_buffer);
                         criterion =
                             simd_conditional(dont_regrid, 0.0, criterion);
                     }
-		}
-	     }
+                }
+            }
 
-	    else
+            else
             {
                 if (m_level >= merger_horizon_max_level &&
                     m_level >= merger_puncture_max_level)
@@ -208,16 +217,18 @@ class BosonChiPunctureExtractionTaggingCriterion
 
             // if punctures are close enough together tag cells at the
             // center of mass for the merger BH
-            if (puncture_separation < m_puncture_radii[0] + m_puncture_radii[1] + m_buffer)
+            if (puncture_separation <
+                m_puncture_radii[0] + m_puncture_radii[1] + m_buffer)
             {
                 std::array<double, CH_SPACEDIM> center_of_mass;
                 FOR1(idir)
                 {
                     center_of_mass[idir] =
-                    (m_puncture_masses[0] * m_puncture_coords[idir] +
-                    m_puncture_masses[1] * m_puncture_coords[3+idir]) / sum_masses;
+                        (m_puncture_masses[0] * m_puncture_coords[idir] +
+                         m_puncture_masses[1] * m_puncture_coords[3 + idir]) /
+                        sum_masses;
                 }
-            
+
                 Coordinates<data_t> coords(current_cell, m_dx, center_of_mass);
                 const data_t max_abs_xy =
                     simd_max(abs(coords.x), abs(coords.y));
@@ -228,7 +239,9 @@ class BosonChiPunctureExtractionTaggingCriterion
                     const double factor = pow(
                         2.0, min(merger_horizon_max_level - m_level - 1, 2));
                     auto regrid2 = simd_compare_lt(
-                        max_abs_xyz, factor * (m_puncture_radii[0] / 2. + m_puncture_radii[1] / 2. + m_buffer));
+                        max_abs_xyz,
+                        factor * (m_puncture_radii[0] / 2. +
+                                  m_puncture_radii[1] / 2. + m_buffer));
                     criterion = simd_conditional(regrid2, 100.0, criterion);
                 }
                 else if (m_level < merger_puncture_max_level)
@@ -239,8 +252,9 @@ class BosonChiPunctureExtractionTaggingCriterion
                     const double factor =
                         pow(2.0, merger_horizon_max_level - m_level - 2);
 
-                    auto regrid2 =
-                        simd_compare_lt(max_abs_xyz, factor * (m_puncture_radii[0] / 2. + m_puncture_radii[1] / 2.));
+                    auto regrid2 = simd_compare_lt(
+                        max_abs_xyz, factor * (m_puncture_radii[0] / 2. +
+                                               m_puncture_radii[1] / 2.));
 
                     criterion = simd_conditional(regrid2, 100.0, criterion);
                 }

@@ -18,7 +18,7 @@ class DefaultComplexPotential
     //! Set the potential function for the complex scalar field here to zero
     template <class data_t, template <typename> class vars_t>
     void compute_potential(data_t &V_of_modulus_phi_squared,
-                            data_t &dVdmodulus_phi_squared,
+                           data_t &dVdmodulus_phi_squared,
                            const vars_t<data_t> &vars) const
     {
         // The potential value at |phi|^2

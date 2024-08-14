@@ -32,11 +32,13 @@ class ADMMass
     const FourthOrderDerivatives
         m_deriv; //!< An object for calculating derivatives of the variables
     const double m_dx;
-    const std::array<double,CH_SPACEDIM> m_centre;
+    const std::array<double, CH_SPACEDIM> m_centre;
 
   public:
-    ADMMass(const std::array<double,CH_SPACEDIM> a_centre, double a_dx)
-        : m_deriv(a_dx), m_dx(a_dx), m_centre(a_centre) {}
+    ADMMass(const std::array<double, CH_SPACEDIM> a_centre, double a_dx)
+        : m_deriv(a_dx), m_dx(a_dx), m_centre(a_centre)
+    {
+    }
 
     template <class data_t> void compute(Cell<data_t> current_cell) const
     {
@@ -49,8 +51,7 @@ class ADMMass
         const auto h_UU = compute_inverse_sym(vars.h);
 
         // Surface element for integration
-        Coordinates<data_t> coords(current_cell, m_dx,
-                                   m_centre);
+        Coordinates<data_t> coords(current_cell, m_dx, m_centre);
         data_t r = coords.get_radius();
         Tensor<1, data_t> x = {coords.x, coords.y, coords.z};
         // This is multiplied by r^2 as SphericalExtraction assumes it is
@@ -60,10 +61,10 @@ class ADMMass
         data_t Madm = 0.0;
         FOR4(i, j, k, l)
         {
-            Madm += dS[i] / (16. * M_PI) * h_UU[j][k] * h_UU[i][l]
-                    * (pow(vars.chi, -0.5) * (d1.h[l][k][j] - d1.h[j][k][l])
-                    - pow(vars.chi, -1.5) * (vars.h[l][j] * d1.chi[j]
-                    - vars.h[j][k] * d1.chi[l]));
+            Madm += dS[i] / (16. * M_PI) * h_UU[j][k] * h_UU[i][l] *
+                    (pow(vars.chi, -0.5) * (d1.h[l][k][j] - d1.h[j][k][l]) -
+                     pow(vars.chi, -1.5) *
+                         (vars.h[l][j] * d1.chi[j] - vars.h[j][k] * d1.chi[l]));
         }
 
         // spin about z axis
@@ -81,8 +82,8 @@ class ADMMass
 
             FOR2(l, m)
             {
-                Jadm += dS[i] / (8. * M_PI) * epsilon[2][j][k] * x[j]
-                        * h_UU[i][l] * h_UU[k][m] * pow(vars.chi, -0.5) *
+                Jadm += dS[i] / (8. * M_PI) * epsilon[2][j][k] * x[j] *
+                        h_UU[i][l] * h_UU[k][m] * pow(vars.chi, -0.5) *
                         (vars.A[l][m] + 1.0 / 3.0 * vars.K * vars.h[l][m]);
             }
         }
