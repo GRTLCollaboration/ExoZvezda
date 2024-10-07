@@ -30,7 +30,7 @@ class BosonChiPunctureExtractionTaggingCriterion
     const spherical_extraction_params_t m_params;
     const std::vector<double> m_puncture_radii;
     const std::vector<double> m_puncture_masses;
-    const std::vector<double> &m_puncture_coords;
+    const std::vector<std::array<double, CH_SPACEDIM>> &m_puncture_coords;
     const double m_buffer;
 
   public:
@@ -53,7 +53,7 @@ class BosonChiPunctureExtractionTaggingCriterion
         const std::array<int, 2> a_horizon_max_levels,
         const std::array<int, 2> a_puncture_max_levels,
         const spherical_extraction_params_t a_params,
-        const std::vector<double> &a_puncture_coords,
+        const std::vector<std::array<double, CH_SPACEDIM>> &a_puncture_coords,
         const bool activate_extraction = false,
         const bool track_punctures = false,
         const std::vector<double> a_puncture_radii = {4.0, 4.0},
@@ -111,8 +111,8 @@ class BosonChiPunctureExtractionTaggingCriterion
 
             FOR1(i)
             {
-                puncture_centre1[i] = m_puncture_coords[i];
-                puncture_centre2[i] = m_puncture_coords[3 + i];
+                puncture_centre1[i] = m_puncture_coords[0][i];
+                puncture_centre2[i] = m_puncture_coords[1][i];
             }
 
             FOR1(idir)
@@ -142,8 +142,7 @@ class BosonChiPunctureExtractionTaggingCriterion
 
                     FOR1(i)
                     {
-                        puncture_centre[i] =
-                            m_puncture_coords[3 * ipuncture + i];
+                        puncture_centre[i] = m_puncture_coords[ipuncture][i];
                     }
                     // where am i?
                     const Coordinates<data_t> coords(current_cell, m_dx,
@@ -224,8 +223,8 @@ class BosonChiPunctureExtractionTaggingCriterion
                 FOR1(idir)
                 {
                     center_of_mass[idir] =
-                        (m_puncture_masses[0] * m_puncture_coords[idir] +
-                         m_puncture_masses[1] * m_puncture_coords[3 + idir]) /
+                        (m_puncture_masses[0] * m_puncture_coords[0][idir] +
+                         m_puncture_masses[1] * m_puncture_coords[1][idir]) /
                         sum_masses;
                 }
 

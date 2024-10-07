@@ -27,6 +27,7 @@ struct BosonStar_params_t
     double BS_rapidity;
     double mass_ratio;
     int n_power;
+    int niter;
     double radius_width1;
     double radius_width2;
     int conformal_factor_power;

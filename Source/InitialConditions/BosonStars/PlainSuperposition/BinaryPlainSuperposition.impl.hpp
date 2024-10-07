@@ -102,7 +102,7 @@ void BinaryPlainSuperposition::compute(Cell<data_t> current_cell) const
     double pc_os = psi_ * psi_ * c_ * c_ - omega_ * omega_ * s_ * s_;
     double lapse_1 = omega_ * psi_ / (sqrt(pc_os));
     double lapse_2 = 1.;
-    double w_ = m_1d_sol.get_w();
+    double w_ = m_1d_sol.get_BSfrequency();
 
     // Write in phase, shift, metric componnets of star 1 and initialise metric
     // components of star 2
@@ -196,11 +196,11 @@ void BinaryPlainSuperposition::compute(Cell<data_t> current_cell) const
     lapse_2 = omega_ * psi_ / (sqrt(pc_os));
     if (antiboson)
     {
-        w_ = -m_1d_sol2.get_w();
+        w_ = -m_1d_sol2.get_BSfrequency();
     }
     else
     {
-        w_ = m_1d_sol2.get_w();
+        w_ = m_1d_sol2.get_BSfrequency();
     }
     phase_ = w_ * t;
     beta_x = s_ * c_ * (psi_ * psi_ - omega_ * omega_) / (pc_os);

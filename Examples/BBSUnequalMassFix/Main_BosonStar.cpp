@@ -3,7 +3,11 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
+// Chombo includes
+#include "CH_Timer.H"
 #include "parstream.H" //Gives us pout()
+
+// System includes
 #include <chrono>
 #include <iostream>
 
@@ -75,8 +79,7 @@ int runGRChombo(int argc, char *argv[])
     std::chrono::time_point<Clock> start_time = Clock::now();
 
     // Add a scheduler to call specificPostTimeStep on every AMRLevel at t=0
-    auto task = [](GRAMRLevel *level)
-    {
+    auto task = [](GRAMRLevel *level) {
         if (level->time() == 0.)
             level->specificPostTimeStep();
     };

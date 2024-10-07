@@ -259,29 +259,9 @@ void BosonStarLevel::specificPostTimeStep()
         constraints_file.write_time_data_line({L2_Ham, L2_Mom, L1_Ham, L1_Mom});
     }
 
-    if (m_p.do_star_track && m_level == m_p.star_track_level)
-    {
-        pout() << "Running a star tracker now" << endl;
-        // if at restart time read data from dat file,
-        // will default to param file if restart time is 0
-        if (fabs(m_time - m_restart_time) < m_dt * 1.1)
-        {
-            m_st_amr.m_star_tracker.read_old_centre_from_dat(
-                "StarCentres", m_dt, m_time, m_restart_time, first_step);
-        }
-        m_st_amr.m_star_tracker.update_star_centres(m_dt);
-        m_st_amr.m_star_tracker.write_to_dat("StarCentres", m_dt, m_time,
-                                             m_restart_time, first_step);
-    }
-
 #ifdef USE_AHFINDER
     if (m_p.AH_activate && m_level == m_p.AH_params.level_to_run)
     {
-        // if (m_p.AH_set_origins_to_punctures && m_p.track_punctures)
-        // {
-        //     m_bh_amr.m_ah_finder.set_origins(
-        //         m_bh_amr.m_puncture_tracker.get_puncture_coords());
-        // }
         m_st_amr.m_ah_finder.solve(m_dt, m_time, m_restart_time);
     }
 #endif

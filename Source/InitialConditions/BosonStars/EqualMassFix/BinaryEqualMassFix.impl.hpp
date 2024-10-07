@@ -24,24 +24,26 @@ inline BinaryEqualMassFix::BinaryEqualMassFix(
 
 void BinaryEqualMassFix::compute_1d_solution(const double max_r)
 {
+    std::string star1, star2;
     try
     {
-        // set initial parameters and then run the solver (didnt put it in the
-        // constructor)
-
-        pout() << "Setting initial conditions for Star 1" << endl;
+        // Compute for the 1st star
         m_1d_sol.set_initialcondition_params(m_params_BosonStar,
                                              m_params_potential, max_r);
-        pout() << "Running the solver for Star 1" << endl;
         m_1d_sol.main();
-        pout() << "Completed for star 1" << endl;
+        central_amplitude1 = m_1d_sol.A[0];
+        mass1 = m_1d_sol.boson_mass[m_params_BosonStar.gridpoints - 1];
+        radius1 = m_1d_sol.radius;
+        compactness1 = m_1d_sol.compactness_value;
 
-        pout() << "Setting initial conditions for Star 2" << endl;
+        // Compute for the 2nd star
         m_1d_sol2.set_initialcondition_params(m_params_BosonStar2,
                                               m_params_potential, max_r);
-        pout() << "Running the solver for Star 2" << endl;
         m_1d_sol2.main();
-        pout() << "Completed for star 2" << endl;
+        central_amplitude2 = m_1d_sol2.A[0];
+        mass2 = m_1d_sol2.boson_mass[m_params_BosonStar.gridpoints - 1];
+        radius2 = m_1d_sol2.radius;
+        compactness2 = m_1d_sol2.compactness_value;
     }
     catch (std::exception &exception)
     {
@@ -99,7 +101,7 @@ void BinaryEqualMassFix::compute(Cell<data_t> current_cell) const
     double pc_os = psi_ * psi_ * c_ * c_ - omega_ * omega_ * s_ * s_;
     double lapse_1 = omega_ * psi_ / (sqrt(pc_os));
     double lapse_2 = 1.;
-    double w_ = m_1d_sol.get_w();
+    double w_ = m_1d_sol.get_BSfrequency();
 
     // Write in phase, shift, metric componnets of star 1 and initialise metric
     // components of star 2
@@ -213,11 +215,11 @@ void BinaryEqualMassFix::compute(Cell<data_t> current_cell) const
     lapse_2 = omega_ * psi_ / (sqrt(pc_os));
     if (antiboson)
     {
-        w_ = -m_1d_sol2.get_w();
+        w_ = -m_1d_sol2.get_BSfrequency();
     }
     else
     {
-        w_ = m_1d_sol2.get_w();
+        w_ = m_1d_sol2.get_BSfrequency();
     }
 
     phase_ = w_ * t;
