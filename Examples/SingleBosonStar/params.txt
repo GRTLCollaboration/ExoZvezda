@@ -36,8 +36,7 @@ regrid_threshold_chi = 0.3
 ##############################################################
 # BosonStar Initial data parameters
 central_amplitude_CSF = 0.17 
-gridpoints = 1000000
-
+BS_solver_verbosity = 1
 BS_rapidity = 0.0
 
 star_centre = 256 0 0
@@ -170,7 +169,7 @@ extraction_radii = 60. 70. 80. 90. 100. 110. 120. 130. 140. 150. 160.
 extraction_levels = 3 2 2 2 2 1 1 1 1 1 1 
 num_points_phi = 48
 num_points_theta = 60
-num_modes = 39
+num_modes = 5
 modes = 2 0
         2 1
         2 2

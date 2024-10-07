@@ -25,6 +25,11 @@ class SimulationParameters : public SimulationParametersBase
 
     void readParams(GRParmParse &pp)
     {
+        pout() << "---------------------------------" << endl;
+        pout() << "Hello! You are running a boson star binary with the "
+                  "'equal-mass fix'!"
+               << endl;
+
         // Gravitional constant
         pp.load("G_Newton", G_Newton, 1.0);
 
@@ -41,6 +46,7 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("BS_solver_omc", bosonstar_params.OMC, 0.5);
         pp.load("BS_solver_verbosity", bosonstar_params.BS_solver_verbosity,
                 false);
+        pp.load("BS_solver_niter", bosonstar_params.niter, 17);
 
         pp.load("star_centre", bosonstar_params.star_centre, center);
 
@@ -68,27 +74,27 @@ class SimulationParameters : public SimulationParametersBase
         // Boson Star 2 parameters
         pp.load("central_amplitude_CSF2",
                 bosonstar2_params.central_amplitude_CSF);
+        if (bosonstar_params.central_amplitude_CSF !=
+            bosonstar2_params.central_amplitude_CSF)
+        {
+            MayDay::Error("Ooof... You are trying to simulate an unequal mass "
+                          "BS binary with the 'equal-mass fix'!");
+        }
         pp.load("BS_rapidity2", bosonstar2_params.BS_rapidity);
         pp.load("BS_mass2", bosonstar2_params.mass, 1.0);
 
         // std::array<double, CH_SPACEDIM> positionA, positionB;
 
-        positionA[0] =
-            (bosonstar_params.star_centre[0] +
-             bosonstar_params.mass_ratio * bosonstar_params.BS_separation /
-                 (bosonstar_params.mass_ratio + 1.));
+        positionA[0] = bosonstar_params.star_centre[0] +
+                       bosonstar_params.BS_separation / 2.;
         positionA[1] = bosonstar_params.star_centre[1] -
-                       bosonstar_params.mass_ratio *
-                           bosonstar_params.BS_impact_parameter /
-                           (bosonstar_params.mass_ratio + 1.);
+                       bosonstar_params.BS_impact_parameter / 2.;
         positionA[2] = bosonstar_params.star_centre[2];
 
-        positionB[0] = (bosonstar_params.star_centre[0] -
-                        bosonstar_params.BS_separation /
-                            (bosonstar_params.mass_ratio + 1.));
+        positionB[0] = bosonstar_params.star_centre[0] -
+                       bosonstar_params.BS_separation / 2.;
         positionB[1] = bosonstar_params.star_centre[1] +
-                       bosonstar_params.BS_impact_parameter /
-                           (bosonstar_params.mass_ratio + 1.);
+                       bosonstar_params.BS_impact_parameter / 2.;
         positionB[2] = bosonstar_params.star_centre[2];
 
         pout() << "Star A is at x-position " << positionA[0] << endl;
