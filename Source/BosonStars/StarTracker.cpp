@@ -19,7 +19,7 @@ void StarTracker::set_up_fitting(int num_star, int fitting_direction)
     std::vector<double> vals_chi(m_points); // vector to store chi
 
     // Define the x/y/z coordinate intervals for fitting. The interval length is
-    // determined by 'm_width_A' and 'm_width_B', which can be dfferent for the
+    // determined by 'm_width_A' and 'm_width_B', which can be different for the
     // two BSs. The 'm_points' determines the way the interval is split into
     // parts.
     for (int i = 0; i < m_points; i++)
@@ -63,13 +63,13 @@ void StarTracker::set_up_fitting(int num_star, int fitting_direction)
     bool fill_ghosts = true;
     m_interpolator->refresh(fill_ghosts);
 
-    InterpolationQuery query(m_points);
-    query.setCoords(0, m_x_coords.data())
+    InterpolationQuery query_st(m_points);
+    query_st.setCoords(0, m_x_coords.data())
         .setCoords(1, m_y_coords.data())
         .setCoords(2, m_z_coords.data())
         .addComp(c_chi, vals_chi.data());
 
-    m_interpolator->interp(query);
+    m_interpolator->interp(query_st);
 
     // We want to fit the Gaussian to (1-chi), since chi asymptotes to 1
     for (int i = 0; i < m_points; i++)
