@@ -72,16 +72,16 @@ void BosonStarLevel::initialData()
                                         m_p.bosonstar2_params,
                                         m_p.potential_params, m_dx);
 
-    // the max radius the code might need to calculate out to is L*sqrt(3)
+    // Initiate solver for 1D BS solutions
     boson_star.compute_1d_solution(4. * m_p.L);
 
     if (m_level == 0)
     {
-    pout() << "Star 1 has A[0] " << boson_star.central_amplitude1 << " mass " << boson_star.mass1 << " radius " << boson_star.radius1 << " and compactness " << boson_star.compactness1 << endl;
-    pout() << "Star 2 has A[0] " << boson_star.central_amplitude2 << " mass " << boson_star.mass2 << " radius " << boson_star.radius2 << " and compactness " << boson_star.compactness2 << endl;
+    pout() << "Star 1 has A[0] " << boson_star.central_amplitude1 << " mass " << boson_star.mass1 << " frequency " << boson_star.frequency1 << " radius " << boson_star.radius1 << " and compactness " << boson_star.compactness1 << endl;
+    pout() << "Star 2 has A[0] " << boson_star.central_amplitude2 << " mass " << boson_star.mass2 << " frequency " << boson_star.frequency2 << " radius " << boson_star.radius2 << " and compactness " << boson_star.compactness2 << endl;
     }
     // First set everything to zero ... we don't want undefined values in
-    // constraints etc, then  initial conditions for Boson Star
+    // constraints etc, then set initial conditions for Boson Star
     BoxLoops::loop(make_compute_pack(SetValue(0.0), boson_star), m_state_new,
                    m_state_new, INCLUDE_GHOST_CELLS, disable_simd());
 
@@ -218,7 +218,7 @@ void BosonStarLevel::specificPostTimeStep()
         mass_extraction.execute_query(m_gr_amr.m_interpolator);
     }
 
-    // noether charge, max mod phi, min chi, constraint violations
+    // Noether charge, max mod phi, min chi, constraint violations
     if (at_level_timestep_multiple(0))
     {
         BoxLoops::loop(NoetherCharge(), m_state_new, m_state_diagnostics,
@@ -229,10 +229,7 @@ void BosonStarLevel::specificPostTimeStep()
         AMRReductions<VariableType::diagnostic> amr_reductions(m_gr_amr);
         if (m_p.calculate_noether_charge)
         {
-            // noether charge should be calculated pre-check and pre plot
-            // so automatically here
-
-            // compute integrated volume weighted noether charge integral
+            // Compute volume weighted Noether charge integral
 
             double noether_charge = amr_reductions.sum(c_N);
             SmallDataIO noether_charge_file("NoetherCharge", m_dt, m_time,
@@ -269,8 +266,7 @@ void BosonStarLevel::specificPostTimeStep()
         }
         min_chi_file.write_time_data_line({min_chi});
 
-        // constraints calculated pre check and pre plot so done here already
-
+        // Constraints below
         double L2_Ham = amr_reductions.norm(c_Ham, 2, true);
         double L2_Mom = amr_reductions.norm(Interval(c_Mom1, c_Mom3), 2, true);
         double L1_Ham = amr_reductions.norm(c_Ham, 1, true);

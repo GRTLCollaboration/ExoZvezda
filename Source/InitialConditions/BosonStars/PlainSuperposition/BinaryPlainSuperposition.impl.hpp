@@ -27,14 +27,13 @@ void BinaryPlainSuperposition::compute_1d_solution(const double max_r)
 {
     try
     {
-        // set initial parameters and then run the solver (didnt put it in the
-        // constructor)
-
+        // Set initial parameters and then run the solver 
         m_1d_sol.set_initialcondition_params(m_params_BosonStar,
                                              m_params_potential, max_r);
         m_1d_sol.main();
-	central_amplitude1 = m_1d_sol.A[0];
+	    central_amplitude1 = m_1d_sol.A[0];
         mass1 = m_1d_sol.boson_mass[m_params_BosonStar.gridpoints - 1];
+        frequency1 = m_1d_sol.get_BSfrequency();
         radius1 = m_1d_sol.radius;
         compactness1 = m_1d_sol.compactness_value;
 
@@ -43,6 +42,7 @@ void BinaryPlainSuperposition::compute_1d_solution(const double max_r)
         m_1d_sol2.main();
 	central_amplitude2 = m_1d_sol2.A[0];
         mass2 = m_1d_sol2.boson_mass[m_params_BosonStar.gridpoints - 1];
+        frequency2 = m_1d_sol2.get_BSfrequency();
         radius2 = m_1d_sol2.radius;
         compactness2 = m_1d_sol2.compactness_value;
     }

@@ -42,10 +42,9 @@ class BinaryPlainSuperposition
 
     double central_amplitude1, central_amplitude2;
     double mass1, mass2;
+    double frequency1, frequency2;
     double radius1, radius2;
     double compactness1, compactness2;
-
-    // The object that stores the solution found by the 1d ODE integrator */
 
   protected:
     double m_dx;

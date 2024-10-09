@@ -37,8 +37,8 @@ class SingleBosonStar
 
     BosonStarSolution m_1d_sol;
 
-    // The object that stores the solution found by the 1d ODE integrator */
-
+    double central_amplitude1, mass1, frequency1, radius1, compactness1;
+    
   protected:
     double m_dx;
     BosonStar_params_t m_params_BosonStar;  //!< The complex scalar field params

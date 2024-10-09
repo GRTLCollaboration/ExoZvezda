@@ -24,15 +24,15 @@ void SingleBosonStar::compute_1d_solution(const double max_r)
 {
     try
     {
-        // set initial parameters and then run the solver (didnt put it in the
-        // constructor)
-
-        pout() << "Setting initial conditions for Star 1" << endl;
+        // Set initial parameters for one star 
         m_1d_sol.set_initialcondition_params(m_params_BosonStar,
                                              m_params_potential, max_r);
-        pout() << "Running the solver for Star 1" << endl;
         m_1d_sol.main();
-        pout() << "Completed for star 1" << endl;
+        central_amplitude1 = m_1d_sol.A[0];
+        mass1 = m_1d_sol.boson_mass[m_params_BosonStar.gridpoints - 1];
+        frequency1 = m_1d_sol.get_BSfrequency();
+        radius1 = m_1d_sol.radius;
+        compactness1 = m_1d_sol.compactness_value;
     }
     catch (std::exception &exception)
     {
