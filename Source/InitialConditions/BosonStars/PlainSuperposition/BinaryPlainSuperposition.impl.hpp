@@ -30,19 +30,21 @@ void BinaryPlainSuperposition::compute_1d_solution(const double max_r)
         // set initial parameters and then run the solver (didnt put it in the
         // constructor)
 
-        pout() << "Setting initial conditions for Star 1" << endl;
         m_1d_sol.set_initialcondition_params(m_params_BosonStar,
                                              m_params_potential, max_r);
-        pout() << "Running the solver for Star 1" << endl;
         m_1d_sol.main();
-        pout() << "Completed for star 1" << endl;
+	central_amplitude1 = m_1d_sol.A[0];
+        mass1 = m_1d_sol.boson_mass[m_params_BosonStar.gridpoints - 1];
+        radius1 = m_1d_sol.radius;
+        compactness1 = m_1d_sol.compactness_value;
 
-        pout() << "Setting initial conditions for Star 2" << endl;
         m_1d_sol2.set_initialcondition_params(m_params_BosonStar2,
                                               m_params_potential, max_r);
-        pout() << "Running the solver for Star 2" << endl;
         m_1d_sol2.main();
-        pout() << "Completed for star 2" << endl;
+	central_amplitude2 = m_1d_sol2.A[0];
+        mass2 = m_1d_sol2.boson_mass[m_params_BosonStar.gridpoints - 1];
+        radius2 = m_1d_sol2.radius;
+        compactness2 = m_1d_sol2.compactness_value;
     }
     catch (std::exception &exception)
     {
