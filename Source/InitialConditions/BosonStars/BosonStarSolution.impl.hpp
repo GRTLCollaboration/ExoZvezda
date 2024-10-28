@@ -766,9 +766,11 @@ double BosonStarSolution::get_dA_interp(const double r) const
     // do the cubic spline, from mathematica script written by Robin
     // (rc634@cam.ac.uk)
     interpolated_value =
-        (1. / (24. * dx)) *
-        ((f1 - 27. * f2 + 27. * f3 - f4) + 12. * a * (f1 - f2 - f3 + f4) -
-         12. * a * a * (f1 - 3. * f2 + 3. * f3 - f4));
+        (1. / 48.) *
+        (f1 * (-3. + 2. * a + 12. * a * a - 8. * a * a * a) +
+         (3. + 2. * a) *
+             (-(1. + 2. * a) * (-9. * f3 + f4 + 6. * f3 * a - 2 * f4 * a) +
+              3. * f2 * (3. - 8. * a + 4. * a * a)));
     return interpolated_value;
 }
 
@@ -854,9 +856,11 @@ double BosonStarSolution::get_dpsi_interp(const double r) const
     // do the cubic spline, from mathematica script written by Robin
     // (rc634@cam.ac.uk)
     interpolated_value =
-        (1. / (24. * dx)) *
-        ((f1 - 27. * f2 + 27. * f3 - f4) + 12. * a * (f1 - f2 - f3 + f4) -
-         12. * a * a * (f1 - 3. * f2 + 3. * f3 - f4));
+        (1. / 48.) *
+        (f1 * (-3. + 2. * a + 12. * a * a - 8. * a * a * a) +
+         (3. + 2. * a) *
+             (-(1. + 2. * a) * (-9. * f3 + f4 + 6. * f3 * a - 2 * f4 * a) +
+              3. * f2 * (3. - 8. * a + 4. * a * a)));
     return interpolated_value;
 }
 
