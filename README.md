@@ -34,18 +34,18 @@ If you use ExoChombo as part of a paper, please cite the following publications:
 }
 ```
 ```
-@article{Helfer:2021brt,
-    author = "Helfer, Thomas and Sperhake, Ulrich and Croft, Robin and Radia, Miren and Ge, Bo-Xuan and Lim, Eugene A.",
-    title = "{Malaise and remedy of binary boson-star initial data}",
-    eprint = "2108.11995",
+@article{Evstafyeva:2022bpr,
+    author = "Evstafyeva, Tamara and Sperhake, Ulrich and Helfer, Thomas and Croft, Robin and Radia, Miren and Ge, Bo-Xuan and Lim, Eugene A.",
+    title = "{Unequal-mass boson-star binaries: initial data and merger dynamics}",
+    eprint = "2212.08023",
     archivePrefix = "arXiv",
     primaryClass = "gr-qc",
-    doi = "10.1088/1361-6382/ac53b7",
+    doi = "10.1088/1361-6382/acc2a8",
     journal = "Class. Quant. Grav.",
-    volume = "39",
-    number = "7",
-    pages = "074001",
-    year = "2022"
+    volume = "40",
+    number = "8",
+    pages = "085009",
+    year = "2023"
 }
 ```
 ```
