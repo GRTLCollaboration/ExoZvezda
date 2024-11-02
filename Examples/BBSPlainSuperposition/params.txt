@@ -28,11 +28,10 @@ N_full = 128
 #L = 1024
 L_full = 512
 
-# Used \chi and \rho criterion for the grid 
-
 # Regridding
 # Thresholds on the change across a cell which prompts regrid
-regrid_threshold_rho = 0.05
+regrid_threshold_phi = 0.25
+regrid_threshold_chi = 0.125
 
 ##############################################################
 # BosonStar Initial data parameters
@@ -52,8 +51,8 @@ star_centre = 256 256 0
 # Potential params
 scalar_mass = 1.0
 phi4_coeff = 0.0
-solitonic = true # if false, next line is irrelevant. Make true for solitonic potential
-sigma_solitonic = 0.2 # try central density ~ 0.05, the soliton is very sensitive
+solitonic = true 
+sigma_solitonic = 0.2 
 
 ##############################################################
 # Level data
@@ -91,17 +90,15 @@ vars_parity            = 0 0 4 6 0 5 0    #chi and hij
                          0 1 2 3 1 2 3    #lapse shift and B
                          0 0 0 0          #phi and Pi
 
-
-
-vars_parity_diagnostic = 0 1 2 3          #Ham and Mom
-                         0                #modphi
+vars_parity_diagnostic = 0                #modphi
                          0 0              #ADM mass and J
                          0                #N
                          0 1 2 3          #H,mom constraints
                          0 7              #Weyl4 re im
                          0 1 2 3          #Stresstensor rho s1 s2 s3
                          0 4 6 0 5 0      #Stresstensor s11 s12 s13 s22 s23 s33
-                         0 0 0 0 0           #Qphi Fphi Sphi
+                         0 0 0 0 0 0 0    #Qphi Fphi Sphi
+
 # if reflective boundaries selected, must set
 # parity of all vars (in order given by UserVariables.hpp)
 
@@ -132,7 +129,7 @@ lapse_advec_coeff = 1 # 1 makes the lapse gauge 1+log slicing
 
 # Shift evolution coefficients
 shift_advec_coeff = 0 # Usually no advection for beta
-shift_Gamma_coeff = 0.75 #
+shift_Gamma_coeff = 0.75 
 eta = 1.0 # This is beta_driver, usually of order 1/M_ADM of spacetime
 
 # CCZ4 parameters
@@ -185,6 +182,7 @@ modes = 2 0
 
 write_extraction = 0
 
+# Star tracking 
 do_star_track = false
 number_of_stars = 2
 star_points = 7

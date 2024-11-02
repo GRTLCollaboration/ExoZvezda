@@ -36,7 +36,6 @@ regrid_threshold_chi = 0.3
 ##############################################################
 # BosonStar Initial data parameters
 central_amplitude_CSF = 0.17 
-BS_solver_verbosity = 1
 BS_rapidity = 0.0
 
 star_centre = 256 0 0
@@ -44,8 +43,8 @@ star_centre = 256 0 0
 # Potential params
 scalar_mass = 1.0
 phi4_coeff = 0.0
-solitonic = true # if false, next line is irrelevant. Make true for solitonic potential
-sigma_solitonic = 0.2 # try central density ~ 0.05, the soliton is very sensitive
+solitonic = true 
+sigma_solitonic = 0.2 
 
 ##############################################################
 # Level data
@@ -86,15 +85,15 @@ vars_parity            = 0 0 4 6 0 5 0    #chi and hij
                          0 1 2 3 1 2 3    #lapse shift and B
                          0 0 0 0          #phi and Pi
 
-vars_parity_diagnostic = 0 1 2 3          #Ham and Mom
-                         0                #modphi
+vars_parity_diagnostic = 0                #modphi
                          0 0              #ADM mass and J
                          0                #N
                          0 1 2 3          #H,mom constraints
                          0 7              #Weyl4 re im
                          0 1 2 3          #Stresstensor rho s1 s2 s3
                          0 4 6 0 5 0      #Stresstensor s11 s12 s13 s22 s23 s33
-                         0 0 0 0 0           #Qphi Fphi Sphi
+                         0 0 0 0 0 0 0    #Qphi Fphi Sphi
+
 # if reflective boundaries selected, must set
 # parity of all vars (in order given by UserVariables.hpp)
 
@@ -176,52 +175,4 @@ modes = 2 0
         2 -1
         2 -2
 
-write_extraction = 0
-
-do_star_track = false
-number_of_stars = 2
-star_points = 5
-star_track_width_A = 2.
-star_track_width_B = 2.
-star_track_centre = 256 0 0 # deafults to L/2 L/2 L/2
-star_track_level = 5
-direction_of_motion = "x"
-
-##############################################################
-# Apparent Horizon Finder parameters
-
-AH_activate = 0
-AH_num_ranks = 20
-AH_num_points_u = 30
-AH_num_points_v = 50
-# AH_solve_interval = 1
-# AH_print_interval = 1
-AH_track_center = true
-AH_predict_origin = true
-AH_set_origins_to_punctures = true
-AH_level_to_run = 1
-# AH_start_time = 0.
-# AH_give_up_time = -1.
-# AH_merger_search_factor = 1.
-# AH_merger_pre_factor = 1.
-# AH_allow_re_attempt = 0
-# AH_max_fails_after_lost = -1
-AH_verbose = 3
-AH_print_geometry_data = 1
-# AH_re_solve_at_restart = 0
-# AH_stop_if_max_fails = 0
-# AH_expansion_radius_power = 1.
-
-# AH_1_initial_guess = 0.3
-# AH_2_initial_guess = 0.3
-
-# AH_expansion_radius_power = 1.
-
-# AH_num_extra_vars = 2
-# AH_extra_vars = chi d1_Ham d2_A11
-
-# AH_set_origins_to_punctures = 0
-
-# AH_coords_subpath = "data/coords"
-# AH_stats_prefix = "stats_AH"
-# AH_coords_prefix = "coords_AH"
+write_extraction = 0 
