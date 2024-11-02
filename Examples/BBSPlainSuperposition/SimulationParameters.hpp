@@ -125,15 +125,6 @@ class SimulationParameters : public SimulationParametersBase
         // Tagging
         pp.load("regrid_threshold_phi", regrid_threshold_phi);
         pp.load("regrid_threshold_chi", regrid_threshold_chi);
-        pp.load("regrid_threshold_rho", regrid_threshold_rho, 0.5);
-
-        pp.load("tag_radius_A", tag_radius_A, 4.);
-        pp.load("tag_radius_B", tag_radius_B, 4.);
-        pp.load("tag_buffer", tag_buffer, 0.5);
-        pp.load("tag_punctures_max_levels", tag_punctures_max_levels,
-                {max_level, max_level});
-        pp.load("tag_horizons_max_levels", tag_horizons_max_levels,
-                {max_level, max_level});
 
         // Mass extraction
         pp.load("activate_mass_extraction", activate_mass_extraction, 0);

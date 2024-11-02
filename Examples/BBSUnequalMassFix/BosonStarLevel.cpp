@@ -332,43 +332,30 @@ void BosonStarLevel::computeTaggingCriterion(
     const FArrayBox &current_state_diagnostics)
 {
 
-    // BoxLoops::loop(ComplexPhiAndChiExtractionTaggingCriterion(m_dx, m_level,
-    //                   m_p.mass_extraction_params, m_p.regrid_threshold_phi,
-    //                   m_p.regrid_threshold_chi), current_state,
-    //                   tagging_criterion);
-
-    //    BoxLoops::loop(ChiandRhoTaggingCriterion(m_dx, m_level,
-    //                    m_p.mass_extraction_params, m_p.regrid_threshold_rho,
-    //                    m_p.regrid_threshold_chi), current_state,
-    //                    tagging_criterion);
+    BoxLoops::loop(ComplexPhiAndChiExtractionTaggingCriterion(m_dx, m_level,
+                      m_p.mass_extraction_params, m_p.regrid_threshold_phi,
+                      m_p.regrid_threshold_chi), current_state,
+                      tagging_criterion);
 
     // Be aware of the tagging here, you may want to change it, depending on
-    // your problem of interest. Below tagging for when the tracking is
-    // activated is 'intense' and specific to binary inspirals.
+    // your problem of interest. Below is the tagging for moving boxes approach. 
 
-    if (m_p.do_star_track == true)
-    {
-        const vector<double> puncture_radii = {m_p.tag_radius_A,
-                                               m_p.tag_radius_B};
-        const vector<double> puncture_masses = {m_p.bosonstar_params.mass,
-                                                m_p.bosonstar2_params.mass};
+    // if (m_p.do_star_track == true)
+    // {
+    //     const vector<double> puncture_radii = {m_p.tag_radius_A,
+    //                                            m_p.tag_radius_B};
+    //     const vector<double> puncture_masses = {m_p.bosonstar_params.mass,
+    //                                             m_p.bosonstar2_params.mass};
 
-        const std::vector<std::array<double, CH_SPACEDIM>> puncture_coords =
-            m_st_amr.m_star_tracker.get_puncture_coords();
+    //     const std::vector<std::array<double, CH_SPACEDIM>> puncture_coords =
+    //         m_st_amr.m_star_tracker.get_puncture_coords();
 
-        BoxLoops::loop(BosonChiPunctureExtractionTaggingCriterion(
-                           m_dx, m_level, m_p.tag_horizons_max_levels,
-                           m_p.tag_punctures_max_levels, m_p.extraction_params,
-                           puncture_coords, m_p.activate_extraction,
-                           m_p.do_star_track, puncture_radii, puncture_masses,
-                           m_p.tag_buffer),
-                       current_state, tagging_criterion);
-    }
-    else
-    {
-        BoxLoops::loop(ChiandRhoTaggingCriterion(
-                           m_dx, m_level, m_p.mass_extraction_params,
-                           m_p.regrid_threshold_rho, m_p.regrid_threshold_chi),
-                       current_state, tagging_criterion);
-    }
+    //     BoxLoops::loop(BosonChiPunctureExtractionTaggingCriterion(
+    //                        m_dx, m_level, m_p.tag_horizons_max_levels,
+    //                        m_p.tag_punctures_max_levels, m_p.extraction_params,
+    //                        puncture_coords, m_p.activate_extraction,
+    //                        m_p.do_star_track, puncture_radii, puncture_masses,
+    //                        m_p.tag_buffer),
+    //                    current_state, tagging_criterion);
+    // }
 }
