@@ -1,6 +1,6 @@
-# ExoChombo
+# ExoZvezda
 
-ExoChombo is an open-source code for performing simulations of exotic compact objects, based on the publicly available 
+ExoZvezda is an open-source code for performing simulations of exotic compact objects, based on the publicly available 
 3+1 numerical relativity code [GRChombo](https://github.com/GRChombo/GRChombo). It inherits all of the capabilities of the main code and is developed and maintained by a collaboration of numerical relativists with a wide range of research interests, from early universe cosmology to astrophysics and mathematical general relativity. 
 
 Current exotic compact objects available for evolution: 
@@ -10,13 +10,13 @@ Current exotic compact objects available for evolution:
 //Detailed installation instructions and usage examples are available in our [wiki](https://github.com/GRTLCollaboration/ExoChombo/wiki), with the home page giving guidance on where to start.-->
 
 ## Contributing
-We welcome feedback, bug reports, and contributions. Please consult the [wiki](https://github.com/GRChombo/GRFolres/wiki) for our coding style and testing policy before filing a pull request.
+We welcome feedback, bug reports, and contributions. Please consult the [wiki]([https://github.com/GRChombo/GRFolres/wiki](https://github.com/GRTLCollaboration/GRChombo/wiki/Contributing-to-GRChombo)) for our coding style and testing policy before filing a pull request.
 
 ## License
-ExoChombo is licensed under the BSD 3-Clause License. Please see LICENSE for details.
+ExoZvezda is licensed under the BSD 3-Clause License. Please see LICENSE for details.
 
 ## Citation
-If you use ExoChombo as part of a paper, please cite the following publications:
+If you use ExoZvezda as part of a paper, please cite the following publications:
 
 ```
 @article{Helfer:2021brt,
