@@ -8,7 +8,7 @@
 
 // #include "simd.hpp"
 
-class Potential
+class ComplexPotential
 {
   public:
     struct params_t
@@ -24,7 +24,7 @@ class Potential
 
   public:
     //! The constructor
-    Potential(params_t a_params) : m_params(a_params) {}
+    ComplexPotential(params_t a_params) : m_params(a_params) {}
 
     //! Set the potential function for the scalar field here
     template <class data_t, template <typename> class vars_t>

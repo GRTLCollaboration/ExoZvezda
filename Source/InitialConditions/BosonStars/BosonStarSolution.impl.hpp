@@ -898,7 +898,7 @@ double BosonStarSolution::get_BSfrequency() const { return sqrt(omega_true); }
 // Initialise solver 
 void BosonStarSolution::set_initialcondition_params(
     BosonStar_params_t m_params_BosonStar,
-    Potential::params_t m_params_potential, const double max_r)
+    ComplexPotential::params_t m_params_potential, const double max_r)
 {
     gridsize = m_params_BosonStar.gridpoints;
     adaptive_buffer =

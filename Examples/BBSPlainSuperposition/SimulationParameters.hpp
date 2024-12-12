@@ -173,7 +173,7 @@ class SimulationParameters : public SimulationParametersBase
 
     BosonStar_params_t bosonstar_params;
     BosonStar_params_t bosonstar2_params;
-    Potential::params_t potential_params;
+    ComplexPotential::params_t potential_params;
 
     // Mass extraction
     int activate_mass_extraction;

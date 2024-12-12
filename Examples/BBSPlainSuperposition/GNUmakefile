@@ -6,11 +6,9 @@
 # Included makefiles need an absolute path to the Chombo installation
 # CHOMBO_HOME := Please set the CHOMBO_HOME locally (e.g. export CHOMBO_HOME=... in bash)
 
-#ifndef BOOST_ROOT
-#		$(error The BosonStar example requires BOOST_ROOT to be set to the root of the boost library directory.)
-#endif
+# The user needs to specify GRCHOMBO_SOURCE location, e.g. using 'export GRCHOMBO_SOURCE = /home/folder/GRChombo/Source'
 
-GRCHOMBO_SOURCE = ../../Source
+export EXOZVEZDA_SOURCE = $(shell pwd)/../../Source
 
 ebase := Main_BosonStar
 
@@ -22,11 +20,13 @@ src_dirs := $(GRCHOMBO_SOURCE)/utils \
             $(GRCHOMBO_SOURCE)/Matter  \
             $(GRCHOMBO_SOURCE)/BoxUtils  \
             $(GRCHOMBO_SOURCE)/GRChomboCore  \
-            $(GRCHOMBO_SOURCE)/TaggingCriteria  \
             $(GRCHOMBO_SOURCE)/AMRInterpolator  \
-            $(GRCHOMBO_SOURCE)/BosonStars \
-            $(GRCHOMBO_SOURCE)/InitialConditions/BosonStars \
-            $(GRCHOMBO_SOURCE)/InitialConditions/BosonStars/PlainSuperposition \
-            $(GRCHOMBO_SOURCE)/ApparentHorizonFinder 
+            $(GRCHOMBO_SOURCE)/ApparentHorizonFinder \
+            $(EXOZVEZDA_SOURCE)/InitialConditions/BosonStars \
+            $(EXOZVEZDA_SOURCE)/InitialConditions/BosonStars/PlainSuperposition \
+            $(EXOZVEZDA_SOURCE)/Matter \
+            $(EXOZVEZDA_SOURCE)/BosonStars \
+            $(EXOZVEZDA_SOURCE)/utils \
+            $(EXOZVEZDA_SOURCE)/TaggingCriteria 
 
 include $(CHOMBO_HOME)/mk/Make.test

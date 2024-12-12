@@ -54,9 +54,8 @@ class ADMMass
         Coordinates<data_t> coords(current_cell, m_dx, m_centre);
         data_t r = coords.get_radius();
         Tensor<1, data_t> x = {coords.x, coords.y, coords.z};
-        // This is multiplied by r^2 as SphericalExtraction assumes it is
-        // normalised as such.
-        Tensor<1, data_t> dS = {coords.x * r, coords.y * r, coords.z * r};
+        // Only one coordinate is multiplied by r as we wish to normalise the quantity by 1/r^2
+        Tensor<1, data_t> dS = {coords.x, coords.y, coords.z * r};
 
         data_t Madm = 0.0;
         FOR4(i, j, k, l)

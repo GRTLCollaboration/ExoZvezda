@@ -28,7 +28,7 @@ class BinaryPlainSuperposition
     //! The constructor
     BinaryPlainSuperposition(BosonStar_params_t a_params_BosonStar,
                              BosonStar_params_t a_params_BosonStar2,
-                             Potential::params_t a_params_potential,
+                             ComplexPotential::params_t a_params_potential,
                              double a_dx);
 
     //! Computes the 1d solution and stores in m_1d_sol
@@ -50,7 +50,7 @@ class BinaryPlainSuperposition
     double m_dx;
     BosonStar_params_t m_params_BosonStar;
     BosonStar_params_t m_params_BosonStar2; //!< The complex scalar field params
-    Potential::params_t m_params_potential; //!< The potential params
+    ComplexPotential::params_t m_params_potential; //!< The potential params
 };
 
 #include "BinaryPlainSuperposition.impl.hpp"
