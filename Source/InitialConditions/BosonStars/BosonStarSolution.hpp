@@ -81,7 +81,7 @@ class BosonStarSolution
         compactness_value; // for storing the radius and compactness of the BS
 
     void set_initialcondition_params(BosonStar_params_t m_params_BosonStar,
-                                     Potential::params_t m_params_potential,
+                                     ComplexPotential::params_t m_params_potential,
                                      const double max_r);
     double get_A_interp(const double r) const;
     double get_lapse_interp(const double r) const;

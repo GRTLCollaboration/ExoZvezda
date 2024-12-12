@@ -107,7 +107,7 @@ void BosonStarLevel::preCheckpointLevel()
     CH_TIME("BosonStarLevel::preCheckpointLevel");
 
     fillAllGhosts();
-    Potential potential(m_p.potential_params);
+    ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
     BoxLoops::loop(
         make_compute_pack(MatterWeyl4<ComplexScalarFieldWithPotential>(
@@ -127,7 +127,7 @@ void BosonStarLevel::prePlotLevel()
     CH_TIME("BosonStarLevel::prePlotLevel");
 
     fillAllGhosts();
-    Potential potential(m_p.potential_params);
+    ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
     BoxLoops::loop(
         make_compute_pack(MatterWeyl4<ComplexScalarFieldWithPotential>(
@@ -152,7 +152,7 @@ void BosonStarLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
     // Calculate MatterCCZ4 right hand side with matter_t = ComplexScalarField
     // We don't want undefined values floating around in the constraints so
     // zero these
-    Potential potential(m_p.potential_params);
+    ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
     BoxLoops::loop(MatterCCZ4RHS<ComplexScalarFieldWithPotential>(
                        complex_scalar_field, m_p.ccz4_params, m_dx, m_p.sigma,
@@ -176,7 +176,7 @@ void BosonStarLevel::specificPostTimeStep()
 
     // First compute the ADM Mass integrand values on the grid
     fillAllGhosts();
-    Potential potential(m_p.potential_params);
+    ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
     auto weyl4_adm_compute_pack = make_compute_pack(
         MatterWeyl4<ComplexScalarFieldWithPotential>(

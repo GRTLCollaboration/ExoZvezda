@@ -16,7 +16,7 @@
 inline BinaryPlainSuperposition::BinaryPlainSuperposition(
     BosonStar_params_t a_params_BosonStar,
     BosonStar_params_t a_params_BosonStar2,
-    Potential::params_t a_params_potential, double a_dx)
+    ComplexPotential::params_t a_params_potential, double a_dx)
     : m_dx(a_dx), m_params_BosonStar(a_params_BosonStar),
       m_params_BosonStar2(a_params_BosonStar2),
       m_params_potential(a_params_potential)
