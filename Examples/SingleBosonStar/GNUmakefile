@@ -10,7 +10,7 @@
 
 export EXOZVEZDA_SOURCE = $(shell pwd)/../../Source
 
-ebase := Main_BosonStar
+ebase := Main_SingleBosonStar
 
 LibNames := AMRTimeDependent AMRTools BoxTools
 

@@ -3,8 +3,8 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#ifndef BOSONSTARLEVEL_HPP_
-#define BOSONSTARLEVEL_HPP_
+#ifndef BBSUNEQUALMASSFIXLEVEL_HPP_
+#define BBSUNEQUALMASSFIXLEVEL_HPP_
 
 #include "DefaultLevelFactory.hpp"
 #include "GRAMRLevel.hpp"
@@ -18,9 +18,9 @@
      The class takes some initial data for a boson star (i.e. a compact complex
      scalar field configuration) and evolves it using the CCZ4 equations.
 */
-class BosonStarLevel : public GRAMRLevel
+class BBSUnequalMassFixLevel : public GRAMRLevel
 {
-    friend class DefaultLevelFactory<BosonStarLevel>;
+    friend class DefaultLevelFactory<BBSUnequalMassFixLevel>;
     // Inherit the contructors from GRAMRLevel
     using GRAMRLevel::GRAMRLevel;
 
@@ -59,4 +59,4 @@ class BosonStarLevel : public GRAMRLevel
     virtual void specificPostTimeStep() override;
 };
 
-#endif /* BOSONSTARLEVEL_HPP_ */
+#endif /* BBSUNEQUALMASSFIXLEVEL_HPP_ */
