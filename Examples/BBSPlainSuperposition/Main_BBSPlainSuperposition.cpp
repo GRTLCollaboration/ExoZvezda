@@ -19,7 +19,7 @@
 #include "SimulationParameters.hpp"
 
 // Problem specific includes:
-#include "BosonStarLevel.hpp"
+#include "BBSPlainSuperpositionLevel.hpp"
 
 // Star tracking
 #include "STAMR.hpp"
@@ -42,7 +42,7 @@ int runGRChombo(int argc, char *argv[])
         {sim_params.positionA, sim_params.positionB}, sim_params.star_points,
         sim_params.star_track_width_A, sim_params.star_track_width_B,
         sim_params.star_track_direction_of_motion);
-    DefaultLevelFactory<BosonStarLevel> boson_star_level_fact(st_amr,
+    DefaultLevelFactory<BBSPlainSuperpositionLevel> boson_star_level_fact(st_amr,
                                                               sim_params);
     setupAMRObject(st_amr, boson_star_level_fact);
 
@@ -51,13 +51,6 @@ int runGRChombo(int argc, char *argv[])
         st_amr, sim_params.origin, sim_params.dx, sim_params.boundary_params,
         sim_params.verbosity);
     st_amr.set_interpolator(&interpolator);
-
-    // Add a scheduler to GRAMR which just calls doAnalysis on every AMRLevel
-    // at time 0. It is called later in postTimeStep
-    // RefCountedPtr<CallDoAnalysis> call_do_analysis_ptr(new CallDoAnalysis);
-    // RefCountedPtr<Scheduler> scheduler_ptr(new Scheduler);
-    // scheduler_ptr->schedule(call_do_analysis_ptr, sim_params.max_steps);
-    // st_amr.schedule(scheduler_ptr);
 
 #ifdef USE_AHFINDER
     if (sim_params.AH_activate)

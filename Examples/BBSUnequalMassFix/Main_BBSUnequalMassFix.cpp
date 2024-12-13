@@ -19,7 +19,7 @@
 #include "SimulationParameters.hpp"
 
 // Problem specific includes:
-#include "BosonStarLevel.hpp"
+#include "BBSUnequalMassFixLevel.hpp"
 
 // Star tracking
 #include "STAMR.hpp"
@@ -42,7 +42,7 @@ int runGRChombo(int argc, char *argv[])
         {sim_params.positionA, sim_params.positionB}, sim_params.star_points,
         sim_params.star_track_width_A, sim_params.star_track_width_B,
         sim_params.star_track_direction_of_motion);
-    DefaultLevelFactory<BosonStarLevel> boson_star_level_fact(st_amr,
+    DefaultLevelFactory<BBSUnequalMassFixLevel> boson_star_level_fact(st_amr,
                                                               sim_params);
     setupAMRObject(st_amr, boson_star_level_fact);
 
