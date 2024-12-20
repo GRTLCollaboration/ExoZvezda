@@ -12,7 +12,6 @@
 #include "TraceARemoval.hpp"
 
 // For RHS update
-#include "IntegratedMovingPunctureGauge.hpp"
 #include "MatterCCZ4.hpp"
 
 // For constraints calculation
@@ -31,11 +30,9 @@
 
 // For mass extraction
 #include "ADMMass.hpp"
-// #include "Density.hpp"
 #include "ADMMassExtraction.hpp"
 #include "EMTensor.hpp"
 #include "MomFluxCalc.hpp"
-#include "SourceIntPreconditioner.hpp"
 
 // For GW extraction
 #include "MatterWeyl4.hpp"
@@ -45,10 +42,7 @@
 #include "NoetherCharge.hpp"
 #include "SmallDataIO.hpp"
 
-// For Ang Mom Integrating
-#include "AngMomFlux.hpp"
-
-// for chombo grid Functions
+// for Chombo grid functions
 #include "AMRReductions.hpp"
 
 // Things to do at each advance step, after the RK4 is calculated
@@ -87,17 +81,14 @@ void SingleBosonStarLevel::initialData()
                << boson_star.compactness1 << endl;
     }
 
-    // First set everything to zero ... we don't want undefined values in
-    // constraints etc, then set initial conditions for Boson Star
+    // First set everything to zero, as we do not want undefined values in
+    // constraints. Then set initial conditions for a BS.
     BoxLoops::loop(make_compute_pack(SetValue(0.0), boson_star), m_state_new,
                    m_state_new, INCLUDE_GHOST_CELLS, disable_simd());
 
+    fillAllGhosts();
     BoxLoops::loop(GammaCalculator(m_dx), m_state_new, m_state_new,
                    EXCLUDE_GHOST_CELLS, disable_simd());
-
-    fillAllGhosts();
-    BoxLoops::loop(IntegratedMovingPunctureGauge(m_p.ccz4_params), m_state_new,
-                   m_state_new, EXCLUDE_GHOST_CELLS, disable_simd());
 }
 
 // Things to do before outputting a checkpoint file
@@ -168,7 +159,7 @@ void SingleBosonStarLevel::specificPostTimeStep()
 
     bool first_step = (m_time == 0.0);
 
-    // First compute the ADM Mass integrand values on the grid
+    // First compute diagnostics values on the grid
     fillAllGhosts();
     ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
@@ -182,7 +173,7 @@ void SingleBosonStarLevel::specificPostTimeStep()
     {
         if (m_verbosity)
         {
-            pout() << "BinaryBSLevel::specificPostTimeStep:"
+            pout() << "SingleBosonStarLevel::specificPostTimeStep:"
                       " Extracting mass."
                    << endl;
         }
@@ -203,6 +194,7 @@ void SingleBosonStarLevel::specificPostTimeStep()
     if (m_level == 0)
     {
         AMRReductions<VariableType::diagnostic> amr_reductions(m_gr_amr);
+        AMRReductions<VariableType::evolution> amr_reductions_ev(m_gr_amr);
         if (m_p.calculate_noether_charge)
         {
             // Compute volume weighted noether charge integral
@@ -231,8 +223,8 @@ void SingleBosonStarLevel::specificPostTimeStep()
         }
         mod_phi_max_file.write_time_data_line({mod_phi_max});
 
-        // Compute the min of chi and write it to a file
-        double min_chi = amr_reductions.min(c_chi);
+        // Compute the min of \chi
+        double min_chi = amr_reductions_ev.min(c_chi);
         SmallDataIO min_chi_file("min_chi", m_dt, m_time, m_restart_time,
                                  SmallDataIO::APPEND, first_step);
         min_chi_file.remove_duplicate_time_data();
@@ -242,7 +234,7 @@ void SingleBosonStarLevel::specificPostTimeStep()
         }
         min_chi_file.write_time_data_line({min_chi});
 
-        // Constraints below
+        // Compute constraints 
         double L2_Ham = amr_reductions.norm(c_Ham, 2, true);
         double L2_Mom = amr_reductions.norm(Interval(c_Mom1, c_Mom3), 2, true);
         double L1_Ham = amr_reductions.norm(c_Ham, 1, true);
@@ -275,9 +267,7 @@ void SingleBosonStarLevel::computeTaggingCriterion(
     FArrayBox &tagging_criterion, const FArrayBox &current_state,
     const FArrayBox &current_state_diagnostics)
 {
-
-    BoxLoops::loop(ComplexPhiAndChiExtractionTaggingCriterion(
-                       m_dx, m_level, m_p.mass_extraction_params,
-                       m_p.regrid_threshold_phi, m_p.regrid_threshold_chi),
-                   current_state, tagging_criterion);
+    BoxLoops::loop(ComplexPhiAndChiExtractionTaggingCriterion(m_dx, m_level,
+                   m_p.extraction_params, m_p.regrid_threshold_phi,
+                   m_p.regrid_threshold_chi, m_p.activate_extraction), current_state, tagging_criterion);
 }

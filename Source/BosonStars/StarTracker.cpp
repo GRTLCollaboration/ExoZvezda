@@ -400,21 +400,15 @@ void StarTracker::read_old_centre_from_dat(std::string a_filename, double a_dt,
         size = CH_SPACEDIM * m_num_stars;
         star_coords.resize(size, 0);
 
-        for (int ipuncture = 0; ipuncture < m_num_stars; ++ipuncture)
-        {
-            for (int i = 0; i < CH_SPACEDIM; ++i)
-            {
-                star_coords[CH_SPACEDIM * ipuncture + i] =
-                    m_puncture_coords[ipuncture][i];
-            }
-        }
-
         if (length_match)
         {
             for (int i = 0; i < data_line.size(); i++)
             {
                 star_coords[i] = data_line[i];
             }
+
+            pout() << "Star A restarted at : " << star_coords[0] << " " << star_coords[1] << " " << star_coords[2] << endl;
+            pout() << "Star B restarted at : " << star_coords[3] << " " << star_coords[4] << " " << star_coords[5] << endl;
         }
         else
         {

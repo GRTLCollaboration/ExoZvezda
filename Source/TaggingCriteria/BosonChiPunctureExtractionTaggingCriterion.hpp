@@ -167,10 +167,9 @@ class BosonChiPunctureExtractionTaggingCriterion
                             max_abs_xyz,
                             factor *
                                 (m_puncture_radii[ipuncture] / 2. + m_buffer));
-                        // NOTE: you can also use factor *
-                        // (m_puncture_masses[ipuncture] * 2. + m_buffer) in the
-                        // simd_compare_lt call; this would result in milder
-                        // tagging.
+                        // you can also use 
+                        // factor * (m_puncture_masses[ipuncture] * 2. + m_buffer) 
+                        // in the simd_compare_lt call. 
 
                         criterion = simd_conditional(regrid, 100.0, criterion);
                     }

@@ -13,13 +13,11 @@
 struct AngMomFlux_params_t
 {
     int number_radii;
-    bool do_flux_integration; // need to put this in specific level
+    bool do_flux_integration;
     int extraction_level;
     int num_phi, num_theta;
     std::array<double, CH_SPACEDIM> centre;
     std::vector<double> radii;
-
-    // need to sort out the field numbers... try mirens interval thing
 };
 
 #endif /* ANGMOMFLUXPARAMS_HPP_ */

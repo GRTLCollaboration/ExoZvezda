@@ -153,20 +153,12 @@ class SimulationParameters : public SimulationParametersBase
         auto min_extraction_level_it =
             mass_extraction_params.min_extraction_level();
 
-        // Do we cant to calculate L2 norms of constraint violations
-        pp.load("calculate_constraint_violations",
-                calculate_constraint_violations, false);
-
         // Do we want to calculate and write the Noether Charge to a file
         pp.load("calculate_noether_charge", calculate_noether_charge, false);
     }
 
     // Tagging thresholds
-    Real regrid_threshold_phi, regrid_threshold_chi, regrid_threshold_rho;
-    Real tag_radius_A, tag_radius_B, tag_buffer;
-
-    std::array<int, 2> tag_punctures_max_levels;
-    std::array<int, 2> tag_horizons_max_levels;
+    Real regrid_threshold_phi, regrid_threshold_chi;
 
     // Initial data for matter and potential
     double G_Newton;
@@ -180,9 +172,6 @@ class SimulationParameters : public SimulationParametersBase
     extraction_params_t mass_extraction_params;
 
     int activate_weyl_extraction;
-
-    // Do we want to write a file with the L2 norms of contraints?
-    bool calculate_constraint_violations;
 
     // Do we want to write the Noether Charge to a file
     bool calculate_noether_charge;

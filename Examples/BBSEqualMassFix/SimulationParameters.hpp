@@ -68,7 +68,7 @@ class SimulationParameters : public SimulationParametersBase
                 0.0);
 
         // Initialize values for bosonstar2_params to same as bosonstar_params
-        // and then assign that ones that should differ below
+        // and then assign the ones that should differ below
         bosonstar2_params = bosonstar_params;
 
         // Boson Star 2 parameters
@@ -82,8 +82,6 @@ class SimulationParameters : public SimulationParametersBase
         }
         pp.load("BS_rapidity2", bosonstar2_params.BS_rapidity);
         pp.load("BS_mass2", bosonstar2_params.mass, 1.0);
-
-        // std::array<double, CH_SPACEDIM> positionA, positionB;
 
         positionA[0] = bosonstar_params.star_centre[0] +
                        bosonstar_params.BS_separation / 2.;
@@ -125,16 +123,7 @@ class SimulationParameters : public SimulationParametersBase
 
         // Tagging
         pp.load("regrid_threshold_phi", regrid_threshold_phi);
-        pp.load("regrid_threshold_rho", regrid_threshold_rho, 0.5);
         pp.load("regrid_threshold_chi", regrid_threshold_chi);
-
-        pp.load("tag_radius_A", tag_radius_A, 4.);
-        pp.load("tag_radius_B", tag_radius_B, 4.);
-        pp.load("tag_buffer", tag_buffer, 0.5);
-        pp.load("tag_punctures_max_levels", tag_punctures_max_levels,
-                {max_level, max_level});
-        pp.load("tag_horizons_max_levels", tag_horizons_max_levels,
-                {max_level, max_level});
 
         // Mass extraction
         pp.load("activate_mass_extraction", activate_mass_extraction, 0);
@@ -163,20 +152,12 @@ class SimulationParameters : public SimulationParametersBase
         auto min_extraction_level_it =
             mass_extraction_params.min_extraction_level();
 
-        // Do we cant to calculate L2 norms of constraint violations
-        pp.load("calculate_constraint_violations",
-                calculate_constraint_violations, false);
-
         // Do we want to calculate and write the Noether Charge to a file
         pp.load("calculate_noether_charge", calculate_noether_charge, false);
     }
 
     // Tagging thresholds
-    Real regrid_threshold_phi, regrid_threshold_chi, regrid_threshold_rho;
-    Real tag_radius_A, tag_radius_B, tag_buffer;
-
-    std::array<int, 2> tag_punctures_max_levels;
-    std::array<int, 2> tag_horizons_max_levels;
+    Real regrid_threshold_phi, regrid_threshold_chi;
 
     // Initial data for matter and potential
     double G_Newton;
@@ -190,9 +171,6 @@ class SimulationParameters : public SimulationParametersBase
     extraction_params_t mass_extraction_params;
 
     int activate_weyl_extraction;
-
-    // Do we want to write a file with the L2 norms of contraints?
-    bool calculate_constraint_violations;
 
     // Do we want to write the Noether Charge to a file
     bool calculate_noether_charge;

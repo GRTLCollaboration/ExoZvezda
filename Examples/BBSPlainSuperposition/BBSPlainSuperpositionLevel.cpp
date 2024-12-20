@@ -30,7 +30,6 @@
 
 // For mass extraction
 #include "ADMMass.hpp"
-// #include "Density.hpp"
 #include "ADMMassExtraction.hpp"
 
 // For GW extraction
@@ -139,10 +138,12 @@ void BBSPlainSuperpositionLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelDat
     // Calculate MatterCCZ4 right hand side with matter_t = ComplexScalarField
     ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
-    BoxLoops::loop(MatterCCZ4RHS<ComplexScalarFieldWithPotential>(
-                       complex_scalar_field, m_p.ccz4_params, m_dx, m_p.sigma,
-                       m_p.formulation, m_p.G_Newton),
-                   a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
+    MatterCCZ4RHS<ComplexScalarFieldWithPotential> my_ccz4_matter(
+        complex_scalar_field, m_p.ccz4_params, m_dx, m_p.sigma, m_p.formulation,
+        m_p.G_Newton);
+    SetValue set_analysis_vars_zero(0.0, Interval(c_Pi_Im + 1, NUM_VARS - 1));
+    auto compute_pack =
+        make_compute_pack(my_ccz4_matter, set_analysis_vars_zero);
 }
 
 // Things to do at ODE update, after soln + rhs
@@ -159,7 +160,7 @@ void BBSPlainSuperpositionLevel::specificPostTimeStep()
 
     bool first_step = (m_time == 0.0);
 
-    // First compute the ADM Mass integrand values on the grid
+    // First compute the Weyl4 & ADM mass integrand values on the grid + constraints
     fillAllGhosts();
     ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
@@ -179,14 +180,14 @@ void BBSPlainSuperpositionLevel::specificPostTimeStep()
         at_level_timestep_multiple(
             m_p.extraction_params.min_extraction_level()))
     {
-        CH_TIME("BBSPlainSuperpositionLevel::doAnalysis::Weyl4&ADMMass");
+        CH_TIME("BBSPlainSuperpositionLevel::specificPostTimeStep::Weyl4Matter");
 
         // Do the extraction on the min extraction level
         if (m_level == m_p.extraction_params.min_extraction_level())
         {
             if (m_verbosity)
             {
-                pout() << "BinaryBSLevel::specificPostTimeStep:"
+                pout() << "BBSPlainSuperpositionLevel::specificPostTimeStep:"
                           " Extracting gravitational waves."
                        << endl;
             }
@@ -204,7 +205,7 @@ void BBSPlainSuperpositionLevel::specificPostTimeStep()
     {
         if (m_verbosity)
         {
-            pout() << "BinaryBSLevel::specificPostTimeStep:"
+            pout() << "BBSPlainSuperpositionLevel::specificPostTimeStep:"
                       " Extracting mass."
                    << endl;
         }
@@ -225,6 +226,7 @@ void BBSPlainSuperpositionLevel::specificPostTimeStep()
     if (m_level == 0)
     {
         AMRReductions<VariableType::diagnostic> amr_reductions(m_gr_amr);
+        AMRReductions<VariableType::evolution> amr_reductions_ev(m_gr_amr);
         if (m_p.calculate_noether_charge)
         {
             // Compute volume weighted Noether charge integral
@@ -241,7 +243,7 @@ void BBSPlainSuperpositionLevel::specificPostTimeStep()
             noether_charge_file.write_time_data_line({noether_charge});
         }
 
-        // Compute the maximum of mod_phi and write it to a file
+        // Compute the maximum of mod_phi 
         double mod_phi_max = amr_reductions.max(c_mod_phi);
         SmallDataIO mod_phi_max_file("mod_phi_max", m_dt, m_time,
                                      m_restart_time, SmallDataIO::APPEND,
@@ -253,8 +255,8 @@ void BBSPlainSuperpositionLevel::specificPostTimeStep()
         }
         mod_phi_max_file.write_time_data_line({mod_phi_max});
 
-        // Compute the min of chi and write it to a file
-        double min_chi = amr_reductions.min(c_chi);
+        // Compute the min of \chi
+        double min_chi = amr_reductions_ev.min(c_chi);
         SmallDataIO min_chi_file("min_chi", m_dt, m_time, m_restart_time,
                                  SmallDataIO::APPEND, first_step);
         min_chi_file.remove_duplicate_time_data();
@@ -318,7 +320,6 @@ void BBSPlainSuperpositionLevel::computeTaggingCriterion(
     const FArrayBox &current_state_diagnostics)
 {
     BoxLoops::loop(ComplexPhiAndChiExtractionTaggingCriterion(m_dx, m_level,
-                       m_p.mass_extraction_params, m_p.regrid_threshold_phi,
-                       m_p.regrid_threshold_chi), current_state,
-                       tagging_criterion);
+                   m_p.extraction_params, m_p.regrid_threshold_phi,
+                   m_p.regrid_threshold_chi, m_p.activate_extraction), current_state, tagging_criterion);
 }
