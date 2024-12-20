@@ -14,7 +14,7 @@ RealCleanExampleDirs := $(ExampleDirs:%=realclean-%)
 
 .PHONY: all run examples clean realclean $(TestDirs) $(ExampleDirs)
 
-export GRCHOMBO_SOURCE = $(shell pwd)/Source
+export EXOZVEZDA_SOURCE = $(shell pwd)/Source
 
 ECHO?=@ # set this to null on the command line to increase verbosity
 

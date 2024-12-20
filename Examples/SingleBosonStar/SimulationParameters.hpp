@@ -11,7 +11,6 @@
 #include "SimulationParametersBase.hpp"
 
 // Problem specific includes:
-#include "AngMomFluxParams.hpp"
 #include "BosonStarParams.hpp"
 #include "ComplexPotential.hpp"
 
@@ -27,9 +26,6 @@ class SimulationParameters : public SimulationParametersBase
     void readParams(GRParmParse &pp)
     {
         pout() << "---------------------------------" << endl;
-        // for regridding
-        pp.load("regrid_threshold_phi", regrid_threshold_phi);
-        pp.load("regrid_threshold_chi", regrid_threshold_chi);
 
         // Gravitional constant
         pp.load("G_Newton", G_Newton, 1.0);
@@ -70,6 +66,10 @@ class SimulationParameters : public SimulationParametersBase
                 0.5 * bosonstar_params.mass);
 #endif
 
+        // Tagging
+        pp.load("regrid_threshold_phi", regrid_threshold_phi);
+        pp.load("regrid_threshold_chi", regrid_threshold_chi);
+
         // Mass extraction
         pp.load("activate_mass_extraction", activate_mass_extraction, 0);
         pp.load("mass_write_extraction",
@@ -97,20 +97,8 @@ class SimulationParameters : public SimulationParametersBase
         auto min_extraction_level_it =
             mass_extraction_params.min_extraction_level();
 
-        // Do we cant to calculate L2 norms of constraint violations
-        pp.load("calculate_constraint_violations",
-                calculate_constraint_violations, false);
-
         // Do we want to calculate and write the Noether Charge to a file
         pp.load("calculate_noether_charge", calculate_noether_charge, false);
-
-        // Variables for outputting to plot files
-        // pp.load("num_plot_vars", num_plot_vars, 0);
-        // pp.load("plot_vars", plot_vars, num_plot_vars, 0);
-
-        // Variables for outputting inf-norm
-        pp.load("num_vars_inf_norm", num_vars_inf_norm, 0);
-        pp.load("vars_inf_norm", vars_inf_norm, num_vars_inf_norm, 0);
     }
 
     // Tagging thresholds
@@ -128,15 +116,8 @@ class SimulationParameters : public SimulationParametersBase
 
     int activate_weyl_extraction;
 
-    // Do we want to write a file with the L2 norms of contraints?
-    bool calculate_constraint_violations;
-
     // Do we want to write the Noether Charge to a file
     bool calculate_noether_charge;
-
-    // Vars for outputting inf-norms
-    int num_vars_inf_norm;
-    std::vector<int> vars_inf_norm;
 
     std::array<double, CH_SPACEDIM> positionA;
 

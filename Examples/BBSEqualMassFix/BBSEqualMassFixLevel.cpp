@@ -41,7 +41,7 @@
 #include "NoetherCharge.hpp"
 #include "SmallDataIO.hpp"
 
-// for chombo grid Functions
+// For Chombo grid Functions
 #include "AMRReductions.hpp"
 
 // Things to do at each advance step, after the RK4 is calculated
@@ -84,8 +84,8 @@ void BBSEqualMassFixLevel::initialData()
                << boson_star.compactness2 << endl;
     }
 
-    // First set everything to zero ... we don't want undefined values in
-    // constraints etc, then set initial conditions for Boson Star
+    // First set everything to zero, as we do not want undefined values in
+    // constraints. Then set initial conditions for a BS.
     BoxLoops::loop(make_compute_pack(SetValue(0.0), boson_star), m_state_new,
                    m_state_new, INCLUDE_GHOST_CELLS, disable_simd());
 
@@ -145,10 +145,12 @@ void BBSEqualMassFixLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_r
     // Calculate MatterCCZ4 right hand side with matter_t = ComplexScalarField
     ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
-    BoxLoops::loop(MatterCCZ4RHS<ComplexScalarFieldWithPotential>(
-                       complex_scalar_field, m_p.ccz4_params, m_dx, m_p.sigma,
-                       m_p.formulation, m_p.G_Newton),
-                   a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
+    MatterCCZ4RHS<ComplexScalarFieldWithPotential> my_ccz4_matter(
+        complex_scalar_field, m_p.ccz4_params, m_dx, m_p.sigma, m_p.formulation,
+        m_p.G_Newton);
+    SetValue set_analysis_vars_zero(0.0, Interval(c_Pi_Im + 1, NUM_VARS - 1));
+    auto compute_pack =
+        make_compute_pack(my_ccz4_matter, set_analysis_vars_zero);
 }
 
 // Things to do at ODE update, after soln + rhs
@@ -165,34 +167,38 @@ void BBSEqualMassFixLevel::specificPostTimeStep()
 
     bool first_step = (m_time == 0.0);
 
-    // First compute the ADM Mass integrand values on the grid
+    // First compute the Weyl4 & ADM mass integrand values on the grid + constraints
     fillAllGhosts();
     ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
+
     auto weyl4_adm_compute_pack = make_compute_pack(
         MatterWeyl4<ComplexScalarFieldWithPotential>(
             complex_scalar_field, m_p.extraction_params.extraction_center, m_dx,
             m_p.formulation, m_p.G_Newton),
         ADMMass(m_p.center, m_dx));
+
     BoxLoops::loop(weyl4_adm_compute_pack, m_state_new, m_state_diagnostics,
                    EXCLUDE_GHOST_CELLS);
+
     BoxLoops::loop(MatterConstraints<ComplexScalarFieldWithPotential>(
                        complex_scalar_field, m_dx, m_p.G_Newton, c_Ham,
                        Interval(c_Mom1, c_Mom3)),
                    m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 
+    // Weyl extraction
     if (m_p.activate_weyl_extraction == 1 &&
         at_level_timestep_multiple(
             m_p.extraction_params.min_extraction_level()))
     {
-        CH_TIME("BBSEqualMassFixLevel::doAnalysis::Weyl4&ADMMass");
+        CH_TIME("BBSEqualMassFixLevel::specificPostTimeStep::MatterWeyl4");
 
         // Do the extraction on the min extraction level
         if (m_level == m_p.extraction_params.min_extraction_level())
         {
             if (m_verbosity)
             {
-                pout() << "BinaryBSLevel::specificPostTimeStep:"
+                pout() << "BBSEqualMassFixLevel::specificPostTimeStep:"
                           " Extracting gravitational waves."
                        << endl;
             }
@@ -205,12 +211,13 @@ void BBSEqualMassFixLevel::specificPostTimeStep()
         }
     }
 
+    //ADM mass
     if (m_p.activate_mass_extraction == 1 &&
         m_level == m_p.mass_extraction_params.min_extraction_level())
     {
         if (m_verbosity)
         {
-            pout() << "BinaryBSLevel::specificPostTimeStep:"
+            pout() << "BBSEqualMassFixLevel::specificPostTimeStep:"
                       " Extracting mass."
                    << endl;
         }
@@ -231,6 +238,7 @@ void BBSEqualMassFixLevel::specificPostTimeStep()
     if (m_level == 0)
     {
         AMRReductions<VariableType::diagnostic> amr_reductions(m_gr_amr);
+        AMRReductions<VariableType::diagnostic> amr_reductions_ev(m_gr_amr);
         if (m_p.calculate_noether_charge)
         {
             // Compute volume weighted Noether charge integral
@@ -259,7 +267,7 @@ void BBSEqualMassFixLevel::specificPostTimeStep()
         mod_phi_max_file.write_time_data_line({mod_phi_max});
 
         // Compute the min of chi and write it to a file
-        double min_chi = amr_reductions.min(c_chi);
+        double min_chi = amr_reductions_ev.min(c_chi);
         SmallDataIO min_chi_file("min_chi", m_dt, m_time, m_restart_time,
                                  SmallDataIO::APPEND, first_step);
         min_chi_file.remove_duplicate_time_data();
@@ -322,31 +330,7 @@ void BBSEqualMassFixLevel::computeTaggingCriterion(
     FArrayBox &tagging_criterion, const FArrayBox &current_state,
     const FArrayBox &current_state_diagnostics)
 {
-
     BoxLoops::loop(ComplexPhiAndChiExtractionTaggingCriterion(m_dx, m_level,
-                       m_p.mass_extraction_params, m_p.regrid_threshold_phi,
-                       m_p.regrid_threshold_chi), current_state,
-                       tagging_criterion);
-
-    // Be aware of the tagging here, you may want to change it, depending on
-    // your problem of interest! Below is an example of moving-boxes approach.
-
-    // if (m_p.do_star_track == true)
-    // {
-    //     const vector<double> puncture_radii = {m_p.tag_radius_A,
-    //                                            m_p.tag_radius_B};
-    //     const vector<double> puncture_masses = {m_p.bosonstar_params.mass,
-    //                                             m_p.bosonstar2_params.mass};
-
-    //     const std::vector<std::array<double, CH_SPACEDIM>> puncture_coords =
-    //         m_st_amr.m_star_tracker.get_puncture_coords();
-
-    //     BoxLoops::loop(BosonChiPunctureExtractionTaggingCriterion(
-    //                        m_dx, m_level, m_p.tag_horizons_max_levels,
-    //                        m_p.tag_punctures_max_levels, m_p.extraction_params,
-    //                        puncture_coords, m_p.activate_extraction,
-    //                        m_p.do_star_track, puncture_radii, puncture_masses,
-    //                        m_p.tag_buffer),
-    //                    current_state, tagging_criterion);
-    // }
+                   m_p.extraction_params, m_p.regrid_threshold_phi,
+                   m_p.regrid_threshold_chi, m_p.activate_extraction), current_state, tagging_criterion);
 }
