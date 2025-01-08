@@ -46,6 +46,8 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("BS_solver_omc", bosonstar_params.OMC, 0.5);
         pp.load("BS_solver_verbosity", bosonstar_params.BS_solver_verbosity,
                 false);
+        pp.load("BS_enable_matching", bosonstar_params.BS_enable_matching,
+                true);
         pp.load("BS_solver_niter", bosonstar_params.niter, 17);
 
         pp.load("star_centre", bosonstar_params.star_centre, center);
@@ -55,6 +57,7 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("phi4_coeff", potential_params.phi4_coeff, 0.0);
         pp.load("solitonic", potential_params.solitonic, false);
         pp.load("sigma_solitonic", potential_params.sigma_solitonic, 0.2);
+        pp.load("BS_mass", bosonstar_params.mass, 1.0);
 
         // ######################################
         //  Binary Boson Star Parameters
@@ -63,7 +66,6 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("antiboson", bosonstar_params.antiboson, false);
         pp.load("BS_rapidity", bosonstar_params.BS_rapidity, 0.0);
         pp.load("BS_separation", bosonstar_params.BS_separation, 0.0);
-        pp.load("BS_mass", bosonstar_params.mass, 1.0);
         pp.load("BS_impact_parameter", bosonstar_params.BS_impact_parameter,
                 0.0);
         pp.load("mass_ratio", bosonstar_params.mass_ratio, 1.0);
@@ -110,9 +112,9 @@ class SimulationParameters : public SimulationParametersBase
         // Star Tracking
         pp.load("do_star_track", do_star_track, false);
         pp.load("number_of_stars", number_of_stars, 1);
-        pp.load("star_points", star_points, 81);
-        pp.load("star_track_width_A", star_track_width_A, 4.);
-        pp.load("star_track_width_B", star_track_width_B, 4.);
+        pp.load("star_points", star_points, 11);
+        pp.load("star_track_width_A", star_track_width_A, 3.);
+        pp.load("star_track_width_B", star_track_width_B, 3.);
         pp.load("direction_of_motion", star_track_direction_of_motion);
         pp.load("star_track_level", star_track_level, 5);
 
@@ -149,9 +151,6 @@ class SimulationParameters : public SimulationParametersBase
                 mass_extraction_params.extraction_center,
                 {0.5 * L, 0.5 * L, 0.5 * L});
 
-        // Weyl extraction
-        pp.load("activate_gw_extraction", activate_weyl_extraction, 0);
-
         // Work out the minimum extraction level
         auto min_extraction_level_it =
             mass_extraction_params.min_extraction_level();
@@ -173,8 +172,6 @@ class SimulationParameters : public SimulationParametersBase
     // Mass extraction
     int activate_mass_extraction;
     extraction_params_t mass_extraction_params;
-
-    int activate_weyl_extraction;
 
     // Do we want to write the Noether Charge to a file
     bool calculate_noether_charge;

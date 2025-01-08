@@ -176,7 +176,7 @@ void BBSPlainSuperpositionLevel::specificPostTimeStep()
                        Interval(c_Mom1, c_Mom3)),
                    m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 
-    if (m_p.activate_weyl_extraction == 1 &&
+    if (m_p.activate_extraction == 1 &&
         at_level_timestep_multiple(
             m_p.extraction_params.min_extraction_level()))
     {
