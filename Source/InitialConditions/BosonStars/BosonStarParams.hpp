@@ -15,6 +15,7 @@ struct BosonStar_params_t
     double PSC;
     double OMC;
     bool BS_solver_verbosity;
+    bool BS_enable_matching;
     double central_amplitude_CSF;
     double scalar_mass;
     double phi4_coeff;

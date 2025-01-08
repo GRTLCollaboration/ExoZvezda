@@ -19,6 +19,7 @@ class BosonStarSolution
     double sigma;      // self-interaction term for solitonic stars
     bool solitonic;    // false for mini/repulsive star, true for solitonic star
     bool BS_verbosity; // outputs more messages whilst finding the solution
+    bool enable_matching; // whether to enable matching to the BS asymptotics, otherwise the scalar field will be set smoothly to zero after some radius
     double EIGEN = 0;  // the desired eigenstate, 0 for ground
     int gridsize;      // number of grid points (10^6 is very good)
     int adaptive_buffer; // number of gridpoints to intergate more carefully

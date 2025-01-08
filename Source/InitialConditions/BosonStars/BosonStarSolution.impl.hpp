@@ -52,7 +52,10 @@ void BosonStarSolution::main()
 
         // Force the scalar field to zero after the point the amplitude diverges
         force_to_zero(matching_index);
-        rk4_asymp(matching_index, false, omega_true);
+        if (enable_matching)
+        {
+            rk4_asymp(matching_index, false, omega_true);
+        }
         rk4_asymp(
             matching_index, true,
             omega_true); // (true) uses large radius adaptive stepsize to get
@@ -918,6 +921,7 @@ void BosonStarSolution::set_initialcondition_params(
     solitonic = m_params_potential.solitonic;
     sigma = m_params_potential.sigma_solitonic;
     BS_verbosity = m_params_BosonStar.BS_solver_verbosity;
+    enable_matching = m_params_BosonStar.BS_enable_matching;
     PSC = m_params_BosonStar.PSC;
     OMC = m_params_BosonStar.OMC;
     niter = m_params_BosonStar.niter;

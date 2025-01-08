@@ -187,7 +187,7 @@ void BBSEqualMassFixLevel::specificPostTimeStep()
                    m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 
     // Weyl extraction
-    if (m_p.activate_weyl_extraction == 1 &&
+    if (m_p.activate_extraction == 1 &&
         at_level_timestep_multiple(
             m_p.extraction_params.min_extraction_level()))
     {

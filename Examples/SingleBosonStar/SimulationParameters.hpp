@@ -43,7 +43,10 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("BS_solver_omc", bosonstar_params.OMC, 0.5);
         pp.load("BS_solver_verbosity", bosonstar_params.BS_solver_verbosity,
                 false);
+        pp.load("BS_enable_matching", bosonstar_params.BS_enable_matching,
+                true);
         pp.load("BS_solver_niter", bosonstar_params.niter, 17);
+        pp.load("BS_mass", bosonstar_params.mass, 1.0);
 
         pp.load("star_centre", bosonstar_params.star_centre, center);
 
@@ -90,9 +93,6 @@ class SimulationParameters : public SimulationParametersBase
                 mass_extraction_params.extraction_center,
                 {0.5 * L, 0.5 * L, 0.5 * L});
 
-        // Weyl extraction
-        pp.load("activate_gw_extraction", activate_weyl_extraction, 0);
-
         // Work out the minimum extraction level
         auto min_extraction_level_it =
             mass_extraction_params.min_extraction_level();
@@ -113,8 +113,6 @@ class SimulationParameters : public SimulationParametersBase
     // Mass extraction
     int activate_mass_extraction;
     extraction_params_t mass_extraction_params;
-
-    int activate_weyl_extraction;
 
     // Do we want to write the Noether Charge to a file
     bool calculate_noether_charge;
