@@ -75,13 +75,13 @@ void BBSEqualMassFixLevel::initialData()
     if (m_level == 0)
     {
         pout() << "Star 1 has A[0] " << boson_star.central_amplitude1
-               << " mass " << boson_star.mass1 << " frequency " << boson_star.frequency1 << " radius "
-               << boson_star.radius1 << " and compactness "
-               << boson_star.compactness1 << endl;
+               << " mass " << boson_star.mass1 << " frequency "
+               << boson_star.frequency1 << " radius " << boson_star.radius1
+               << " and compactness " << boson_star.compactness1 << endl;
         pout() << "Star 2 has A[0] " << boson_star.central_amplitude2
-               << " mass " << boson_star.mass2 << " frequency " << boson_star.frequency2 << " radius "
-               << boson_star.radius2 << " and compactness "
-               << boson_star.compactness2 << endl;
+               << " mass " << boson_star.mass2 << " frequency "
+               << boson_star.frequency2 << " radius " << boson_star.radius2
+               << " and compactness " << boson_star.compactness2 << endl;
     }
 
     // First set everything to zero, as we do not want undefined values in
@@ -135,8 +135,9 @@ void BBSEqualMassFixLevel::prePlotLevel()
 }
 
 // Things to do in RHS update, at each RK4 step
-void BBSEqualMassFixLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
-                                     const double a_time)
+void BBSEqualMassFixLevel::specificEvalRHS(GRLevelData &a_soln,
+                                           GRLevelData &a_rhs,
+                                           const double a_time)
 {
     // Enforce trace free A_ij and positive chi and alpha
     BoxLoops::loop(make_compute_pack(TraceARemoval(), PositiveChiAndAlpha()),
@@ -155,7 +156,8 @@ void BBSEqualMassFixLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_r
 
 // Things to do at ODE update, after soln + rhs
 void BBSEqualMassFixLevel::specificUpdateODE(GRLevelData &a_soln,
-                                       const GRLevelData &a_rhs, Real a_dt)
+                                             const GRLevelData &a_rhs,
+                                             Real a_dt)
 {
     // Enforce trace free A_ij
     BoxLoops::loop(TraceARemoval(), a_soln, a_soln, INCLUDE_GHOST_CELLS);
@@ -167,7 +169,8 @@ void BBSEqualMassFixLevel::specificPostTimeStep()
 
     bool first_step = (m_time == 0.0);
 
-    // First compute the Weyl4 & ADM mass integrand values on the grid + constraints
+    // First compute the Weyl4 & ADM mass integrand values on the grid +
+    // constraints
     fillAllGhosts();
     ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
@@ -211,7 +214,7 @@ void BBSEqualMassFixLevel::specificPostTimeStep()
         }
     }
 
-    //ADM mass
+    // ADM mass
     if (m_p.activate_mass_extraction == 1 &&
         m_level == m_p.mass_extraction_params.min_extraction_level())
     {
@@ -277,7 +280,7 @@ void BBSEqualMassFixLevel::specificPostTimeStep()
         }
         min_chi_file.write_time_data_line({min_chi});
 
-        // Constraints below 
+        // Constraints below
         double L2_Ham = amr_reductions.norm(c_Ham, 2, true);
         double L2_Mom = amr_reductions.norm(Interval(c_Mom1, c_Mom3), 2, true);
         double L1_Ham = amr_reductions.norm(c_Ham, 1, true);
@@ -330,7 +333,9 @@ void BBSEqualMassFixLevel::computeTaggingCriterion(
     FArrayBox &tagging_criterion, const FArrayBox &current_state,
     const FArrayBox &current_state_diagnostics)
 {
-    BoxLoops::loop(ComplexPhiAndChiExtractionTaggingCriterion(m_dx, m_level,
-                   m_p.extraction_params, m_p.regrid_threshold_phi,
-                   m_p.regrid_threshold_chi, m_p.activate_extraction), current_state, tagging_criterion);
+    BoxLoops::loop(ComplexPhiAndChiExtractionTaggingCriterion(
+                       m_dx, m_level, m_p.extraction_params,
+                       m_p.regrid_threshold_phi, m_p.regrid_threshold_chi,
+                       m_p.activate_extraction),
+                   current_state, tagging_criterion);
 }

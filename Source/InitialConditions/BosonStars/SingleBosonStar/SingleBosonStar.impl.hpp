@@ -12,9 +12,9 @@
 
 #include "BosonStarSolution.hpp" //for BosonStarSolution class
 
-inline SingleBosonStar::SingleBosonStar(BosonStar_params_t a_params_BosonStar,
-                                        ComplexPotential::params_t a_params_potential,
-                                        double a_dx)
+inline SingleBosonStar::SingleBosonStar(
+    BosonStar_params_t a_params_BosonStar,
+    ComplexPotential::params_t a_params_potential, double a_dx)
     : m_dx(a_dx), m_params_BosonStar(a_params_BosonStar),
       m_params_potential(a_params_potential)
 {
@@ -24,7 +24,7 @@ void SingleBosonStar::compute_1d_solution(const double max_r)
 {
     try
     {
-        // Set initial parameters for one star 
+        // Set initial parameters for one star
         m_1d_sol.set_initialcondition_params(m_params_BosonStar,
                                              m_params_potential, max_r);
         m_1d_sol.main();

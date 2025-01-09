@@ -3,7 +3,7 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#include "StarTracker.hpp" 
+#include "StarTracker.hpp"
 #include "DimensionDefinitions.hpp"
 #include "FittingMethod.hpp"
 #include "FittingModel.hpp"
@@ -407,8 +407,10 @@ void StarTracker::read_old_centre_from_dat(std::string a_filename, double a_dt,
                 star_coords[i] = data_line[i];
             }
 
-            pout() << "Star A restarted at : " << star_coords[0] << " " << star_coords[1] << " " << star_coords[2] << endl;
-            pout() << "Star B restarted at : " << star_coords[3] << " " << star_coords[4] << " " << star_coords[5] << endl;
+            pout() << "Star A restarted at : " << star_coords[0] << " "
+                   << star_coords[1] << " " << star_coords[2] << endl;
+            pout() << "Star B restarted at : " << star_coords[3] << " "
+                   << star_coords[4] << " " << star_coords[5] << endl;
         }
         else
         {

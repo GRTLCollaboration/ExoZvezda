@@ -29,7 +29,8 @@ class BinaryUnequalMassFix
     //! The constructor
     BinaryUnequalMassFix(BosonStar_params_t a_params_BosonStar,
                          BosonStar_params_t a_params_BosonStar2,
-                         ComplexPotential::params_t a_params_potential, double a_dx);
+                         ComplexPotential::params_t a_params_potential,
+                         double a_dx);
 
     //! Computes the 1d solution and stores in m_1d_sol
     void compute_1d_solution(const double max_r);

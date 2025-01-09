@@ -38,10 +38,10 @@ class SingleBosonStar
     BosonStarSolution m_1d_sol;
 
     double central_amplitude1, mass1, frequency1, radius1, compactness1;
-    
+
   protected:
     double m_dx;
-    BosonStar_params_t m_params_BosonStar;  //!< The complex scalar field params
+    BosonStar_params_t m_params_BosonStar; //!< The complex scalar field params
     ComplexPotential::params_t m_params_potential; //!< The potential params
 };
 

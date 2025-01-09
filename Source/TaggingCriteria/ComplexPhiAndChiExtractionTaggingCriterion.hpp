@@ -44,13 +44,13 @@ class ComplexPhiAndChiExtractionTaggingCriterion
     };
 
   public:
-    ComplexPhiAndChiExtractionTaggingCriterion(const double a_dx,
-        const int a_level,
-        const extraction_params_t a_params,
-        const double a_threshold_phi, const double a_threshold_chi, const bool activate_extraction = false)
-        : m_dx(a_dx), m_deriv(a_dx),
-        m_params(a_params), m_level(a_level),
-        m_threshold_phi(a_threshold_phi), m_threshold_chi(a_threshold_chi), m_activate_extraction(activate_extraction) {};
+    ComplexPhiAndChiExtractionTaggingCriterion(
+        const double a_dx, const int a_level,
+        const extraction_params_t a_params, const double a_threshold_phi,
+        const double a_threshold_chi, const bool activate_extraction = false)
+        : m_dx(a_dx), m_deriv(a_dx), m_params(a_params), m_level(a_level),
+          m_threshold_phi(a_threshold_phi), m_threshold_chi(a_threshold_chi),
+          m_activate_extraction(activate_extraction){};
 
     template <class data_t> void compute(Cell<data_t> current_cell) const
     {
@@ -89,22 +89,23 @@ class ComplexPhiAndChiExtractionTaggingCriterion
         // there
         if (m_activate_extraction)
         {
-        for (int iradius = 0; iradius < m_params.num_extraction_radii;
-             ++iradius)
-        {
-            // regrid if within extraction level and not at required refinement
-            if (m_level < m_params.extraction_levels[iradius])
+            for (int iradius = 0; iradius < m_params.num_extraction_radii;
+                 ++iradius)
             {
-                const Coordinates<data_t> coords(current_cell, m_dx,
-                                                 m_params.extraction_center);
-                const data_t r = coords.get_radius();
-                // add a 20% buffer to extraction zone so not too near to
-                // boundary
-                auto regrid = simd_compare_lt(
-                    r, 1.2 * m_params.extraction_radii[iradius]);
-                criterion = simd_conditional(regrid, 100.0, criterion);
+                // regrid if within extraction level and not at required
+                // refinement
+                if (m_level < m_params.extraction_levels[iradius])
+                {
+                    const Coordinates<data_t> coords(
+                        current_cell, m_dx, m_params.extraction_center);
+                    const data_t r = coords.get_radius();
+                    // add a 20% buffer to extraction zone so not too near to
+                    // boundary
+                    auto regrid = simd_compare_lt(
+                        r, 1.2 * m_params.extraction_radii[iradius]);
+                    criterion = simd_conditional(regrid, 100.0, criterion);
+                }
             }
-        }
         }
 
         // Write back into the flattened Chombo box

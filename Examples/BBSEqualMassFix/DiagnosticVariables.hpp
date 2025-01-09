@@ -90,7 +90,7 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
 
     "profile1",
     "profile2"
-    
+
 };
 
 }

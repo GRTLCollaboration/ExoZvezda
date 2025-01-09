@@ -43,7 +43,8 @@ template <class matter_t> class EMTensor_and_mom_flux
     const Interval m_c_Si;  // Interval of var enums for the momentum density
     const Interval m_c_Sij; // Interval of var enums for the spatial part
                             // stress-energy density
-    const std::array<double, CH_SPACEDIM> m_centre; // centre of momentum flux calculation
+    const std::array<double, CH_SPACEDIM>
+        m_centre; // centre of momentum flux calculation
 };
 
 #include "MomFluxCalc.impl.hpp"
