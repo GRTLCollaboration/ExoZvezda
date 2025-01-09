@@ -124,8 +124,9 @@ void SingleBosonStarLevel::prePlotLevel()
 }
 
 // Things to do in RHS update, at each RK4 step
-void SingleBosonStarLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
-                                     const double a_time)
+void SingleBosonStarLevel::specificEvalRHS(GRLevelData &a_soln,
+                                           GRLevelData &a_rhs,
+                                           const double a_time)
 {
     // Enforce trace free A_ij and positive chi and alpha
     BoxLoops::loop(make_compute_pack(TraceARemoval(), PositiveChiAndAlpha()),
@@ -147,7 +148,8 @@ void SingleBosonStarLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_r
 
 // Things to do at ODE update, after soln + rhs
 void SingleBosonStarLevel::specificUpdateODE(GRLevelData &a_soln,
-                                       const GRLevelData &a_rhs, Real a_dt)
+                                             const GRLevelData &a_rhs,
+                                             Real a_dt)
 {
     // Enforce trace free A_ij
     BoxLoops::loop(TraceARemoval(), a_soln, a_soln, INCLUDE_GHOST_CELLS);
@@ -234,7 +236,7 @@ void SingleBosonStarLevel::specificPostTimeStep()
         }
         min_chi_file.write_time_data_line({min_chi});
 
-        // Compute constraints 
+        // Compute constraints
         double L2_Ham = amr_reductions.norm(c_Ham, 2, true);
         double L2_Mom = amr_reductions.norm(Interval(c_Mom1, c_Mom3), 2, true);
         double L1_Ham = amr_reductions.norm(c_Ham, 1, true);
@@ -267,7 +269,9 @@ void SingleBosonStarLevel::computeTaggingCriterion(
     FArrayBox &tagging_criterion, const FArrayBox &current_state,
     const FArrayBox &current_state_diagnostics)
 {
-    BoxLoops::loop(ComplexPhiAndChiExtractionTaggingCriterion(m_dx, m_level,
-                   m_p.extraction_params, m_p.regrid_threshold_phi,
-                   m_p.regrid_threshold_chi, m_p.activate_extraction), current_state, tagging_criterion);
+    BoxLoops::loop(ComplexPhiAndChiExtractionTaggingCriterion(
+                       m_dx, m_level, m_p.extraction_params,
+                       m_p.regrid_threshold_phi, m_p.regrid_threshold_chi,
+                       m_p.activate_extraction),
+                   current_state, tagging_criterion);
 }

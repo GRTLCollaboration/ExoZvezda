@@ -51,12 +51,11 @@ template <class matter_t> class SourceIntPreconditioner
     }
 
   protected:
-    const double m_L, m_dx, m_radius; 
+    const double m_L, m_dx, m_radius;
     const matter_t &m_matter;
     FourthOrderDerivatives m_deriv;
-    const int m_c_var1, m_c_var2; // var enum 
-    const std::array<double, CH_SPACEDIM> m_centre; 
+    const int m_c_var1, m_c_var2; // var enum
+    const std::array<double, CH_SPACEDIM> m_centre;
 };
-
 
 #endif /* SOURCEINTPRECONDITIONER_HPP */

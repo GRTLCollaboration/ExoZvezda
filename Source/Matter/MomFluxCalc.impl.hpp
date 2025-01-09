@@ -156,9 +156,8 @@ void EMTensor_and_mom_flux<matter_t>::compute(Cell<data_t> current_cell) const
          r_xy); // r_xyz*r_xy is r^2 sin theta that is automatically in flux int
 
     // cylinder metric
-    Tensor<2, data_t, 3>
-        hamma_LL; // 3-cylinder metric
-    Tensor<1, data_t, 3> beta_L; // cartesian
+    Tensor<2, data_t, 3> hamma_LL; // 3-cylinder metric
+    Tensor<1, data_t, 3> beta_L;   // cartesian
     Tensor<1, data_t, 3> beta_L_polar;
     FOR1(i) beta_L[i] = 0.;
     FOR1(i) beta_L_polar[i] = 0.;
@@ -219,7 +218,8 @@ void EMTensor_and_mom_flux<matter_t>::compute(Cell<data_t> current_cell) const
     // data_t S_UL[3][3] = {{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}};  // S^i_j
     // FOR3(i, j, k) S_UL[i][j] += gamma_UU[i][k] * emtensor.Sij[k][j]; // S^i_j
     // data_t S_mixed[3][3] = {
-    //     {0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}}; // S_ij with i polar j cart
+    //     {0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}}; // S_ij with i polar j
+    //     cart
     // FOR3(i, j, k) S_mixed[i][j] += emtensor.Sij[k][j] * J_UL[k][j];
 
     // FOR1(j)
@@ -238,16 +238,16 @@ void EMTensor_and_mom_flux<matter_t>::compute(Cell<data_t> current_cell) const
     // is automatically in the surface integrator
 
     // data_t F2_phi = 0., N_normsqr = 0.; // angular momentum flux
-    // Tensor<2, data_t, 3> g_UU; // 4-metric but spatial parts only (not this is
+    // Tensor<2, data_t, 3> g_UU; // 4-metric but spatial parts only (not this
+    // is
     //                            // not a proper metric)
     // FOR2(i, j)
     // g_UU = gamma_UU[i][j] -
     //        vars.shift[i] * vars.shift[j] / (vars.lapse * vars.lapse);
     // FOR2(i, j) N_normsqr += g_UU[i][j] * cart_coords[i] * cart_coords[j];
-    // Tensor<1, data_t, 3> N_cart; // downstaits componnet of radial unit vector
-    // Tensor<1, data_t, 3> N_proj; // upstairs componetnets projected to Sigma
-    // N_cart[0] = x / sqrt(N_normsqr);
-    // N_cart[1] = y / sqrt(N_normsqr);
+    // Tensor<1, data_t, 3> N_cart; // downstaits componnet of radial unit
+    // vector Tensor<1, data_t, 3> N_proj; // upstairs componetnets projected to
+    // Sigma N_cart[0] = x / sqrt(N_normsqr); N_cart[1] = y / sqrt(N_normsqr);
     // N_cart[2] = z / sqrt(N_normsqr);
     // N_proj[0] = 0.;
     // N_proj[1] = 0.;
@@ -255,8 +255,8 @@ void EMTensor_and_mom_flux<matter_t>::compute(Cell<data_t> current_cell) const
     // FOR2(i, j) N_proj[i] += gamma_UU[i][j] * N_cart[j];
 
     // FOR2(i, j)
-    // F2_phi += -N_cart[i] * vars.shift[i] * xi[j] * emtensor.Si[j] / vars.lapse;
-    // FOR2(i, j) F2_phi += N_proj[i] * xi[j] * emtensor.Sij[i][j];
+    // F2_phi += -N_cart[i] * vars.shift[i] * xi[j] * emtensor.Si[j] /
+    // vars.lapse; FOR2(i, j) F2_phi += N_proj[i] * xi[j] * emtensor.Sij[i][j];
 
     /////////////////
     // Flux term  //
@@ -316,12 +316,9 @@ void EMTensor_and_mom_flux<matter_t>::compute(Cell<data_t> current_cell) const
 
     current_cell.store_vars(Q_phi * sqrt_gamma, m_c_Qphi_density);
 
-    current_cell.store_vars(
-        F3_phi * sqrt_sigma_modified,
-        m_c_Fphi_flux); 
+    current_cell.store_vars(F3_phi * sqrt_sigma_modified, m_c_Fphi_flux);
 
-    current_cell.store_vars(S2_phi * sqrt_gamma,
-                            m_c_Sphi_source); 
+    current_cell.store_vars(S2_phi * sqrt_gamma, m_c_Sphi_source);
 }
 
 #endif /* MOMFLUXCALC_IMPL_HPP */

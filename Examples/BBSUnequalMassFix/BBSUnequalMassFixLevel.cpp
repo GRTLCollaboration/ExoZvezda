@@ -69,19 +69,19 @@ void BBSUnequalMassFixLevel::initialData()
     BinaryUnequalMassFix boson_star(m_p.bosonstar_params, m_p.bosonstar2_params,
                                     m_p.potential_params, m_dx);
 
-    // Initiate solver for 1D BS solutions 
+    // Initiate solver for 1D BS solutions
     boson_star.compute_1d_solution(4. * m_p.L);
 
     if (m_level == 0)
     {
         pout() << "Star 1 has A[0] " << boson_star.central_amplitude1
-               << " mass " << boson_star.mass1 << " frequency " << boson_star.frequency1 << " radius "
-               << boson_star.radius1 << " and compactness "
-               << boson_star.compactness1 << endl;
+               << " mass " << boson_star.mass1 << " frequency "
+               << boson_star.frequency1 << " radius " << boson_star.radius1
+               << " and compactness " << boson_star.compactness1 << endl;
         pout() << "Star 2 has A[0] " << boson_star.central_amplitude2
-               << " mass " << boson_star.mass2 << " frequency " << boson_star.frequency2 << " radius "
-               << boson_star.radius2 << " and compactness "
-               << boson_star.compactness2 << endl;
+               << " mass " << boson_star.mass2 << " frequency "
+               << boson_star.frequency2 << " radius " << boson_star.radius2
+               << " and compactness " << boson_star.compactness2 << endl;
     }
 
     // First set everything to zero ... we don't want undefined values in
@@ -140,8 +140,9 @@ void BBSUnequalMassFixLevel::prePlotLevel()
 }
 
 // Things to do in RHS update, at each RK4 step
-void BBSUnequalMassFixLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
-                                     const double a_time)
+void BBSUnequalMassFixLevel::specificEvalRHS(GRLevelData &a_soln,
+                                             GRLevelData &a_rhs,
+                                             const double a_time)
 {
     // Enforce trace free A_ij and positive chi and alpha
     BoxLoops::loop(make_compute_pack(TraceARemoval(), PositiveChiAndAlpha()),
@@ -162,7 +163,8 @@ void BBSUnequalMassFixLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a
 
 // Things to do at ODE update, after soln + rhs
 void BBSUnequalMassFixLevel::specificUpdateODE(GRLevelData &a_soln,
-                                       const GRLevelData &a_rhs, Real a_dt)
+                                               const GRLevelData &a_rhs,
+                                               Real a_dt)
 {
     // Enforce trace free A_ij
     BoxLoops::loop(TraceARemoval(), a_soln, a_soln, INCLUDE_GHOST_CELLS);
@@ -174,7 +176,8 @@ void BBSUnequalMassFixLevel::specificPostTimeStep()
 
     bool first_step = (m_time == 0.0);
 
-    // First compute the Weyl4 & ADM mass integrand values on the grid + constraints
+    // First compute the Weyl4 & ADM mass integrand values on the grid +
+    // constraints
     fillAllGhosts();
     ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
@@ -243,7 +246,7 @@ void BBSUnequalMassFixLevel::specificPostTimeStep()
         AMRReductions<VariableType::evolution> amr_reductions_ev(m_gr_amr);
         if (m_p.calculate_noether_charge)
         {
-         // Compute volume weighted Noether charge integral
+            // Compute volume weighted Noether charge integral
             double noether_charge = amr_reductions.sum(c_N);
             SmallDataIO noether_charge_file("NoetherCharge", m_dt, m_time,
                                             m_restart_time, SmallDataIO::APPEND,
@@ -256,7 +259,7 @@ void BBSUnequalMassFixLevel::specificPostTimeStep()
             noether_charge_file.write_time_data_line({noether_charge});
         }
 
-        // Compute the maximum of mod_phi 
+        // Compute the maximum of mod_phi
         double mod_phi_max = amr_reductions.max(c_mod_phi);
         SmallDataIO mod_phi_max_file("mod_phi_max", m_dt, m_time,
                                      m_restart_time, SmallDataIO::APPEND,
@@ -268,7 +271,7 @@ void BBSUnequalMassFixLevel::specificPostTimeStep()
         }
         mod_phi_max_file.write_time_data_line({mod_phi_max});
 
-        // Compute the min of \chi 
+        // Compute the min of \chi
         double min_chi = amr_reductions_ev.min(c_chi);
         SmallDataIO min_chi_file("min_chi", m_dt, m_time, m_restart_time,
                                  SmallDataIO::APPEND, first_step);
@@ -332,8 +335,9 @@ void BBSUnequalMassFixLevel::computeTaggingCriterion(
     FArrayBox &tagging_criterion, const FArrayBox &current_state,
     const FArrayBox &current_state_diagnostics)
 {
-    BoxLoops::loop(ComplexPhiAndChiExtractionTaggingCriterion(m_dx, m_level,
-                   m_p.extraction_params, m_p.regrid_threshold_phi,
-                   m_p.regrid_threshold_chi, m_p.activate_extraction), current_state, tagging_criterion);
-
+    BoxLoops::loop(ComplexPhiAndChiExtractionTaggingCriterion(
+                       m_dx, m_level, m_p.extraction_params,
+                       m_p.regrid_threshold_phi, m_p.regrid_threshold_chi,
+                       m_p.activate_extraction),
+                   current_state, tagging_criterion);
 }

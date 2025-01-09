@@ -19,10 +19,12 @@ class BosonStarSolution
     double sigma;      // self-interaction term for solitonic stars
     bool solitonic;    // false for mini/repulsive star, true for solitonic star
     bool BS_verbosity; // outputs more messages whilst finding the solution
-    bool enable_matching; // whether to enable matching to the BS asymptotics, otherwise the scalar field will be set smoothly to zero after some radius
-    double EIGEN = 0;  // the desired eigenstate, 0 for ground
-    int gridsize;      // number of grid points (10^6 is very good)
-    int adaptive_buffer; // number of gridpoints to intergate more carefully
+    bool enable_matching; // whether to enable matching to the BS asymptotics,
+                          // otherwise the scalar field will be set smoothly to
+                          // zero after some radius
+    double EIGEN = 0;     // the desired eigenstate, 0 for ground
+    int gridsize;         // number of grid points (10^6 is very good)
+    int adaptive_buffer;  // number of gridpoints to intergate more carefully
     const int adaptive_stepsize_repetitions = 20; // 50; // 0 for no adaptive
     double L, dx;                                 // L, length of domain, dx.
     double omega_ansatz,
@@ -81,9 +83,10 @@ class BosonStarSolution
     double radius,
         compactness_value; // for storing the radius and compactness of the BS
 
-    void set_initialcondition_params(BosonStar_params_t m_params_BosonStar,
-                                     ComplexPotential::params_t m_params_potential,
-                                     const double max_r);
+    void
+    set_initialcondition_params(BosonStar_params_t m_params_BosonStar,
+                                ComplexPotential::params_t m_params_potential,
+                                const double max_r);
     double get_A_interp(const double r) const;
     double get_lapse_interp(const double r) const;
     double get_psi_interp(const double r) const;

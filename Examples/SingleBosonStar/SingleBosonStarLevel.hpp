@@ -27,7 +27,8 @@ class SingleBosonStarLevel : public GRAMRLevel
     STAMR &m_st_amr = dynamic_cast<STAMR &>(m_gr_amr);
 
     // Typedef for scalar field
-    typedef ComplexScalarField<ComplexPotential> ComplexScalarFieldWithPotential;
+    typedef ComplexScalarField<ComplexPotential>
+        ComplexScalarFieldWithPotential;
 
     //! Things to do at the end of the advance step, after RK4 calculation
     virtual void specificAdvance() override;
