@@ -4,7 +4,7 @@ ExoZvezda is an open-source code for performing simulations of exotic compact ob
 3+1 numerical relativity code [GRChombo](https://github.com/GRChombo/GRChombo). It inherits all of the capabilities of the main code and is developed and maintained by a collaboration of numerical relativists with a wide range of research interests, from early universe cosmology to astrophysics and mathematical general relativity. 
 
 Current exotic compact objects available for evolution: 
-* Single and binary evolution of **boson stars** (BSs) :crystal_ball:
+* Single and binary evolutions of **boson stars** (BSs) :crystal_ball:
 
 <!--## Getting started
 //Detailed installation instructions and usage examples are available in our [wiki](https://github.com/GRTLCollaboration/ExoChombo/wiki), with the home page giving guidance on where to start.-->
