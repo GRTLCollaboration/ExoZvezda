@@ -52,10 +52,13 @@ void BosonStarSolution::main()
 
         // Force the scalar field to zero after the point the amplitude diverges
         force_to_zero(matching_index);
-        if (enable_matching)
+         if (enable_matching)
         {
-            rk4_asymp(matching_index, false, omega_true);
+            rk4_match(matching_index, false, omega_true);
+            rk4_match(matching_index, true,
+                  omega_true);
         }
+        rk4_asymp(matching_index, false, omega_true);
         rk4_asymp(matching_index, true,
                   omega_true); // (true) uses large radius adaptive stepsize to
                                // get asymptotics by integrating vacuum metric
@@ -412,7 +415,7 @@ void BosonStarSolution::rk4(const double ww_)
     }
 }
 
-// Intergartion starts at point (iter), enforcing scalar field to be in vacuum.
+// Integration starts at point (iter), enforcing scalar field to be in vacuum.
 // The integral here is adaptive in the sense that it accelerates ar later
 // radius in order to find correct asymptotic behaviour. It will give an error,
 // if the radius reached is below 8e7.
@@ -494,10 +497,10 @@ void BosonStarSolution::rk4_asymp(const int iter, const bool adaptive,
         dpsi[i] = dpsi[i - 1] + (r1 + 2. * r2 + 2. * r3 + r4) / 6.;
         omega[i] = omega[i - 1] + (o1 + 2. * o2 + 2. * o3 + o4) / 6.;
         x_ += DX_;
-        if (!adaptive)
-        {
-            radius_array[i] = i * dx;
-        }
+        // if (!adaptive)
+        // {
+        //     radius_array[i] = i * dx;
+        // }
     }
 
     if (adaptive and x_ < 8e7)
@@ -507,7 +510,7 @@ void BosonStarSolution::rk4_asymp(const int iter, const bool adaptive,
     }
 }
 
-// Matches the solution to the coorect asymptotics at index iter
+// Matches the solution to the correct asymptotics at index iter
 void BosonStarSolution::rk4_match(const int iter, const bool adaptive,
                                   const double ww_)
 {
@@ -533,9 +536,31 @@ void BosonStarSolution::rk4_match(const int iter, const bool adaptive,
         pout() << "Constant B " << c2 << endl;
     }
 
+    double k1 = 0, k2 = 0, k3 = 0, k4 = 0, q1 = 0, q2 = 0, q3 = 0,
+           q4 = 0; // for RK steps
+    double x_ = iter * dx, h, delta = (double)gridsize;
+    const double DX = dx;
+    double DX_ = DX;
+    double N_ = gridsize - iter, L_ = pow(9., 9);
+    int i_;
+
+    double k_ = log(L_) / N_;
+
     for (int i = iter + 1; i < gridsize; ++i)
     {
-        dr = radius_array[i] - radius_array[i - 1];
+        i_ = double(i - iter);
+        if (adaptive)
+        {
+            if (x_ < 8e8)
+            {
+                DX_ = (exp(k_) - 1.) * exp(k_ * i_);
+            }
+            else
+            {
+                DX_ = DX;
+            }
+        }
+        h = DX_ / 2.;
 
         // 1st RK step
         r = radius_array[i - 1];
@@ -546,41 +571,41 @@ void BosonStarSolution::rk4_match(const int iter, const bool adaptive,
         arealr = r + mass + mass * mass / (4 * r);
         Amp = c1 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
         eta = c2 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
-        o1 = dr *
+        o1 = DX_ *
              OMEGA_RHS(r, Amp, eta, psi[i - 1], dpsi[i - 1], omega[i - 1], ww_);
-        s1 = dr *
+        s1 = DX_ *
              PSI_RHS(r, Amp, eta, psi[i - 1], dpsi[i - 1], omega[i - 1], ww_);
-        r1 = dr *
+        r1 = DX_ *
              DPSI_RHS(r, Amp, eta, psi[i - 1], dpsi[i - 1], omega[i - 1], ww_);
 
         // 2nd RK step
-        r = radius_array[i - 1] + 0.5 * dr;
+        r = radius_array[i - 1] + 0.5 * DX_;
         om0 = pow(1 / (omega[i - 1] + o1 / 2.), 2);
         mass = -(psi[i - 1] + s1 / 2.) * (dpsi[i - 1] + r1 / 2.) * r * r;
         epsilon = mass * (1 - 2 * ww_) / sqrt(1 - ww_ / om0);
         arealr = r + mass + mass * mass / (4 * r);
         Amp = c1 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
         eta = c2 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
-        o2 = dr * OMEGA_RHS(r, Amp, eta, psi[i - 1] + s1 / 2.,
+        o2 = DX_ * OMEGA_RHS(r, Amp, eta, psi[i - 1] + s1 / 2.,
                             dpsi[i - 1] + r1 / 2., omega[i - 1] + o1 / 2., ww_);
-        s2 = dr * PSI_RHS(r, Amp, eta, psi[i - 1] + s1 / 2.,
+        s2 = DX_ * PSI_RHS(r, Amp, eta, psi[i - 1] + s1 / 2.,
                           dpsi[i - 1] + r1 / 2., omega[i - 1] + o1 / 2., ww_);
-        r2 = dr * DPSI_RHS(r, Amp, eta, psi[i - 1] + s1 / 2.,
+        r2 = DX_ * DPSI_RHS(r, Amp, eta, psi[i - 1] + s1 / 2.,
                            dpsi[i - 1] + r1 / 2., omega[i - 1] + o1 / 2., ww_);
 
         // 3rd RK step
-        r = radius_array[i - 1] + 0.5 * dr;
+        r = radius_array[i - 1] + 0.5 * DX_;
         om0 = pow(1 / (omega[i - 1] + o2 / 2.), 2);
         mass = -(psi[i - 1] + s2 / 2.) * (dpsi[i - 1] + r2 / 2.) * r * r;
         epsilon = mass * (1 - 2 * ww_) / sqrt(1 - ww_ / om0);
         arealr = r + mass + mass * mass / (4 * r);
         Amp = c1 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
         eta = c2 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
-        o3 = dr * OMEGA_RHS(r, Amp, eta, psi[i - 1] + s2 / 2.,
+        o3 = DX_ * OMEGA_RHS(r, Amp, eta, psi[i - 1] + s2 / 2.,
                             dpsi[i - 1] + r2 / 2., omega[i - 1] + o2 / 2., ww_);
-        s3 = dr * PSI_RHS(r, Amp, eta, psi[i - 1] + s2 / 2.,
+        s3 = DX_ * PSI_RHS(r, Amp, eta, psi[i - 1] + s2 / 2.,
                           dpsi[i - 1] + r2 / 2., omega[i - 1] + o2 / 2., ww_);
-        r3 = dr * DPSI_RHS(r, Amp, eta, psi[i - 1] + s2 / 2.,
+        r3 = DX_ * DPSI_RHS(r, Amp, eta, psi[i - 1] + s2 / 2.,
                            dpsi[i - 1] + r2 / 2., omega[i - 1] + o2 / 2., ww_);
 
         // 4th RK step
@@ -591,11 +616,11 @@ void BosonStarSolution::rk4_match(const int iter, const bool adaptive,
         arealr = r + mass + mass * mass / (4 * r);
         Amp = c1 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
         eta = c2 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
-        o4 = dr * OMEGA_RHS(r, Amp, eta, psi[i - 1] + s3, dpsi[i - 1] + r3,
+        o4 = DX_ * OMEGA_RHS(r, Amp, eta, psi[i - 1] + s3, dpsi[i - 1] + r3,
                             omega[i - 1] + o3, ww_);
-        s4 = dr * PSI_RHS(r, Amp, eta, psi[i - 1] + s3, dpsi[i - 1] + r3,
+        s4 = DX_ * PSI_RHS(r, Amp, eta, psi[i - 1] + s3, dpsi[i - 1] + r3,
                           omega[i - 1] + o3, ww_);
-        r4 = dr * DPSI_RHS(r, Amp, eta, psi[i - 1] + s3, dpsi[i - 1] + r3,
+        r4 = DX_ * DPSI_RHS(r, Amp, eta, psi[i - 1] + s3, dpsi[i - 1] + r3,
                            omega[i - 1] + o3, ww_);
 
         // Update variables
@@ -609,7 +634,19 @@ void BosonStarSolution::rk4_match(const int iter, const bool adaptive,
         arealr = r + mass + mass * mass / (4 * r);
         A[i] = c1 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
         dA[i] = c2 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
+
+        x_ += DX_;
+        // if (!adaptive)
+        // {
+        //     radius_array[i] = i * dx;
+        // }
     }
+
+        if (adaptive and x_ < 8e7)
+        {
+            pout() << "Radius is " << x_ << endl;
+            MayDay::Error("Asymptotic Radius Too Small");
+        }
 }
 
 // RHS for BS amplitude
