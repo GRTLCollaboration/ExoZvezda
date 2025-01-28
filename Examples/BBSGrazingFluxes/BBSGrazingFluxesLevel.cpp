@@ -220,7 +220,7 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
 
     // ADM mass
     if (m_p.activate_mass_extraction == 1 &&
-        m_level == m_p.mass_extraction_params.min_extraction_level())
+        m_level == m_p.mass_flux_extraction_params.min_extraction_level())
     {
         if (m_verbosity)
         {
@@ -231,7 +231,7 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
 
         // Now refresh the interpolator and do the interpolation
         m_gr_amr.m_interpolator->refresh();
-        ADMMassExtraction mass_extraction(m_p.mass_extraction_params, m_dt,
+        ADMMassExtraction mass_extraction(m_p.mass_flux_extraction_params, m_dt,
                                           m_time, first_step, m_restart_time);
         mass_extraction.execute_query(m_gr_amr.m_interpolator);
     }
@@ -321,122 +321,37 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
     }
 
     // Flux calculation
-    if (m_p.do_flux_integration && at_level_timestep_multiple(
-            m_p.angmomflux_params.min_extraction_level()))
-    {
+    if (m_p.do_flux_integration && m_level == m_p.mass_flux_extraction_params.min_extraction_level())
+    {   
         double S_phi_integral; 
         double Q_phi_integral; 
         double temp_dx;
         
         std::vector<AMRLevel *> all_level_ptrs = getAMRLevelHierarchy().stdVector();
-        std::vector<double> S_phi_integrals(m_p.angmomflux_params.num_extraction_radii); // vector storing all integrals
-        std::vector<double> Q_phi_integrals(m_p.angmomflux_params.num_extraction_radii); // vector storing all integrals
-    
-        // fill grid with angular momentum variables on every level
-        for (auto level_ptr : all_level_ptrs)
-        {
-            BBSGrazingFluxesLevel *bs_level_ptr = dynamic_cast<BBSGrazingFluxesLevel *>(level_ptr);
-            if (bs_level_ptr == nullptr)
-            {
-                MayDay::Error("Could not assign bs_level_ptr variable in the first loop of BBSGrazingFluxesLevel.cpp");
-                break;
-            }
-            temp_dx = bs_level_ptr->m_dx;
-            BoxLoops::loop(EMTensor_and_mom_flux<ComplexScalarFieldWithPotential>(complex_scalar_field, temp_dx, m_p.L, m_p.angmomflux_params.extraction_center,
+        std::vector<double> S_phi_integrals(m_p.mass_flux_extraction_params.num_extraction_radii); // vector storing all integrals
+        std::vector<double> Q_phi_integrals(m_p.mass_flux_extraction_params.num_extraction_radii); // vector storing all integrals
+
+        BoxLoops::loop(EMTensor_and_mom_flux<ComplexScalarFieldWithPotential>(complex_scalar_field, temp_dx, m_p.L, m_p.mass_flux_extraction_params.extraction_center,
                                      c_Fphi_flux, c_Sphi_source, c_Qphi_density,
                                                      c_rho, Interval(c_s1,c_s3),
-                             Interval(c_s11,c_s33)),  bs_level_ptr->m_state_new,
-                                bs_level_ptr->m_state_diagnostics, EXCLUDE_GHOST_CELLS);
-        }
-        // loop through levels and fill ghosts
-        for (auto level_ptr : all_level_ptrs)
-        {
-            BBSGrazingFluxesLevel *bs_level_ptr =
-                    dynamic_cast<BBSGrazingFluxesLevel *>(level_ptr);
-            if (bs_level_ptr == nullptr)
-            {
-                MayDay::Error("Could not assign bs_level_ptr variable in the second loop of BBSGrazingFluxesLevel.cpp");
-                break;
-            }
-            bs_level_ptr->fillAllGhosts();
-        }
+                             Interval(c_s11,c_s33)),  m_state_new,
+                                m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 
-        for (int i=m_p.angmomflux_params.num_extraction_radii-1; i>=0; i--)
-        {
-            temp_dx = m_p.coarsest_dx;
-            for (auto level_ptr : all_level_ptrs)
-            {
-                BBSGrazingFluxesLevel *bs_level_ptr =
-                        dynamic_cast<BBSGrazingFluxesLevel *>(level_ptr);
-                if (bs_level_ptr == nullptr)
-                {
-                    break;
-                }
-
-            // set angular momentum source and density to zero outside of extraction radii
-            temp_dx = bs_level_ptr->m_dx;
-            BoxLoops::loop(SourceIntPreconditioner<ComplexScalarFieldWithPotential>
-              (complex_scalar_field, temp_dx, m_p.L, m_p.angmomflux_params.extraction_center,
+        for (int i=m_p.mass_flux_extraction_params.num_extraction_radii-1; i>=0; i--)
+        {        
+        BoxLoops::loop(SourceIntPreconditioner<ComplexScalarFieldWithPotential>
+              (complex_scalar_field, temp_dx, m_p.L, m_p.mass_flux_extraction_params.extraction_center,
                                                  c_Sphi_source, c_Qphi_density,
-                                    m_p.angmomflux_params.extraction_radii[i]),
-                          bs_level_ptr->m_state_new, bs_level_ptr->m_state_diagnostics,
+                                    m_p.mass_flux_extraction_params.extraction_radii[i]),
+                          m_state_new, m_state_diagnostics,
                                                           INCLUDE_GHOST_CELLS);
-            }
-            
-            AMRReductions<VariableType::diagnostic> amr_reductions(m_gr_amr);
-            S_phi_integral = amr_reductions.sum(c_Sphi_source);
-            S_phi_integrals[i] = S_phi_integral;
-            Q_phi_integral = amr_reductions.sum(c_Qphi_density);
-            Q_phi_integrals[i] = Q_phi_integral;
-            }
 
-            // save the source integral to file
-            std::vector<string> title_line(m_p.angmomflux_params.num_extraction_radii);
-            string dummy_string;
-
-            for (int j=0; j<m_p.angmomflux_params.num_extraction_radii; j++)
-            {
-                dummy_string = "r = " + to_string(m_p.angmomflux_params.extraction_radii[j]);
-                title_line[j] = dummy_string;
-            }
-
-            SmallDataIO angmomsource_file("AngMomSource", m_dt, m_time,
-                                          m_restart_time,
-                                          SmallDataIO::APPEND,
-                                          first_step);
-
-            if (m_time > 0) angmomsource_file.remove_duplicate_time_data();
-            if (m_time == 0.)
-            {
-                angmomsource_file.write_header_line(title_line);
-            }
-            angmomsource_file.write_time_data_line(S_phi_integrals);
-
-            // save the density integral to file
-            std::vector<string> title_line2(m_p.angmomflux_params.num_extraction_radii);
-            string dummy_string2;
-            for (int j=0; j<m_p.angmomflux_params.num_extraction_radii; j++)
-            {
-                dummy_string2 = "r = " + to_string(m_p.angmomflux_params.extraction_radii[j]);
-                title_line2[j] = dummy_string2;
-            }
-
-            SmallDataIO density_file("AngMomDensity", m_dt, m_time,
-                                          m_restart_time,
-                                          SmallDataIO::APPEND,
-                                          first_step);
-            if (m_time > 0) density_file.remove_duplicate_time_data();
-            if (m_time == 0.)
-            {
-                density_file.write_header_line(title_line2);
-            }
-            density_file.write_time_data_line(Q_phi_integrals);
-
-            // Refresh the interpolator and do the interpolation
-            m_gr_amr.m_interpolator->refresh();
-            // setup and perform the angular momentum flux integral
-            AngMomFlux ang_mom_flux(m_p.angmomflux_params,m_time,m_dt,m_restart_time,first_step);
-            ang_mom_flux.run(m_gr_amr.m_interpolator);
+        // Refresh the interpolator and do the interpolation
+        m_gr_amr.m_interpolator->refresh();
+        // setup and perform the angular momentum flux integral
+        AngMomFlux ang_mom_flux(m_p.mass_flux_extraction_params,m_time,m_dt,m_restart_time,first_step);
+        ang_mom_flux.run(m_gr_amr.m_interpolator);
+        }
         }
 
 #ifdef USE_AHFINDER

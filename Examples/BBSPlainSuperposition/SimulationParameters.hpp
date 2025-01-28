@@ -146,7 +146,7 @@ class SimulationParameters : public SimulationParametersBase
                 mass_extraction_params.num_points_theta, 4);
         pp.load("mass_extraction_center",
                 mass_extraction_params.extraction_center,
-                {0.5 * L, 0.5 * L, 0.5 * L});
+                center);
 
         // Work out the minimum extraction level
         auto min_extraction_level_it =
