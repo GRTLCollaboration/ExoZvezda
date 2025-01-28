@@ -1,7 +1,7 @@
 #Params for runtime inputs
 
 ##############################################################
-verbosity = 0
+verbosity = 2
 
 chk_prefix = BosonChk_
 plot_prefix = Bosonp_
@@ -18,16 +18,16 @@ plot_interval = 50
 ##############################################################
 # Set up grid spacings and regrid params
 # NB - the N values need to be multiples of block_factor
-N_full = 128
+N_full = 32
 
 # Length of longest box side, dx_coarsest = L/N(max)
 # NB if non cubic, this determines dx for all sides
-L_full = 1024
+L_full = 64
 
 # Regridding
 # Thresholds on the change across a cell which prompts regrid
-regrid_threshold_phi = 0.25
-regrid_threshold_chi = 0.125
+regrid_threshold_phi = 1.0
+regrid_threshold_chi = 1.0
 
 ##############################################################
 # BosonStar Initial data parameters
@@ -40,10 +40,10 @@ BS_solver_verbosity = 1
 
 BS_rapidity = 0.100335
 BS_rapidity2 = 0.100335
-BS_impact_parameter = 8.0 #separation perpendicular to boost, y
-BS_separation = 80. #separation parallel to boost, x
+BS_impact_parameter = 1.0 #separation perpendicular to boost, y
+BS_separation = 5. #separation parallel to boost, x
 
-star_centre = 512 512 0
+star_centre = 32 32 0
 
 # Potential params
 scalar_mass = 1.0
@@ -54,7 +54,7 @@ sigma_solitonic = 0.2
 ##############################################################
 # Level data
 # Maximum number of times you can regrid above coarsest level
-max_level = 7 # There are (max_level+1) grids, so min is zero
+max_level = 1 # There are (max_level+1) grids, so min is zero
 
 # Frequency of regridding at each level
 # Need one for each level, ie max_level+1 items
@@ -117,7 +117,7 @@ vars_asymptotic_values = 1.0 1.0 0.0 0.0 1.0 0.0 1.0 #chi and hij
 # Set up time steps
 # dt will be dx*dt_multiplier on each grid level
 dt_multiplier = 0.25
-stop_time = 400.0
+stop_time = 1.0
 
 #Lapse evolution
 lapse_power = 1.0
@@ -152,29 +152,25 @@ plot_vars = mod_phi chi Ham
 
 ##############################################################
 # Mass extraction params
-mass_extraction_center = 256 256 0
+#mass_extraction_center = 256 256 0
 activate_mass_extraction = 1
-num_mass_extraction_radii = 6
-mass_extraction_radii = 60. 100. 120. 140. 160. 180.
-mass_extraction_levels = 3 2 1 1 1 1
+num_mass_extraction_radii = 1
+mass_extraction_radii = 10.
+mass_extraction_levels = 1
 num_points_phi_mass = 16
 num_points_theta_mass = 24
 
 # Flux extraction 
 flux_do = true
-flux_number_of_radii = 3
-flux_extraction_radii = 40. 50. 60.
-flux_extraction_level = 3 3 3
-flux_num_theta = 80
-flux_num_phi = 64
+
 
 # GW extraction params
 #default center to grid center, uncomment to change
 #extraction_center = 0 0 0
 activate_extraction = 1
-num_extraction_radii = 7
-extraction_radii = 60. 70. 80. 90. 100. 110. 120. 
-extraction_levels = 3 2 2 2 2 1 1 
+num_extraction_radii = 1
+extraction_radii = 20. 
+extraction_levels = 0  
 num_points_phi = 48
 num_points_theta = 60
 num_modes = 5
@@ -191,9 +187,9 @@ number_of_stars = 2
 star_points = 11
 star_track_width_A = 2.
 star_track_width_B = 2.
-star_track_centre = 256 256 0 # deafults to L/2 L/2 L/2
-star_track_level = 5
-direction_of_motion = "x"
+star_track_centre = 32 32 0 # deafults to L/2 L/2 L/2
+star_track_level = 1
+direction_of_motion = "xy"
 
 ##############################################################
 # Apparent Horizon Finder parameters
