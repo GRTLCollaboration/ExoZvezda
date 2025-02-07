@@ -295,8 +295,12 @@ void BosonStarLevel::specificPostTimeStep()
         pout() << "Running a star tracker now" << endl;
         // if at restart time read data from dat file,
         // will default to param file if restart time is 0
-        if (fabs(m_time - m_restart_time) < m_dt * 1.1)
+        pout() << "m_time " << m_time << endl;
+	pout() << "m_restart_time " << m_restart_time << endl;
+	pout() << "m_dt " << m_dt << endl;
+	if (fabs(m_time - m_restart_time) < m_dt * 1.1)
         {
+	    pout() << "Reading star positions from file" << endl;
             m_st_amr.m_star_tracker.read_old_centre_from_dat(
                 "StarCentres", m_dt, m_time, m_restart_time, first_step);
         }
