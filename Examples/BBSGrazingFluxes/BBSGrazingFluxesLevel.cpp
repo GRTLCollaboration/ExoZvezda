@@ -114,6 +114,10 @@ void BBSGrazingFluxesLevel::preCheckpointLevel()
                           MatterConstraints<ComplexScalarFieldWithPotential>(
                               complex_scalar_field, m_dx, m_p.G_Newton, c_Ham,
                               Interval(c_Mom1, c_Mom3)),
+                          EMTensor_and_mom_flux<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.extraction_center,
+                                     c_Fphi_flux, c_Sphi_source, c_Qphi_density,
+                                                     c_rho, Interval(c_s1,c_s3),
+                             Interval(c_s11,c_s33)),
                           NoetherCharge()),
         m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 }
@@ -245,7 +249,7 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
     if (m_level == 0)
     {
         AMRReductions<VariableType::diagnostic> amr_reductions(m_gr_amr);
-        AMRReductions<VariableType::diagnostic> amr_reductions_ev(m_gr_amr);
+        AMRReductions<VariableType::evolution> amr_reductions_ev(m_gr_amr);
         if (m_p.calculate_noether_charge)
         {
             // Compute volume weighted Noether charge integral
