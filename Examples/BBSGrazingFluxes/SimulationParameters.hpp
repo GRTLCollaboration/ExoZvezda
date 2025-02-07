@@ -26,8 +26,7 @@ class SimulationParameters : public SimulationParametersBase
     void readParams(GRParmParse &pp)
     {
         pout() << "---------------------------------" << endl;
-        pout() << "Hello! You are running a boson star binary with the "
-                  "'equal-mass fix'!"
+        pout() << "Hello! You are running a boson star binary and testing fluxes'!"
                << endl;
 
         // Gravitional constant
@@ -127,29 +126,32 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("regrid_threshold_phi", regrid_threshold_phi);
         pp.load("regrid_threshold_chi", regrid_threshold_chi);
 
-        // Mass extraction
-        pp.load("activate_mass_extraction", activate_mass_extraction, 0);
+        // Mass and flux extraction parameters: we use the same set for simplicity but may be easily generalised to two types of paramater templates.
         pp.load("mass_write_extraction",
-                mass_extraction_params.write_extraction, false);
+                mass_flux_extraction_params.write_extraction, false);
         pp.load("num_mass_extraction_radii",
-                mass_extraction_params.num_extraction_radii, 1);
+                mass_flux_extraction_params.num_extraction_radii, 1);
         pp.load("mass_extraction_levels",
-                mass_extraction_params.extraction_levels,
-                mass_extraction_params.num_extraction_radii, 0);
+                mass_flux_extraction_params.extraction_levels,
+                mass_flux_extraction_params.num_extraction_radii, 0);
         pp.load("mass_extraction_radii",
-                mass_extraction_params.extraction_radii,
-                mass_extraction_params.num_extraction_radii, 0.1);
-        pp.load("num_points_phi_mass", mass_extraction_params.num_points_phi,
+                mass_flux_extraction_params.extraction_radii,
+                mass_flux_extraction_params.num_extraction_radii, 0.1);
+        pp.load("num_points_phi_mass", mass_flux_extraction_params.num_points_phi,
                 2);
         pp.load("num_points_theta_mass",
-                mass_extraction_params.num_points_theta, 4);
+                mass_flux_extraction_params.num_points_theta, 4);
         pp.load("mass_extraction_center",
-                mass_extraction_params.extraction_center,
-                {0.5 * L, 0.5 * L, 0.5 * L});
+                mass_flux_extraction_params.extraction_center,
+                center);
+
+        // Flux and mass booleans 
+        pp.load("activate_mass_extraction", activate_mass_extraction, 0);
+        pp.load("flux_do", do_flux_integration, false);
 
         // Work out the minimum extraction level
         auto min_extraction_level_it =
-            mass_extraction_params.min_extraction_level();
+            mass_flux_extraction_params.min_extraction_level();
 
         // Do we want to calculate and write the Noether Charge to a file
         pp.load("calculate_noether_charge", calculate_noether_charge, false);
@@ -167,7 +169,11 @@ class SimulationParameters : public SimulationParametersBase
 
     // Mass extraction
     int activate_mass_extraction;
-    extraction_params_t mass_extraction_params;
+    extraction_params_t mass_flux_extraction_params;
+
+    // Fluxes intergaration
+//     extraction_params_t angmomflux_params;
+    bool do_flux_integration;
 
     // Do we want to write the Noether Charge to a file
     bool calculate_noether_charge;

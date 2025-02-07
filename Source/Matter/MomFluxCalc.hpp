@@ -13,8 +13,7 @@
 #include "MatterCCZ4.hpp"
 #include "simd.hpp"
 
-//! Calculates the EM tensor and angmomflux then saves the ones specified in the
-//! constructor on the grid
+//! Calculates the EM tensor and angular momentum flux
 template <class matter_t> class EMTensor_and_mom_flux
 {
   public:
@@ -34,17 +33,18 @@ template <class matter_t> class EMTensor_and_mom_flux
     template <class data_t> void compute(Cell<data_t> current_cell) const;
 
   protected:
-    const double m_L, m_dx; // simulation boxsize and cellsize
+    const double m_L, m_dx; // simulation boxsize and cell size
     const matter_t &m_matter;
     FourthOrderDerivatives m_deriv;
     const int m_c_rho;         // var enum for the energy density
-    const int m_c_Fphi_flux;   // ang mom flux
-    const int m_c_Sphi_source; // ang source mom
+    const int m_c_Fphi_flux;   // angular momentum flux
+    const int m_c_Sphi_source; // angular source momentum
     const int m_c_Qphi_density;
     const Interval m_c_Si;  // Interval of var enums for the momentum density
-    const Interval m_c_Sij; // Interval of var enums for the spatial
+    const Interval m_c_Sij; // Interval of var enums for the spatial part
                             // stress-energy density
-    const std::array<double, CH_SPACEDIM> m_centre; // centre of mom flux calc
+    const std::array<double, CH_SPACEDIM>
+        m_centre; // centre of momentum flux calculation
 };
 
 #include "MomFluxCalc.impl.hpp"

@@ -28,7 +28,8 @@ class BinaryEqualMassFix
     //! The constructor
     BinaryEqualMassFix(BosonStar_params_t a_params_BosonStar,
                        BosonStar_params_t a_params_BosonStar2,
-                       Potential::params_t a_params_potential, double a_dx);
+                       ComplexPotential::params_t a_params_potential,
+                       double a_dx);
 
     //! Computes the 1d solution and stores in m_1d_sol
     void compute_1d_solution(const double max_r);
@@ -49,7 +50,7 @@ class BinaryEqualMassFix
     double m_dx;
     BosonStar_params_t m_params_BosonStar;
     BosonStar_params_t m_params_BosonStar2; //!< The complex scalar field params
-    Potential::params_t m_params_potential; //!< The potential params
+    ComplexPotential::params_t m_params_potential; //!< The potential params
 };
 
 #include "BinaryEqualMassFix.impl.hpp"

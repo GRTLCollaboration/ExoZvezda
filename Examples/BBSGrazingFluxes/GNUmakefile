@@ -10,7 +10,7 @@
 
 export EXOZVEZDA_SOURCE = $(shell pwd)/../../Source
 
-ebase := Main_SingleBosonStar
+ebase := Main_BBSGrazingFluxes
 
 LibNames := AMRTimeDependent AMRTools BoxTools
 
@@ -23,7 +23,7 @@ src_dirs := $(GRCHOMBO_SOURCE)/utils \
             $(GRCHOMBO_SOURCE)/AMRInterpolator  \
             $(GRCHOMBO_SOURCE)/ApparentHorizonFinder \
             $(EXOZVEZDA_SOURCE)/InitialConditions/BosonStars \
-            $(EXOZVEZDA_SOURCE)/InitialConditions/BosonStars/SingleBosonStar \
+            $(EXOZVEZDA_SOURCE)/InitialConditions/BosonStars/EqualMassFix \
             $(EXOZVEZDA_SOURCE)/Matter \
             $(EXOZVEZDA_SOURCE)/BosonStars \
             $(EXOZVEZDA_SOURCE)/utils \

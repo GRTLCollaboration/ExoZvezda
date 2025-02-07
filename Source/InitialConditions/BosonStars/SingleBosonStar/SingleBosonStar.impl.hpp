@@ -12,9 +12,9 @@
 
 #include "BosonStarSolution.hpp" //for BosonStarSolution class
 
-inline SingleBosonStar::SingleBosonStar(BosonStar_params_t a_params_BosonStar,
-                                        Potential::params_t a_params_potential,
-                                        double a_dx)
+inline SingleBosonStar::SingleBosonStar(
+    BosonStar_params_t a_params_BosonStar,
+    ComplexPotential::params_t a_params_potential, double a_dx)
     : m_dx(a_dx), m_params_BosonStar(a_params_BosonStar),
       m_params_potential(a_params_potential)
 {
@@ -24,7 +24,7 @@ void SingleBosonStar::compute_1d_solution(const double max_r)
 {
     try
     {
-        // Set initial parameters for one star 
+        // Set initial parameters for one star
         m_1d_sol.set_initialcondition_params(m_params_BosonStar,
                                              m_params_potential, max_r);
         m_1d_sol.main();
@@ -54,17 +54,10 @@ void SingleBosonStar::compute(Cell<data_t> current_cell) const
     Coordinates<data_t> coords(current_cell, m_dx,
                                m_params_BosonStar.star_centre);
 
-    // Import BS parameters and option of whether this is a BS binary or BS-BH
-    // binary
+    // Import BS parameters
     double rapidity = m_params_BosonStar.BS_rapidity;
 
-    // Define boosts and coordinate objects, suppose star 1 is on the left of
-    // the centre of mass and star 2 is on the right of centre of mass
-
-    // e.g. taking the centre of mass to be the origin, then STAR2 --------
-    // (origin) -------- STAR1
-
-    // First star positioning
+    // Star positioning
     double c_ = cosh(rapidity);
     double s_ = sinh(rapidity);
     double v_ = tanh(rapidity);

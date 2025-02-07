@@ -45,8 +45,8 @@ class AngMomFlux : SphericalExtraction
     {
         std::vector<double> integrals;
         auto integrand = [](std::vector<double> mom_flux_vals, double r,
-                            double theta,
-                            double phi) { return mom_flux_vals[0]; };
+                            double theta, double phi)
+        { return mom_flux_vals[0]; };
 
         // extract the values of the Weyl scalars on the spheres
         extract(a_interpolator);
