@@ -414,7 +414,18 @@ void StarTracker::read_old_centre_from_dat(std::string a_filename, double a_dt,
             for (int i = 0; i < data_line.size(); i++)
             {
                 star_coords[i] = data_line[i];
+		for (int ipuncture = 0; ipuncture < m_num_stars; ++ipuncture)
+		{
+		 m_puncture_coords[ipuncture][i] = star_coords[CH_SPACEDIM * ipuncture + i];
+		}
             }
+
+	    pout() << "For Star A I've read position 0 " << m_puncture_coords[0][0] << endl;
+	    pout() << "For Star A I've read position 1 " << m_puncture_coords[0][1] << endl;
+	    pout() << "For Star A I've read position 2 " << m_puncture_coords[0][2] << endl;
+	    pout() << "For Star B I've read position 0 " << m_puncture_coords[1][0] << endl;
+	    pout() << "For Star B I've read position 1 " << m_puncture_coords[1][1] << endl;
+	    pout() << "For Star B I've read position 2 " << m_puncture_coords[1][2] << endl;
         }
         else
         {
