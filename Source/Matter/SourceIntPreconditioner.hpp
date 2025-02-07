@@ -14,7 +14,6 @@
 #include "simd.hpp"
 
 //! Sets a field variable to zero outside a set radius
-//! constructor on the grid
 template <class matter_t> class SourceIntPreconditioner
 {
   public:
@@ -52,13 +51,11 @@ template <class matter_t> class SourceIntPreconditioner
     }
 
   protected:
-    const double m_L, m_dx, m_radius; // simulation boxsize and cellsize
+    const double m_L, m_dx, m_radius;
     const matter_t &m_matter;
     FourthOrderDerivatives m_deriv;
-    const int m_c_var1, m_c_var2; // var enum for the angmom source
-    const std::array<double, CH_SPACEDIM> m_centre; // centre of mom flux calc
+    const int m_c_var1, m_c_var2; // var enum
+    const std::array<double, CH_SPACEDIM> m_centre;
 };
-
-// #include "SourceIntPreconditioner.impl.hpp"
 
 #endif /* SOURCEINTPRECONDITIONER_HPP */

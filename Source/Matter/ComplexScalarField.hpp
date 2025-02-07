@@ -7,7 +7,7 @@
 #define COMPLEXSCALARFIELD_HPP_
 
 #include "CCZ4Geometry.hpp"
-#include "DefaultComplexPotential.hpp"
+#include "ComplexPotential.hpp"
 #include "FourthOrderDerivatives.hpp"
 #include "Tensor.hpp"
 #include "TensorAlgebra.hpp"
@@ -17,7 +17,7 @@
 //!  Calculates the matter type specific elements such as the EMTensor and
 //   matter evolution
 
-template <class potential_t = DefaultComplexPotential> class ComplexScalarField
+template <class potential_t = ComplexPotential> class ComplexScalarField
 {
   protected:
     //! The local copy of the potential

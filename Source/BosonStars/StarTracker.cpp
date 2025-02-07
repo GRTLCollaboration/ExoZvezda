@@ -3,7 +3,7 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#include "StarTracker.hpp" 
+#include "StarTracker.hpp"
 #include "DimensionDefinitions.hpp"
 #include "FittingMethod.hpp"
 #include "FittingModel.hpp"
@@ -399,15 +399,6 @@ void StarTracker::read_old_centre_from_dat(std::string a_filename, double a_dt,
 
         size = CH_SPACEDIM * m_num_stars;
         star_coords.resize(size, 0);
-
-        for (int ipuncture = 0; ipuncture < m_num_stars; ++ipuncture)
-        {
-            for (int i = 0; i < CH_SPACEDIM; ++i)
-            {
-                star_coords[CH_SPACEDIM * ipuncture + i] =
-                    m_puncture_coords[ipuncture][i];
-            }
-        }
 
         if (length_match)
         {

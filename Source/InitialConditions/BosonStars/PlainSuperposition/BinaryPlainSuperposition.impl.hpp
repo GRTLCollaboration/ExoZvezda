@@ -16,7 +16,7 @@
 inline BinaryPlainSuperposition::BinaryPlainSuperposition(
     BosonStar_params_t a_params_BosonStar,
     BosonStar_params_t a_params_BosonStar2,
-    Potential::params_t a_params_potential, double a_dx)
+    ComplexPotential::params_t a_params_potential, double a_dx)
     : m_dx(a_dx), m_params_BosonStar(a_params_BosonStar),
       m_params_BosonStar2(a_params_BosonStar2),
       m_params_potential(a_params_potential)
@@ -27,11 +27,11 @@ void BinaryPlainSuperposition::compute_1d_solution(const double max_r)
 {
     try
     {
-        // Set initial parameters and then run the solver 
+        // Set initial parameters and then run the solver
         m_1d_sol.set_initialcondition_params(m_params_BosonStar,
                                              m_params_potential, max_r);
         m_1d_sol.main();
-	    central_amplitude1 = m_1d_sol.A[0];
+        central_amplitude1 = m_1d_sol.A[0];
         mass1 = m_1d_sol.boson_mass[m_params_BosonStar.gridpoints - 1];
         frequency1 = m_1d_sol.get_BSfrequency();
         radius1 = m_1d_sol.radius;
@@ -40,7 +40,7 @@ void BinaryPlainSuperposition::compute_1d_solution(const double max_r)
         m_1d_sol2.set_initialcondition_params(m_params_BosonStar2,
                                               m_params_potential, max_r);
         m_1d_sol2.main();
-	central_amplitude2 = m_1d_sol2.A[0];
+        central_amplitude2 = m_1d_sol2.A[0];
         mass2 = m_1d_sol2.boson_mass[m_params_BosonStar.gridpoints - 1];
         frequency2 = m_1d_sol2.get_BSfrequency();
         radius2 = m_1d_sol2.radius;

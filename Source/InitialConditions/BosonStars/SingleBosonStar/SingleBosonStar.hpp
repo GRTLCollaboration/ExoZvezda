@@ -27,7 +27,7 @@ class SingleBosonStar
   public:
     //! The constructor
     SingleBosonStar(BosonStar_params_t a_params_BosonStar,
-                    Potential::params_t a_params_potential, double a_dx);
+                    ComplexPotential::params_t a_params_potential, double a_dx);
 
     //! Computes the 1d solution and stores in m_1d_sol
     void compute_1d_solution(const double max_r);
@@ -38,11 +38,11 @@ class SingleBosonStar
     BosonStarSolution m_1d_sol;
 
     double central_amplitude1, mass1, frequency1, radius1, compactness1;
-    
+
   protected:
     double m_dx;
-    BosonStar_params_t m_params_BosonStar;  //!< The complex scalar field params
-    Potential::params_t m_params_potential; //!< The potential params
+    BosonStar_params_t m_params_BosonStar; //!< The complex scalar field params
+    ComplexPotential::params_t m_params_potential; //!< The potential params
 };
 
 #include "SingleBosonStar.impl.hpp"
