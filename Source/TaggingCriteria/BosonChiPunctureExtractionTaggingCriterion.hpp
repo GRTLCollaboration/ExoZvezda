@@ -173,20 +173,6 @@ class BosonChiPunctureExtractionTaggingCriterion
 
                         criterion = simd_conditional(regrid, 100.0, criterion);
                     }
-                    else if (m_level < m_puncture_max_levels[ipuncture])
-                    {
-                        // make the first level below horizon_max_level
-                        // 1/4 the length across and levels below that
-                        // 1/2 as small each time
-                        const double factor = pow(
-                            2.0, m_horizon_max_levels[ipuncture] - m_level - 2);
-
-                        auto regrid = simd_compare_lt(
-                            max_abs_xyz,
-                            factor * m_puncture_radii[ipuncture] / 2.);
-
-                        criterion = simd_conditional(regrid, 100.0, criterion);
-                    }
                     else
                     {
                         // remove any finer levels for BHs with
@@ -202,8 +188,7 @@ class BosonChiPunctureExtractionTaggingCriterion
 
             else
             {
-                if (m_level >= merger_horizon_max_level &&
-                    m_level >= merger_puncture_max_level)
+                if (m_level >= merger_horizon_max_level)
                 {
                     // drop any finer levels after merger
                     // tagging for merger BH handled below
@@ -240,20 +225,6 @@ class BosonChiPunctureExtractionTaggingCriterion
                         max_abs_xyz,
                         factor * (m_puncture_radii[0] / 2. +
                                   m_puncture_radii[1] / 2. + m_buffer));
-                    criterion = simd_conditional(regrid2, 100.0, criterion);
-                }
-                else if (m_level < merger_puncture_max_level)
-                {
-                    // make the first level below horizon_max_level
-                    // 1/4 the length across and levels below that
-                    // 1/2 as small each time
-                    const double factor =
-                        pow(2.0, merger_horizon_max_level - m_level - 2);
-
-                    auto regrid2 = simd_compare_lt(
-                        max_abs_xyz, factor * (m_puncture_radii[0] / 2. +
-                                               m_puncture_radii[1] / 2.));
-
                     criterion = simd_conditional(regrid2, 100.0, criterion);
                 }
             }
