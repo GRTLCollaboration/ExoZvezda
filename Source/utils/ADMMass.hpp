@@ -56,7 +56,7 @@ class ADMMass
         Tensor<1, data_t> x = {coords.x, coords.y, coords.z};
         // Only one coordinate is multiplied by r as we wish to normalise the
         // quantity by 1/r^2
-        Tensor<1, data_t> dS = {coords.x, coords.y, coords.z * r};
+        Tensor<1, data_t> dS = {coords.x, coords.y, coords.z};
 
         data_t Madm = 0.0;
         FOR4(i, j, k, l)

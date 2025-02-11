@@ -26,6 +26,8 @@ class ADMMassExtraction : public SphericalExtraction
     //! Execute the query
     void execute_query(AMRInterpolator<Lagrange<4>> *a_interpolator)
     {
+        std::vector<double> final_integral;
+
         extract(a_interpolator);
 
         if (m_params.write_extraction)
@@ -34,15 +36,23 @@ class ADMMassExtraction : public SphericalExtraction
         }
 
         // add integrand
-        std::vector<double> integrals;
-        add_var_integrand(0, integrals, IntegrationMethod::simpson);
+        // std::vector<double> integrals;
+         // note that this is normalised by multiplying by radius
+         auto normalised_mass =
+         [](std::vector<double> adm_mass_parts, double r, double, double)
+         {
+         return r * adm_mass_parts[0];
+         };
+        
+        add_integrand(normalised_mass, final_integral, IntegrationMethod::simpson);
+        // add_var_integrand(0, normalised_mass, IntegrationMethod::simpson);
 
         // integrate
         integrate();
 
         // write integrals
         std::string integrals_filename = "ADMmass";
-        write_integral(integrals_filename, integrals, "ADM mass");
+        write_integral(integrals_filename, final_integral, "ADM mass");
     }
 };
 

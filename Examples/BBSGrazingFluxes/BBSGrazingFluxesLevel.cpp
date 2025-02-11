@@ -312,9 +312,11 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
     if (m_p.do_star_track && m_level == m_p.star_track_level)
     {
         pout() << "Running a star tracker now" << endl;
+        int current_step = m_gr_amr.m_interpolator->getAMR().s_step;
+
         // if at restart time read data from dat file,
         // will default to param file if restart time is 0
-        if (fabs(m_time - m_restart_time) < m_dt * 1.1)
+        if (current_step != 0 && fabs(m_time - m_restart_time) < m_dt * 1.1)
         {
             m_st_amr.m_star_tracker.read_old_centre_from_dat(
                 "StarCentres", m_dt, m_time, m_restart_time, first_step);
@@ -327,15 +329,7 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
     // Flux calculation
     if (m_p.do_flux_integration && m_level == m_p.mass_flux_extraction_params.min_extraction_level())
     {   
-        double S_phi_integral; 
-        double Q_phi_integral; 
-        double temp_dx;
-        
-        std::vector<AMRLevel *> all_level_ptrs = getAMRLevelHierarchy().stdVector();
-        std::vector<double> S_phi_integrals(m_p.mass_flux_extraction_params.num_extraction_radii); // vector storing all integrals
-        std::vector<double> Q_phi_integrals(m_p.mass_flux_extraction_params.num_extraction_radii); // vector storing all integrals
-
-        BoxLoops::loop(EMTensor_and_mom_flux<ComplexScalarFieldWithPotential>(complex_scalar_field, temp_dx, m_p.L, m_p.mass_flux_extraction_params.extraction_center,
+        BoxLoops::loop(EMTensor_and_mom_flux<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.extraction_center,
                                      c_Fphi_flux, c_Sphi_source, c_Qphi_density,
                                                      c_rho, Interval(c_s1,c_s3),
                              Interval(c_s11,c_s33)),  m_state_new,
@@ -344,7 +338,7 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
         for (int i=m_p.mass_flux_extraction_params.num_extraction_radii-1; i>=0; i--)
         {        
         BoxLoops::loop(SourceIntPreconditioner<ComplexScalarFieldWithPotential>
-              (complex_scalar_field, temp_dx, m_p.L, m_p.mass_flux_extraction_params.extraction_center,
+              (complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.extraction_center,
                                                  c_Sphi_source, c_Qphi_density,
                                     m_p.mass_flux_extraction_params.extraction_radii[i]),
                           m_state_new, m_state_diagnostics,
