@@ -3,8 +3,8 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#ifndef MOMFLUXCALC_HPP
-#define MOMFLUXCALC_HPP
+#ifndef EMTENSORANDFLUXES_HPP
+#define EMTENSORANDFLUXES_HPP
 
 #include "CCZ4Geometry.hpp"
 #include "Cell.hpp"
@@ -14,14 +14,14 @@
 #include "simd.hpp"
 
 //! Calculates the EM tensor and angular momentum flux
-template <class matter_t> class EMTensor_and_mom_flux
+template <class matter_t> class EMTensorAndFluxes
 {
   public:
     template <class data_t>
     using Vars = typename MatterCCZ4<matter_t>::template Vars<data_t>;
 
     //! Constructor
-    EMTensor_and_mom_flux(const matter_t &a_matter, const double dx,
+    EMTensorAndFluxes(const matter_t &a_matter, const double dx,
                           const double a_L,
                           const std::array<double, CH_SPACEDIM> a_centre,
                           const int a_c_rho = -1, const int a_c_Fphi_flux = -1,
@@ -47,6 +47,6 @@ template <class matter_t> class EMTensor_and_mom_flux
         m_centre; // centre of momentum flux calculation
 };
 
-#include "MomFluxCalc.impl.hpp"
+#include "EMTensorAndFluxes.impl.hpp"
 
-#endif /* MOMFLUXCALC_HPP */
+#endif /* EMTENSORANDFLUXES_HPP */

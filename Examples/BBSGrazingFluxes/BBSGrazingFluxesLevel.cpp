@@ -38,8 +38,8 @@
 
 // For flux intergartion 
 #include "AngMomFlux.hpp"
-#include "MomFluxCalc.hpp"
-#include "SourceIntPreconditioner.hpp"
+#include "EMTensorAndFluxes.hpp"
+#include "DiagnosticVariablePreconditioner.hpp"
 
 // For Noether Charge calculation
 #include "NoetherCharge.hpp"
@@ -114,7 +114,7 @@ void BBSGrazingFluxesLevel::preCheckpointLevel()
                           MatterConstraints<ComplexScalarFieldWithPotential>(
                               complex_scalar_field, m_dx, m_p.G_Newton, c_Ham,
                               Interval(c_Mom1, c_Mom3)),
-                          EMTensor_and_mom_flux<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.extraction_center,
+                              EMTensorAndFluxes<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.extraction_center,
                                      c_Fphi_flux, c_Sphi_source, c_Qphi_density,
                                                      c_rho, Interval(c_s1,c_s3),
                              Interval(c_s11,c_s33)),
@@ -141,7 +141,7 @@ void BBSGrazingFluxesLevel::prePlotLevel()
                           NoetherCharge()),
         m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
     BoxLoops::loop(
-        SourceIntPreconditioner<ComplexScalarFieldWithPotential>(
+        DiagnosticVariablePreconditioner<ComplexScalarFieldWithPotential>(
             complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.center,
             c_Sphi_source, c_Qphi_density, 10.),
         m_state_diagnostics, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
@@ -319,7 +319,7 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
         std::vector<double> S_phi_integrals(m_p.mass_flux_extraction_params.num_extraction_radii); 
         std::vector<double> Q_phi_integrals(m_p.mass_flux_extraction_params.num_extraction_radii); 
 
-        BoxLoops::loop(EMTensor_and_mom_flux<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.extraction_center,
+        BoxLoops::loop(EMTensorAndFluxes<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.extraction_center,
                                      c_Fphi_flux, c_Sphi_source, c_Qphi_density,
                                                      c_rho, Interval(c_s1,c_s3),
                              Interval(c_s11,c_s33)),  m_state_new,
@@ -333,7 +333,7 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
 
         pout() << "Extraction radius at " << m_p.mass_flux_extraction_params.extraction_radii[i] << endl;
         BoxLoops::loop(
-                SourceIntPreconditioner<ComplexScalarFieldWithPotential>(
+            DiagnosticVariablePreconditioner<ComplexScalarFieldWithPotential>(
                     complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.center,
                     c_Sphi_source, c_Qphi_density, m_p.mass_flux_extraction_params.extraction_radii[i]),
                 m_state_diagnostics, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
