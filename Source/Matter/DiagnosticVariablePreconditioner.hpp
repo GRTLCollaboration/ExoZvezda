@@ -3,8 +3,8 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#ifndef SOURCEINTPRECONDITIONER_HPP
-#define SOURCEINTPRECONDITIONER_HPP
+#ifndef DIAGNOSTICVARIABLEPRECONDITIONER_HPP
+#define DIAGNOSTICVARIABLEPRECONDITIONER_HPP
 
 #include "CCZ4Geometry.hpp"
 #include "Cell.hpp"
@@ -13,15 +13,15 @@
 #include "MatterCCZ4.hpp"
 #include "simd.hpp"
 
-//! Sets a field variable to zero outside a set radius
-template <class matter_t> class SourceIntPreconditioner
+//! Sets a diagnostic field variable to zero outside a set radius (a_radius)
+template <class matter_t> class DiagnosticVariablePreconditioner
 {
   public:
     template <class data_t>
     using Vars = typename MatterCCZ4<matter_t>::template Vars<data_t>;
 
     //! Constructor
-    SourceIntPreconditioner(const matter_t &a_matter, const double dx,
+    DiagnosticVariablePreconditioner(const matter_t &a_matter, const double dx,
                             const double a_L,
                             const std::array<double, CH_SPACEDIM> a_centre,
                             const int a_c_var1 = -1, const int a_c_var2 = -1,
@@ -58,4 +58,4 @@ template <class matter_t> class SourceIntPreconditioner
     const std::array<double, CH_SPACEDIM> m_centre;
 };
 
-#endif /* SOURCEINTPRECONDITIONER_HPP */
+#endif /* DIAGNOSTICVARIABLEPRECONDITIONER_HPP */

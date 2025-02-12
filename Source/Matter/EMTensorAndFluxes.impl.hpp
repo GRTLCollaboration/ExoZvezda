@@ -3,12 +3,12 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#if !defined(MOMFLUXCALC_HPP)
-#error "This file should only be included through MomFluxCalc.hpp"
+#if !defined(EMTENSORANDFLUXES_HPP)
+#error "This file should only be included through EMTensorAndFluxes.hpp"
 #endif
 
-#ifndef MOMFLUXCALC_IMPL_HPP
-#define MOMFLUXCALC_IMPL_HPP
+#ifndef EMTENSORANDFLUXES_IMPL_HPP
+#define EMTENSORANDFLUXES_IMPL_HPP
 
 #include "CCZ4Geometry.hpp"
 #include "Cell.hpp"
@@ -18,7 +18,7 @@
 #include "simd.hpp"
 
 template <class matter_t>
-EMTensor_and_mom_flux<matter_t>::EMTensor_and_mom_flux(
+EMTensorAndFluxes<matter_t>::EMTensorAndFluxes(
     const matter_t &a_matter, const double dx, const double a_L,
     std::array<double, CH_SPACEDIM> a_centre, const int a_c_Fphi_flux,
     const int a_c_Sphi_source, const int a_c_Qphi_density, const int a_c_rho,
@@ -44,7 +44,7 @@ EMTensor_and_mom_flux<matter_t>::EMTensor_and_mom_flux(
 
 template <class matter_t>
 template <class data_t>
-void EMTensor_and_mom_flux<matter_t>::compute(Cell<data_t> current_cell) const
+void EMTensorAndFluxes<matter_t>::compute(Cell<data_t> current_cell) const
 {
     const auto vars = current_cell.template load_vars<Vars>();
     const auto d1 = m_deriv.template diff1<Vars>(current_cell);
@@ -321,4 +321,4 @@ void EMTensor_and_mom_flux<matter_t>::compute(Cell<data_t> current_cell) const
     current_cell.store_vars(S2_phi * sqrt_gamma, m_c_Sphi_source);
 }
 
-#endif /* MOMFLUXCALC_IMPL_HPP */
+#endif /* EMTENSORANDFLUXES_IMPL_HPP */
