@@ -19,7 +19,6 @@
 #include "NewMatterConstraints.hpp"
 
 // For tag cells
-#include "BosonChiPunctureExtractionTaggingCriterion.hpp"
 #include "ComplexPhiAndChiExtractionTaggingCriterion.hpp"
 
 // Problem specific includes
@@ -241,7 +240,7 @@ void BBSEqualMassFixLevel::specificPostTimeStep()
     if (m_level == 0)
     {
         AMRReductions<VariableType::diagnostic> amr_reductions(m_gr_amr);
-        AMRReductions<VariableType::diagnostic> amr_reductions_ev(m_gr_amr);
+        AMRReductions<VariableType::evolution> amr_reductions_ev(m_gr_amr);
         if (m_p.calculate_noether_charge)
         {
             // Compute volume weighted Noether charge integral
