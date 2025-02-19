@@ -111,12 +111,11 @@ void BBSGrazingFluxesLevel::preCheckpointLevel()
                               complex_scalar_field,
                               m_p.extraction_params.extraction_center, m_dx,
                               m_p.formulation, m_p.G_Newton),
-                          MatterConstraints<ComplexScalarFieldWithPotential>(
+                              MatterConstraints<ComplexScalarFieldWithPotential>(
                               complex_scalar_field, m_dx, m_p.G_Newton, c_Ham,
                               Interval(c_Mom1, c_Mom3)),
                               EMTensorAndFluxes<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.extraction_center,
-                                     c_Fphi_flux, c_Sphi_source, c_Qphi_density,
-                                                     c_rho, Interval(c_s1,c_s3),
+                                c_rho, c_Fphi_flux, c_Sphi_source, c_Qphi_density, Interval(c_s1,c_s3),
                              Interval(c_s11,c_s33)),
                           NoetherCharge()),
         m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
@@ -138,13 +137,10 @@ void BBSGrazingFluxesLevel::prePlotLevel()
                           MatterConstraints<ComplexScalarFieldWithPotential>(
                               complex_scalar_field, m_dx, m_p.G_Newton, c_Ham,
                               Interval(c_Mom1, c_Mom3)),
+                          EMTensorAndFluxes<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.extraction_center,
+                            c_rho, c_Fphi_flux, c_Sphi_source, c_Qphi_density, Interval(c_s1,c_s3), Interval(c_s11,c_s33)),
                           NoetherCharge()),
         m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
-    BoxLoops::loop(
-        DiagnosticVariablePreconditioner<ComplexScalarFieldWithPotential>(
-            complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.center,
-            c_Sphi_source, c_Qphi_density, 10.),
-        m_state_diagnostics, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 }
 
 // Things to do in RHS update, at each RK4 step
@@ -159,12 +155,10 @@ void BBSGrazingFluxesLevel::specificEvalRHS(GRLevelData &a_soln,
     // Calculate MatterCCZ4 right hand side with matter_t = ComplexScalarField
     ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
-    MatterCCZ4RHS<ComplexScalarFieldWithPotential> my_ccz4_matter(
-        complex_scalar_field, m_p.ccz4_params, m_dx, m_p.sigma, m_p.formulation,
-        m_p.G_Newton);
-    SetValue set_analysis_vars_zero(0.0, Interval(c_Pi_Im + 1, NUM_VARS - 1));
-    auto compute_pack =
-        make_compute_pack(my_ccz4_matter, set_analysis_vars_zero);
+    BoxLoops::loop(MatterCCZ4RHS<ComplexScalarFieldWithPotential>(
+        complex_scalar_field, m_p.ccz4_params, m_dx, m_p.sigma,
+      m_p.formulation, m_p.G_Newton),
+  a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
 }
 
 // Things to do at ODE update, after soln + rhs
@@ -228,9 +222,11 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
     }
 
     // ADM mass
-    if (m_p.activate_mass_extraction == 1 &&
-        m_level == m_p.mass_flux_extraction_params.min_extraction_level())
+    if (m_p.activate_mass_extraction == 1 && at_level_timestep_multiple(m_p.mass_flux_extraction_params.min_extraction_level()))
     {
+        // Do the extraction on the min extraction level
+        if (m_level == m_p.mass_flux_extraction_params.min_extraction_level())
+        {
         if (m_verbosity)
         {
             pout() << "BBSGrazingFluxesLevel::specificPostTimeStep:"
@@ -243,6 +239,7 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
         ADMMassExtraction mass_extraction(m_p.mass_flux_extraction_params, m_dt,
                                           m_time, first_step, m_restart_time);
         mass_extraction.execute_query(m_gr_amr.m_interpolator);
+        }
     }
 
     // Noether charge, max mod phi, min chi, constraint violations
@@ -312,40 +309,41 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
             });
         }
         constraints_file.write_time_data_line({L2_Ham, L2_Mom, L1_Ham, L1_Mom});
-
+    }
         // Flux calculation
-    if (m_p.do_flux_integration && m_level == m_p.mass_flux_extraction_params.min_extraction_level())
+    if (m_p.do_flux_integration && at_level_timestep_multiple(m_p.mass_flux_extraction_params.min_extraction_level()))
     {   
         std::vector<double> S_phi_integrals(m_p.mass_flux_extraction_params.num_extraction_radii); 
         std::vector<double> Q_phi_integrals(m_p.mass_flux_extraction_params.num_extraction_radii); 
-
+ 
+        for (int i=m_p.mass_flux_extraction_params.num_extraction_radii-1; i>=0; i--)
+        {
         BoxLoops::loop(EMTensorAndFluxes<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.extraction_center,
-                                     c_Fphi_flux, c_Sphi_source, c_Qphi_density,
-                                                     c_rho, Interval(c_s1,c_s3),
+            c_rho, c_Fphi_flux, c_Sphi_source, c_Qphi_density, Interval(c_s1,c_s3),
                              Interval(c_s11,c_s33)),  m_state_new,
                                 m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 
-        for (int i=m_p.mass_flux_extraction_params.num_extraction_radii-1; i>=0; i--)
-        {
-        
         double S_phi_integral; // integral of angmomsource
         double Q_phi_integral; // integral of angmomsource
+        BoxLoops::loop(DiagnosticVariablePreconditioner<ComplexScalarFieldWithPotential>(
+                                        complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.center,
+                                        c_Sphi_source, c_Qphi_density, m_p.mass_flux_extraction_params.extraction_radii[i]),
+                                        m_state_new, m_state_diagnostics, INCLUDE_GHOST_CELLS);
 
-        pout() << "Extraction radius at " << m_p.mass_flux_extraction_params.extraction_radii[i] << endl;
-        BoxLoops::loop(
-            DiagnosticVariablePreconditioner<ComplexScalarFieldWithPotential>(
-                    complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.center,
-                    c_Sphi_source, c_Qphi_density, m_p.mass_flux_extraction_params.extraction_radii[i]),
-                m_state_diagnostics, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
-                                
-        AMRReductions<VariableType::diagnostic> amr_reductions(m_gr_amr);
-        S_phi_integral = amr_reductions.sum(c_Sphi_source);
-        pout() << "S_phi_integral is " << S_phi_integral << endl;
-        S_phi_integrals[i] = S_phi_integral;
-        Q_phi_integral = amr_reductions.sum(c_Qphi_density);
-        pout() << "Q_phi_integral is " << Q_phi_integral << endl;
-        Q_phi_integrals[i] = Q_phi_integral;
+        // Do the extraction on the min extraction level
+        if (m_level == 0)
+        {              
+                AMRReductions<VariableType::diagnostic> amr_reductions(m_gr_amr);
+     
+                S_phi_integral = amr_reductions.sum(c_Sphi_source);
+                S_phi_integrals[i] = S_phi_integral;
+                Q_phi_integral = amr_reductions.sum(c_Qphi_density);
+                Q_phi_integrals[i] = Q_phi_integral;
+        }
+    }
 
+        if (m_level == m_p.mass_flux_extraction_params.min_extraction_level())
+        { 
         // save the Source integral to dat file
         std::vector<string> title_line(m_p.mass_flux_extraction_params.num_extraction_radii);
         string dummy_string;
@@ -356,7 +354,7 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
                 to_string(m_p.mass_flux_extraction_params.extraction_radii[j]);
             title_line[j] = dummy_string;
         }
-
+        
         SmallDataIO angmomsource_file("AngMomSource", m_dt, m_time,
                                       m_restart_time, SmallDataIO::APPEND,
                                       first_step);
@@ -401,18 +399,18 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
         // setup and perform the angular momentum flux integral
         AngMomFlux ang_mom_flux(m_p.mass_flux_extraction_params,m_time,m_dt,m_restart_time,first_step);
         ang_mom_flux.run(m_gr_amr.m_interpolator);
-        }
     }
+}
 
     if (m_p.do_star_track && m_level == m_p.star_track_level)
     {
         pout() << "Running a star tracker now" << endl;
         int current_step = m_gr_amr.m_interpolator->getAMR().s_step;
 
-        // if at restart time read data from dat file,
-        // will default to param file if restart time is 0
+        // at the restart time read from file
         if (current_step != 0 && fabs(m_time - m_restart_time) < m_dt * 1.1)
         {
+            pout() << "Reading star positions from file" << endl;
             m_st_amr.m_star_tracker.read_old_centre_from_dat(
                 "StarCentres", m_dt, m_time, m_restart_time, first_step);
         }
@@ -420,7 +418,6 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
         m_st_amr.m_star_tracker.write_to_dat("StarCentres", m_dt, m_time,
                                              m_restart_time, first_step);
     }
-        }
 
 #ifdef USE_AHFINDER
     if (m_p.AH_activate && m_level == m_p.AH_params.level_to_run)
