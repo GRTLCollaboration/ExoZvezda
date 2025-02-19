@@ -171,6 +171,7 @@ void BBSPlainSuperpositionLevel::specificPostTimeStep()
     fillAllGhosts();
     ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
+    
     auto weyl4_adm_compute_pack = make_compute_pack(
         MatterWeyl4<ComplexScalarFieldWithPotential>(
             complex_scalar_field, m_p.extraction_params.extraction_center, m_dx,
