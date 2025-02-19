@@ -153,12 +153,10 @@ void BBSUnequalMassFixLevel::specificEvalRHS(GRLevelData &a_soln,
     // zero these
     ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
-    MatterCCZ4RHS<ComplexScalarFieldWithPotential> my_ccz4_matter(
-        complex_scalar_field, m_p.ccz4_params, m_dx, m_p.sigma, m_p.formulation,
-        m_p.G_Newton);
-    SetValue set_analysis_vars_zero(0.0, Interval(c_Pi_Im + 1, NUM_VARS - 1));
-    auto compute_pack =
-        make_compute_pack(my_ccz4_matter, set_analysis_vars_zero);
+    BoxLoops::loop(MatterCCZ4RHS<ComplexScalarFieldWithPotential>(
+        complex_scalar_field, m_p.ccz4_params, m_dx, m_p.sigma,
+      m_p.formulation, m_p.G_Newton),
+    a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
 }
 
 // Things to do at ODE update, after soln + rhs
@@ -218,7 +216,7 @@ void BBSUnequalMassFixLevel::specificPostTimeStep()
     }
 
     if (m_p.activate_mass_extraction == 1 &&
-        m_level == m_p.mass_extraction_params.min_extraction_level())
+        at_level_timestep_multiple(m_p.mass_extraction_params.min_extraction_level()))
     {
         if (m_verbosity)
         {
@@ -227,11 +225,15 @@ void BBSUnequalMassFixLevel::specificPostTimeStep()
                    << endl;
         }
 
+        // Do the extraction on the min extraction level
+        if (m_level == m_p.mass_extraction_params.min_extraction_level())
+        {
         // Now refresh the interpolator and do the interpolation
         m_gr_amr.m_interpolator->refresh();
         ADMMassExtraction mass_extraction(m_p.mass_extraction_params, m_dt,
                                           m_time, first_step, m_restart_time);
         mass_extraction.execute_query(m_gr_amr.m_interpolator);
+        }
     }
 
     // Noether charge, max mod phi, min chi, constraint violations
@@ -305,11 +307,12 @@ void BBSUnequalMassFixLevel::specificPostTimeStep()
 
     if (m_p.do_star_track && m_level == m_p.star_track_level)
     {
-        pout() << "Running a star tracker now" << endl;
-        // if at restart time read data from dat file,
-        // will default to param file if restart time is 0
-        if (fabs(m_time - m_restart_time) < m_dt * 1.1)
+        int current_step = m_gr_amr.m_interpolator->getAMR().s_step;
+
+        // at the restart time read from file
+        if (current_step != 0 && fabs(m_time - m_restart_time) < m_dt * 1.1)
         {
+            pout() << "Reading star positions from file" << endl;
             m_st_amr.m_star_tracker.read_old_centre_from_dat(
                 "StarCentres", m_dt, m_time, m_restart_time, first_step);
         }

@@ -170,7 +170,7 @@ void SingleBosonStarLevel::specificPostTimeStep()
                    m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 
     if (m_p.activate_mass_extraction == 1 &&
-        m_level == m_p.mass_extraction_params.min_extraction_level())
+        at_level_timestep_multiple(m_p.mass_extraction_params.min_extraction_level()))
     {
         if (m_verbosity)
         {
@@ -179,11 +179,15 @@ void SingleBosonStarLevel::specificPostTimeStep()
                    << endl;
         }
 
+        // Do the extraction on the min extraction level
+        if (m_level == m_p.mass_extraction_params.min_extraction_level())
+        {
         // Now refresh the interpolator and do the interpolation
         m_gr_amr.m_interpolator->refresh();
         ADMMassExtraction mass_extraction(m_p.mass_extraction_params, m_dt,
                                           m_time, first_step, m_restart_time);
         mass_extraction.execute_query(m_gr_amr.m_interpolator);
+        }
     }
 
     // Noether charge, max mod phi, min chi, constraint violations
