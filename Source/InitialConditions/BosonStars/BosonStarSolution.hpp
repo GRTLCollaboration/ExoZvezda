@@ -39,7 +39,7 @@ class BosonStarSolution
 
     void rk4(const double ww_);
     void rk4_asymp(const int iter, const bool adaptive, const double ww_);
-    void rk4_match(const int iter, const bool adaptive, const double ww_);
+    void rk4_match(const int iter, const double ww_);
     double A_RHS(const double x, const double A, const double DA,
                  const double PSI, const double DPSI, const double OM,
                  const double ww_);
