@@ -41,24 +41,25 @@ class ADMMass
     }
 
     template <class data_t> void compute(Cell<data_t> current_cell) const
-    {
-        // copy data from chombo gridpoint into local variables, and calc 1st
-        // derivs
+    {   
+        // Load the required vars
         const auto vars = current_cell.template load_vars<Vars>();
         const auto d1 = m_deriv.template diff1<Diff1Vars>(current_cell);
 
         using namespace TensorAlgebra;
         const auto h_UU = compute_inverse_sym(vars.h);
 
-        // Surface element for integration
         Coordinates<data_t> coords(current_cell, m_dx, m_centre);
         data_t r = coords.get_radius();
-        Tensor<1, data_t> x = {coords.x, coords.y, coords.z};
-        // Only one coordinate is multiplied by r as we wish to normalise the
-        // quantity by 1/r^2
-        Tensor<1, data_t> dS = {coords.x, coords.y, coords.z};
 
+        Tensor<1, data_t> x = {coords.x, coords.y, coords.z};
+
+        // Normal to the surface 
+        Tensor<1, data_t> dS = {coords.x/r, coords.y/r, coords.z/r};
+        
+        // ADM mass
         data_t Madm = 0.0;
+        
         FOR4(i, j, k, l)
         {
             Madm += dS[i] / (16. * M_PI) * h_UU[j][k] * h_UU[i][l] *
@@ -67,11 +68,10 @@ class ADMMass
                          (vars.h[l][j] * d1.chi[j] - vars.h[j][k] * d1.chi[l]));
         }
 
-        // spin about z axis
+        // Spin about z axis
         data_t Jadm = 0.0;
 
-        // note this is the levi civita symbol,
-        // not tensor (eps_tensor = eps_symbol * chi^-1.5)
+        // Note this is the levi civita symbol,
         const Tensor<3, double> epsilon = TensorAlgebra::epsilon();
 
         FOR3(i, j, k)
@@ -88,7 +88,6 @@ class ADMMass
             }
         }
 
-        // assign values of ADMMass in output box
         current_cell.store_vars(Madm, c_Madm);
         current_cell.store_vars(Jadm, c_Jadm);
     }
