@@ -20,12 +20,12 @@
 template <class matter_t>
 EMTensorAndFluxes<matter_t>::EMTensorAndFluxes(
     const matter_t &a_matter, const double dx, const double a_L,
-    std::array<double, CH_SPACEDIM> a_centre, const int a_c_Fphi_flux,
-    const int a_c_Sphi_source, const int a_c_Qphi_density, const int a_c_rho,
+    std::array<double, CH_SPACEDIM> a_centre, const int a_c_rho, const int a_c_Fphi_flux,
+    const int a_c_Sphi_source, const int a_c_Qphi_density,
     const Interval a_c_Si, const Interval a_c_Sij)
-    : m_matter(a_matter), m_deriv(dx), m_dx(dx), m_L(a_L), m_centre(a_centre),
+    : m_matter(a_matter), m_deriv(dx), m_dx(dx), m_L(a_L), m_centre(a_centre), m_c_rho(a_c_rho),
       m_c_Fphi_flux(a_c_Fphi_flux), m_c_Sphi_source(a_c_Sphi_source),
-      m_c_Qphi_density(a_c_Qphi_density), m_c_rho(a_c_rho), m_c_Si(a_c_Si),
+      m_c_Qphi_density(a_c_Qphi_density), m_c_Si(a_c_Si),
       m_c_Sij(a_c_Sij)
 {
     if (m_c_Si.size() != 0)
@@ -90,8 +90,8 @@ void EMTensorAndFluxes<matter_t>::compute(Cell<data_t> current_cell) const
     ///////////////////////////////////
 
     data_t x = coords.x, y = coords.y, z = coords.z,
-           r_xyz = sqrt(x * x + y * y + z * z + 0.00000000001),
-           r_xy = sqrt(x * x + y * y + 0.00000000001), sintheta = r_xy / r_xyz,
+           r_xyz = sqrt(x * x + y * y + z * z + 1.0E-11),
+           r_xy = sqrt(x * x + y * y + 1.0E-11), sintheta = r_xy / r_xyz,
            sinphi = y / r_xy, cosphi = x / r_xy, costheta = z / r_xyz;
     Tensor<1, data_t, 3> xi; // approximate Killing vector = partial_phi but
                              // expressed in cartesian coords
