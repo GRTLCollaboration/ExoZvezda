@@ -15,15 +15,13 @@
 
 //! This class tags cells based on three criteria - the
 //! value of the second derivs, the extraction regions
-//! and the puncture horizons (which must be covered to
-//! a given level
+//! and the puncture 'horizons'. There are no horizon for BSs, but within a certain radius of the star, we will aim to place a box around it. Use of 'horizon' here is not to be taken literally.
 class BosonChiPunctureExtractionTaggingCriterion
 {
   protected:
     const double m_dx;
     const int m_level;
     const std::array<int, 2> m_horizon_max_levels;
-    const std::array<int, 2> m_puncture_max_levels;
     const bool m_track_punctures;
     const bool m_activate_extraction;
     const FourthOrderDerivatives m_deriv;
@@ -51,7 +49,6 @@ class BosonChiPunctureExtractionTaggingCriterion
     BosonChiPunctureExtractionTaggingCriterion(
         const double dx, const int a_level,
         const std::array<int, 2> a_horizon_max_levels,
-        const std::array<int, 2> a_puncture_max_levels,
         const spherical_extraction_params_t a_params,
         const std::vector<std::array<double, CH_SPACEDIM>> &a_puncture_coords,
         const bool activate_extraction = false,
@@ -61,7 +58,6 @@ class BosonChiPunctureExtractionTaggingCriterion
         const double a_buffer = 0.5)
         : m_dx(dx), m_level(a_level),
           m_horizon_max_levels(a_horizon_max_levels),
-          m_puncture_max_levels(a_puncture_max_levels),
           m_track_punctures(track_punctures),
           m_activate_extraction(activate_extraction), m_deriv(dx),
           m_params(a_params), m_puncture_radii(a_puncture_radii),
@@ -127,15 +123,11 @@ class BosonChiPunctureExtractionTaggingCriterion
             const int merger_horizon_max_level =
                 min(m_horizon_max_levels[0], m_horizon_max_levels[1]);
 
-            const int merger_puncture_max_level =
-                min(m_puncture_max_levels[0], m_puncture_max_levels[1]);
-
             if (puncture_separation >
-                (m_puncture_radii[1] + m_puncture_radii[0]))
+                (m_puncture_radii[1]/2. + m_puncture_radii[0]/2.)) //you may want to also try a puncture_separation > (m_puncture_radii[1] + m_puncture_radii[0])
             {
                 // punctures still far enough apart so tag around each one
                 // separately
-                //
                 for (int ipuncture = 0; ipuncture < 2; ++ipuncture)
                 {
                     std::array<double, CH_SPACEDIM> puncture_centre;
@@ -176,7 +168,6 @@ class BosonChiPunctureExtractionTaggingCriterion
                     else
                     {
                         // remove any finer levels for BHs with
-                        // puncture_max_level < max_level
                         auto dont_regrid = simd_compare_lt(
                             max_abs_xyz,
                             m_puncture_radii[ipuncture] / 2. + m_buffer);
@@ -191,7 +182,6 @@ class BosonChiPunctureExtractionTaggingCriterion
                 if (m_level >= merger_horizon_max_level)
                 {
                     // drop any finer levels after merger
-                    // tagging for merger BH handled below
                     criterion = 0.0;
                 }
             }
@@ -199,9 +189,9 @@ class BosonChiPunctureExtractionTaggingCriterion
             double sum_masses = m_puncture_masses[0] + m_puncture_masses[1];
 
             // if punctures are close enough together tag cells at the
-            // center of mass for the merger BH
+            // center of mass for the remnant
             if (puncture_separation <
-                m_puncture_radii[0] + m_puncture_radii[1] + m_buffer)
+                m_puncture_radii[0]/2. + m_puncture_radii[1]/2. + m_buffer) //you may want to also try a puncture_separation > (m_puncture_radii[1] + m_puncture_radii[0])
             {
                 std::array<double, CH_SPACEDIM> center_of_mass;
                 FOR1(idir)
