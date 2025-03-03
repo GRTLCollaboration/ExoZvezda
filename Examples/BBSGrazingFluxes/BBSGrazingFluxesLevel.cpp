@@ -28,15 +28,11 @@
 #include "ComputePack.hpp"
 #include "SetValue.hpp"
 
-// For mass extraction
-#include "ADMMass.hpp"
-#include "ADMMassExtraction.hpp"
-
 // For GW extraction
 #include "MatterWeyl4.hpp"
 #include "WeylExtraction.hpp"
 
-// For flux intergartion 
+// For flux integration 
 #include "AngMomFlux.hpp"
 #include "EMTensorAndFluxes.hpp"
 #include "DiagnosticVariablePreconditioner.hpp"
@@ -114,7 +110,7 @@ void BBSGrazingFluxesLevel::preCheckpointLevel()
                               MatterConstraints<ComplexScalarFieldWithPotential>(
                               complex_scalar_field, m_dx, m_p.G_Newton, c_Ham,
                               Interval(c_Mom1, c_Mom3)),
-                              EMTensorAndFluxes<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.extraction_center,
+                              EMTensorAndFluxes<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.flux_extraction_params.extraction_center,
                                 c_rho, c_Fphi_flux, c_Sphi_source, c_Qphi_density, Interval(c_s1,c_s3),
                              Interval(c_s11,c_s33)),
                           NoetherCharge()),
@@ -137,7 +133,7 @@ void BBSGrazingFluxesLevel::prePlotLevel()
                           MatterConstraints<ComplexScalarFieldWithPotential>(
                               complex_scalar_field, m_dx, m_p.G_Newton, c_Ham,
                               Interval(c_Mom1, c_Mom3)),
-                          EMTensorAndFluxes<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.extraction_center,
+                          EMTensorAndFluxes<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.flux_extraction_params.extraction_center,
                             c_rho, c_Fphi_flux, c_Sphi_source, c_Qphi_density, Interval(c_s1,c_s3), Interval(c_s11,c_s33)),
                           NoetherCharge()),
         m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
@@ -176,19 +172,15 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
 
     bool first_step = (m_time == 0.0);
 
-    // First compute the Weyl4 & ADM mass integrand values on the grid +
+    // First compute the Weyl4 integrand values on the grid +
     // constraints
     fillAllGhosts();
     ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
 
-    auto weyl4_adm_compute_pack = make_compute_pack(
-        MatterWeyl4<ComplexScalarFieldWithPotential>(
-            complex_scalar_field, m_p.extraction_params.extraction_center, m_dx,
-            m_p.formulation, m_p.G_Newton),
-        ADMMass(m_p.center, m_dx));
-
-    BoxLoops::loop(weyl4_adm_compute_pack, m_state_new, m_state_diagnostics,
+    BoxLoops::loop(MatterWeyl4<ComplexScalarFieldWithPotential>(
+        complex_scalar_field, m_p.extraction_params.extraction_center, m_dx,
+        m_p.formulation, m_p.G_Newton), m_state_new, m_state_diagnostics,
                    EXCLUDE_GHOST_CELLS);
 
     BoxLoops::loop(MatterConstraints<ComplexScalarFieldWithPotential>(
@@ -218,27 +210,6 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
             WeylExtraction gw_extraction(m_p.extraction_params, m_dt, m_time,
                                          first_step, m_restart_time);
             gw_extraction.execute_query(m_gr_amr.m_interpolator);
-        }
-    }
-
-    // ADM mass
-    if (m_p.activate_mass_extraction == 1 && at_level_timestep_multiple(m_p.mass_flux_extraction_params.min_extraction_level()))
-    {
-        // Do the extraction on the min extraction level
-        if (m_level == m_p.mass_flux_extraction_params.min_extraction_level())
-        {
-        if (m_verbosity)
-        {
-            pout() << "BBSGrazingFluxesLevel::specificPostTimeStep:"
-                      " Extracting mass."
-                   << endl;
-        }
-
-        // Now refresh the interpolator and do the interpolation
-        m_gr_amr.m_interpolator->refresh();
-        ADMMassExtraction mass_extraction(m_p.mass_flux_extraction_params, m_dt,
-                                          m_time, first_step, m_restart_time);
-        mass_extraction.execute_query(m_gr_amr.m_interpolator);
         }
     }
 
@@ -312,22 +283,21 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
     }
 
     // Flux calculation
-    if (m_p.do_flux_integration && at_level_timestep_multiple(m_p.mass_flux_extraction_params.min_extraction_level()))
+    if (m_p.do_flux_integration && at_level_timestep_multiple(m_p.flux_extraction_params.min_extraction_level()))
     {  
-        BoxLoops::loop(EMTensorAndFluxes<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.extraction_center,
+        BoxLoops::loop(EMTensorAndFluxes<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.flux_extraction_params.extraction_center,
             c_rho, c_Fphi_flux, c_Sphi_source, c_Qphi_density, Interval(c_s1,c_s3),
                              Interval(c_s11,c_s33)),  m_state_new,
                              m_state_diagnostics, EXCLUDE_GHOST_CELLS);
     
         // Do the extraction on the min extraction level
-        if (m_level == m_p.mass_flux_extraction_params.min_extraction_level())
+        if (m_level == m_p.flux_extraction_params.min_extraction_level())
         {
  
             AMRReductions<VariableType::diagnostic> amr_reductions(m_gr_amr);
      
             double S_phi_integral = amr_reductions.sum(c_Sphi_source);
             double Q_phi_integral = amr_reductions.sum(c_Qphi_density);
-            pout() << S_phi_integral << endl;
             SmallDataIO source_density_file("AngMomSourceDensity", m_dt, m_time,
                 m_restart_time, SmallDataIO::APPEND,
                 first_step);
@@ -343,7 +313,7 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
         // Refresh the interpolator and do the interpolation
         m_gr_amr.m_interpolator->refresh();
         // setup and perform the angular momentum flux integral
-        AngMomFlux ang_mom_flux(m_p.mass_flux_extraction_params,m_time,m_dt,m_restart_time,first_step);
+        AngMomFlux ang_mom_flux(m_p.flux_extraction_params,m_time,m_dt,m_restart_time,first_step);
         ang_mom_flux.run(m_gr_amr.m_interpolator);
         }
     }
