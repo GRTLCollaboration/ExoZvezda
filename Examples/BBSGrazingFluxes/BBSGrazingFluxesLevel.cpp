@@ -310,97 +310,43 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
         }
         constraints_file.write_time_data_line({L2_Ham, L2_Mom, L1_Ham, L1_Mom});
     }
-        // Flux calculation
+
+    // Flux calculation
     if (m_p.do_flux_integration && at_level_timestep_multiple(m_p.mass_flux_extraction_params.min_extraction_level()))
-    {   
-        std::vector<double> S_phi_integrals(m_p.mass_flux_extraction_params.num_extraction_radii); 
-        std::vector<double> Q_phi_integrals(m_p.mass_flux_extraction_params.num_extraction_radii); 
- 
-        for (int i=m_p.mass_flux_extraction_params.num_extraction_radii-1; i>=0; i--)
-        {
+    {  
         BoxLoops::loop(EMTensorAndFluxes<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.extraction_center,
             c_rho, c_Fphi_flux, c_Sphi_source, c_Qphi_density, Interval(c_s1,c_s3),
                              Interval(c_s11,c_s33)),  m_state_new,
-                                m_state_diagnostics, EXCLUDE_GHOST_CELLS);
-
-        double S_phi_integral; // integral of angmomsource
-        double Q_phi_integral; // integral of angmomsource
-        BoxLoops::loop(DiagnosticVariablePreconditioner<ComplexScalarFieldWithPotential>(
-                                        complex_scalar_field, m_dx, m_p.L, m_p.mass_flux_extraction_params.center,
-                                        c_Sphi_source, c_Qphi_density, m_p.mass_flux_extraction_params.extraction_radii[i]),
-                                        m_state_new, m_state_diagnostics, INCLUDE_GHOST_CELLS);
-
+                             m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+    
         // Do the extraction on the min extraction level
-        if (m_level == 0)
-        {              
-                AMRReductions<VariableType::diagnostic> amr_reductions(m_gr_amr);
-     
-                S_phi_integral = amr_reductions.sum(c_Sphi_source);
-                S_phi_integrals[i] = S_phi_integral;
-                Q_phi_integral = amr_reductions.sum(c_Qphi_density);
-                Q_phi_integrals[i] = Q_phi_integral;
-        }
-    }
-
         if (m_level == m_p.mass_flux_extraction_params.min_extraction_level())
-        { 
-        // save the Source integral to dat file
-        std::vector<string> title_line(m_p.mass_flux_extraction_params.num_extraction_radii);
-        string dummy_string;
-        for (int j = 0; j < m_p.mass_flux_extraction_params.num_extraction_radii; j++)
         {
-            dummy_string =
-                "r = " +
-                to_string(m_p.mass_flux_extraction_params.extraction_radii[j]);
-            title_line[j] = dummy_string;
-        }
-        
-        SmallDataIO angmomsource_file("AngMomSource", m_dt, m_time,
-                                      m_restart_time, SmallDataIO::APPEND,
-                                      first_step);
+ 
+            AMRReductions<VariableType::diagnostic> amr_reductions(m_gr_amr);
+     
+            double S_phi_integral = amr_reductions.sum(c_Sphi_source);
+            double Q_phi_integral = amr_reductions.sum(c_Qphi_density);
+            pout() << S_phi_integral << endl;
+            SmallDataIO source_density_file("AngMomSourceDensity", m_dt, m_time,
+                m_restart_time, SmallDataIO::APPEND,
+                first_step);
 
-        if (m_time > 0)
-            angmomsource_file.remove_duplicate_time_data();
-
-        if (m_time == 0.)
-        {
-            angmomsource_file.write_header_line(title_line);
-        }
-
-        angmomsource_file.write_time_data_line(S_phi_integrals);
-
-        // save the Density integral to dat file
-        // std::vector<string> title_line2(m_p.angmomflux_params.num_extraction_radii);
-        // string dummy_string2;
-        // for (int j = 0; j < m_p.angmomflux_params.num_extraction_radii; j++)
-        // {
-        //     dummy_string2 =
-        //         "r = " +
-        //         to_string(m_p.angmomflux_params.extraction_radii[j]);
-        //     title_line2[j] = dummy_string2;
-        // }
-
-        SmallDataIO density_file("AngMomDensity", m_dt, m_time,
-                                 m_restart_time, SmallDataIO::APPEND,
-                                 first_step);
-
-        if (m_time > 0)
-            density_file.remove_duplicate_time_data();
-
-        if (m_time == 0.)
-        {
-            density_file.write_header_line(title_line);
-        }
-
-        density_file.write_time_data_line(Q_phi_integrals);
+                source_density_file.remove_duplicate_time_data();
+            if (first_step)
+            {
+                source_density_file.write_header_line({
+                "Q (density)", "S (source)"});
+            }
+            source_density_file.write_time_data_line({Q_phi_integral, S_phi_integral});
 
         // Refresh the interpolator and do the interpolation
         m_gr_amr.m_interpolator->refresh();
         // setup and perform the angular momentum flux integral
         AngMomFlux ang_mom_flux(m_p.mass_flux_extraction_params,m_time,m_dt,m_restart_time,first_step);
         ang_mom_flux.run(m_gr_amr.m_interpolator);
+        }
     }
-}
 
     if (m_p.do_star_track && m_level == m_p.star_track_level)
     {
