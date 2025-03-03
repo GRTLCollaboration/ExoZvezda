@@ -151,10 +151,6 @@ class SimulationParameters : public SimulationParametersBase
                 mass_extraction_params.extraction_center,
                 center);
 
-        // Work out the minimum extraction level
-        auto min_extraction_level_it =
-            mass_extraction_params.min_extraction_level();
-
         // Do we want to calculate and write the Noether Charge to a file
         pp.load("calculate_noether_charge", calculate_noether_charge, false);
     }
