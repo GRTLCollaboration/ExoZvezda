@@ -10,10 +10,6 @@
 #ifndef BINARYUNEQUALMASSFIX_IMPL_HPP_
 #define BINARYUNEQUALMASSFIX_IMPL_HPP_
 
-#include "BosonStarSolution.hpp" //for BosonStarSolution class
-#include "DebuggingTools.hpp"
-#include "WeightFunction.hpp"
-
 inline BinaryUnequalMassFix::BinaryUnequalMassFix(
     BosonStar_params_t a_params_BosonStar,
     BosonStar_params_t a_params_BosonStar2,
@@ -28,8 +24,7 @@ void BinaryUnequalMassFix::compute_1d_solution(const double max_r)
 {
     try
     {
-        // Set initial parameters and run the solver
-
+        // Compute for the 1st star
         m_1d_sol.set_initialcondition_params(m_params_BosonStar,
                                              m_params_potential, max_r);
         m_1d_sol.main();
@@ -39,6 +34,7 @@ void BinaryUnequalMassFix::compute_1d_solution(const double max_r)
         radius1 = m_1d_sol.radius;
         compactness1 = m_1d_sol.compactness_value;
 
+        // Compute for the 2nd star
         m_1d_sol2.set_initialcondition_params(m_params_BosonStar2,
                                               m_params_potential, max_r);
         m_1d_sol2.main();
@@ -50,29 +46,26 @@ void BinaryUnequalMassFix::compute_1d_solution(const double max_r)
     }
     catch (std::exception &exception)
     {
-        pout() << exception.what() << "\n";
+        MayDay::Error("Yikes! I cannot compute the 1d solution in BinaryUnequalMassFix.impl.hpp file.");
     }
 }
 
-// Compute the value of the initial vars on the grid
 template <class data_t>
 void BinaryUnequalMassFix::compute(Cell<data_t> current_cell) const
 {
+    using namespace TensorAlgebra;
     MatterCCZ4<ComplexScalarField<>>::Vars<data_t> vars;
-    // Load variables (should be set to zero if this is a single BS)
-
     current_cell.load_vars(vars);
-    // VarsTools::assign(vars, 0.); // Set only the non-zero components below
 
     // Coordinates for centre of mass
     Coordinates<data_t> coords(current_cell, m_dx,
                                m_params_BosonStar.star_centre);
 
-    // Import BS parameters and option of whether this is a BS binary or BS-BH
-    // binary
+    // Import BS parameters
     double rapidity = m_params_BosonStar.BS_rapidity;
     double rapidity2 = m_params_BosonStar2.BS_rapidity;
     bool antiboson = m_params_BosonStar.antiboson;
+    double phase_offset = m_params_BosonStar.phase;
     double separation = m_params_BosonStar.BS_separation;
     double impact_parameter = m_params_BosonStar.BS_impact_parameter;
     double q = m_params_BosonStar.mass_ratio;
@@ -80,337 +73,181 @@ void BinaryUnequalMassFix::compute(Cell<data_t> current_cell) const
     double radius_width2 = m_params_BosonStar.radius_width2;
     int conformal_power = m_params_BosonStar.conformal_factor_power;
 
-    // Define boosts and coordinate objects, suppose star 1 is on the left of
-    // the centre of mass and star 2 is on the right of centre of mass
+    BosonStarHelperFunction helper;
 
-    // e.g. taking the centre of mass to be the origin, then STAR2 --------
-    // (origin) -------- STAR1
+    // Compute star 1 and star 2 variables
+    BosonStarHelperFunction::BS_3d_vars star1_vars = helper.compute_star_vars(coords, rapidity, - q * separation / (q + 1.), q * impact_parameter / (q + 1.), m_1d_sol, phase_offset, false);
+    BosonStarHelperFunction::BS_3d_vars star2_vars = helper.compute_star_vars(coords, -rapidity2, separation / (q + 1.), -impact_parameter / (q + 1.), m_1d_sol2, 0.0, antiboson);
 
-    // First star positioning
+    // Superpose shift
+    vars.shift[0] += star1_vars.shiftx + star2_vars.shiftx;
+
+    // Superpose scalar vars
+    vars.phi_Re += star1_vars.phi_Re + star2_vars.phi_Re;
+    vars.phi_Im += star1_vars.phi_Im + star2_vars.phi_Im;
+    vars.Pi_Re += star1_vars.Pi_Re + star2_vars.Pi_Re;
+    vars.Pi_Im += star1_vars.Pi_Im + star2_vars.Pi_Im;
+    
+    // Compute inverse metrics for star 1 and star 2
+    auto gammaUU_1 = compute_inverse_sym(star1_vars.gLL);
+    auto gammaUU_2 = compute_inverse_sym(star2_vars.gLL);
+
+    Tensor<2, data_t> gammaLL, KLL; // to store superposed metric and extrinsic curvature
+    FOR (i, j){gammaLL[i][j] = 0.0;
+        KLL[i][j] = 0.0;}
+
+     // Start with plain superposed metrics
+     gammaLL[0][0] = star1_vars.gLL[0][0] + star2_vars.gLL[0][0] - 1.0;
+     gammaLL[1][1] = star1_vars.gLL[1][1] + star2_vars.gLL[1][1] - 1.0;
+     gammaLL[2][2] = star1_vars.gLL[2][2] + star2_vars.gLL[2][2] - 1.0;
+ 
+     // Compute inverse
+     auto gammaUU = compute_inverse_sym(gammaLL);
+
+    // We are now ready to beging using the unequal-mass fix, but we need to calculate a couple of terms
+    Tensor<2, data_t> correctionLL;
+    Tensor<2, data_t> correctionLL2;
+    Tensor<2, data_t> superposed_1; // gamma_{ij}(x_A)
+    Tensor<2, data_t> superposed_2; // gamma_{ij}(x_B) 
+
+    FOR(i, j){ correctionLL[i][j] = 0.0;
+               correctionLL2[i][j] = 0.0;
+               superposed_1[i][j] = 0.0;
+               superposed_2[i][j] = 0.0; }
+
+    // Compute the effect of object 1 on object 2 and write into correctionLL
     double c_ = cosh(rapidity);
     double s_ = sinh(rapidity);
-    double v_ = tanh(rapidity);
-    double t =
-        (coords.x - q * separation / (q + 1.)) * s_; // set /tilde{t} to zero
-    double x = (coords.x - q * separation / (q + 1.)) * c_;
-    double z = coords.z; // set /tilde{t} to zero
-    double y = coords.y + q * impact_parameter / (q + 1.);
-    double r = sqrt(x * x + y * y + z * z);
-
-    // First star physical variables
-    double p_ = m_1d_sol.get_A_interp(r);
-    double dp_ = m_1d_sol.get_dA_interp(r);
-    double omega_ = m_1d_sol.get_lapse_interp(r);
-    double omega_prime_ = m_1d_sol.get_dlapse_interp(r);
-    double psi_ = m_1d_sol.get_psi_interp(r);
-    double psi_prime_ = m_1d_sol.get_dpsi_interp(r);
-
-    // Get scalar field modulus, conformal factor, lapse and their gradients
-    double pc_os = psi_ * psi_ * c_ * c_ - omega_ * omega_ * s_ * s_;
-    double lapse_1 = omega_ * psi_ / (sqrt(pc_os));
-    double lapse_2 = 1.;
-    double w_ = m_1d_sol.get_BSfrequency();
-
-    // Write in phase, shift, metric componnets of star 1 and initialise metric
-    // components of star 2
-    double phase_ = m_params_BosonStar.phase * M_PI + w_ * t;
-    double beta_x = s_ * c_ * (psi_ * psi_ - omega_ * omega_) / (pc_os);
-    vars.shift[0] += beta_x;
-    double g_zz_1 = psi_ * psi_;
-    double g_yy_1 = psi_ * psi_;
-    double g_xx_1 = pc_os;
-    double g_xx_2 = 0., g_yy_2 = 0., g_zz_2 = 0., g_xx, g_yy, g_zz;
-
-    // Add on to evolution equations
-    vars.phi_Re += p_ * cos(phase_);
-    vars.phi_Im += p_ * sin(phase_);
-    vars.Pi_Re +=
-        -(1. / lapse_1) * ((x / r) * (s_ - beta_x * c_) * dp_ * cos(phase_) -
-                           w_ * (c_ - beta_x * s_) * p_ * sin(phase_));
-    vars.Pi_Im +=
-        -(1. / lapse_1) * ((x / r) * (s_ - beta_x * c_) * dp_ * sin(phase_) +
-                           w_ * (c_ - beta_x * s_) * p_ * cos(phase_));
-
-    // Initialise extrinsic curvature and metric with upper indices
-    double KLL_1[3][3] = {{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}};
-    double KLL_2[3][3] = {{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}};
-    double KLL[3][3] = {{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}};
-    double gammaLL[3][3] = {{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}};
-    double gammaUU[3][3] = {{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}};
-    double gammaUU_1[3][3] = {{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}};
-    double gammaUU_2[3][3] = {{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}};
-    double K1 = 0., K2 = 0.;
-
-    // Fill them in
-    gammaUU_1[0][0] = 1. / g_xx_1;
-    gammaUU_1[1][1] = 1. / g_yy_1;
-    gammaUU_1[2][2] = 1. / g_zz_1;
-
-    KLL_1[2][2] = -lapse_1 * s_ * x * psi_prime_ / (r * psi_);
-    KLL_1[1][1] = KLL_1[2][2];
-    KLL_1[0][1] = lapse_1 * c_ * s_ * (y / r) *
-                  (psi_prime_ / psi_ - omega_prime_ / omega_);
-    KLL_1[0][2] = lapse_1 * c_ * s_ * (z / r) *
-                  (psi_prime_ / psi_ - omega_prime_ / omega_);
-    KLL_1[1][0] = KLL_1[0][1];
-    KLL_1[2][0] = KLL_1[0][2];
-    KLL_1[2][1] = 0.;
-    KLL_1[1][2] = 0.;
-    KLL_1[0][0] = lapse_1 * (x / r) * s_ * c_ * c_ *
-                  (psi_prime_ / psi_ - 2. * omega_prime_ / omega_ +
-                   v_ * v_ * omega_ * omega_prime_ * pow(psi_, -2));
-    FOR2(i, j) K1 += gammaUU_1[i][j] * KLL_1[i][j];
-
-    // Here we use Thomas Helfer's trick and find the corresponding fixed values
-    // to be substracted in the initial guess
-    double helferLL[3][3] = {{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}};
-    double helferLL2[3][3] = {{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}};
-    // Note that for equal mass helferLL = helferLL2
-
-    // Here is the conformal factor that will be differently calculated
-    // depending on the choice of the initial data
-    double chi_;
-    double chi_plain;
-
-    // This is the effect of object 1 on object 2 and hence represents the value
-    // to be substracted in the initial data from the position of object 2
-    double t_p = (-separation) * s_; // set /tilde{t} to zero
     double x_p = (-separation) * c_;
-    double z_p = 0.; // set /tilde{t} to zero
+    double z_p = 0.; 
     double y_p = impact_parameter;
     double r_p = sqrt(x_p * x_p + y_p * y_p + z_p * z_p);
-    double p_p = m_1d_sol.get_A_interp(r_p);
-    double dp_p = m_1d_sol.get_dA_interp(r_p);
     double omega_p = m_1d_sol.get_lapse_interp(r_p);
-    double omega_prime_p = m_1d_sol.get_dlapse_interp(r_p);
     double psi_p = m_1d_sol.get_psi_interp(r_p);
-    double psi_prime_p = m_1d_sol.get_dpsi_interp(r_p);
     double pc_os_p = psi_p * psi_p * c_ * c_ - omega_p * omega_p * s_ * s_;
+    
+    correctionLL[1][1] = psi_p * psi_p;
+    correctionLL[2][2] = psi_p * psi_p;
+    correctionLL[0][0] = pc_os_p;
 
-    // Initialise weight function calculation
-
-    WeightFunction weight;
-
-    helferLL[1][1] = psi_p * psi_p;
-    helferLL[2][2] = psi_p * psi_p;
-    helferLL[0][0] = pc_os_p;
-    double chi_inf = pow((2. - helferLL[0][0]) * (2. - helferLL[1][1]) *
-                             (2. - helferLL[2][2]),
-                         -1. / 3.),
-           h00_inf = (2. - helferLL[0][0]) * chi_inf,
-           h11_inf = (2. - helferLL[1][1]) * chi_inf,
-           h22_inf = (2. - helferLL[2][2]) * chi_inf;
-    /*if (r<3){
-    std::cout << "h00 = " << h00_inf << ", h11 = " << h11_inf
-                      << ", h22 = " << h22_inf << ", chi inf = " <<
-                      chi_inf << std::endl;}*/
-
-    // Second star positioning
-    c_ = cosh(-rapidity2);
-    s_ = sinh(-rapidity2);
-    v_ = tanh(-rapidity2);
-    t = (coords.x + separation / (q + 1.)) * s_; // set /tilde{t} to zero
-    x = (coords.x + separation / (q + 1.)) * c_;
-    z = coords.z;
-    y = coords.y - impact_parameter / (q + 1.);
-    r = sqrt(x * x + y * y + z * z);
-
-    // Second star physical variables
-    p_ = m_1d_sol2.get_A_interp(r);
-    dp_ = m_1d_sol2.get_dA_interp(r);
-    omega_ = m_1d_sol2.get_lapse_interp(r);
-    omega_prime_ = m_1d_sol2.get_dlapse_interp(r);
-    psi_ = m_1d_sol2.get_psi_interp(r);
-    psi_prime_ = m_1d_sol2.get_dpsi_interp(r);
-
-    pc_os = psi_ * psi_ * c_ * c_ - omega_ * omega_ * s_ * s_;
-    lapse_2 = omega_ * psi_ / (sqrt(pc_os));
-    if (antiboson)
-    {
-        w_ = -m_1d_sol2.get_BSfrequency();
-    }
-    else
-    {
-        w_ = m_1d_sol2.get_BSfrequency();
-    }
-    phase_ = w_ * t;
-    beta_x = s_ * c_ * (psi_ * psi_ - omega_ * omega_) / (pc_os);
-    vars.shift[0] += beta_x;
-    g_zz_2 = psi_ * psi_;
-    g_yy_2 = psi_ * psi_;
-    g_xx_2 = pc_os;
-    gammaUU_2[0][0] = 1. / g_xx_2;
-    gammaUU_2[1][1] = 1. / g_yy_2;
-    gammaUU_2[2][2] = 1. / g_zz_2;
-
-    vars.phi_Re += p_ * cos(phase_);
-    vars.phi_Im += p_ * sin(phase_);
-    vars.Pi_Re +=
-        -(1. / lapse_2) * ((x / r) * (s_ - beta_x * c_) * dp_ * cos(phase_) -
-                           w_ * (c_ - beta_x * s_) * p_ * sin(phase_));
-    vars.Pi_Im +=
-        -(1. / lapse_2) * ((x / r) * (s_ - beta_x * c_) * dp_ * sin(phase_) +
-                           w_ * (c_ - beta_x * s_) * p_ * cos(phase_));
-
-    KLL_2[2][2] = -lapse_2 * s_ * x * psi_prime_ / (r * psi_);
-    KLL_2[1][1] = KLL_2[2][2];
-    KLL_2[0][1] = lapse_2 * c_ * s_ * (y / r) *
-                  (psi_prime_ / psi_ - omega_prime_ / omega_);
-    KLL_2[0][2] = lapse_2 * c_ * s_ * (z / r) *
-                  (psi_prime_ / psi_ - omega_prime_ / omega_);
-    KLL_2[1][0] = KLL_2[0][1];
-    KLL_2[2][0] = KLL_2[0][2];
-    KLL_2[2][1] = 0.;
-    KLL_2[1][2] = 0.;
-    KLL_2[0][0] = lapse_2 * (x / r) * s_ * c_ * c_ *
-                  (psi_prime_ / psi_ - 2. * omega_prime_ / omega_ +
-                   v_ * v_ * omega_ * omega_prime_ * pow(psi_, -2));
-    FOR2(i, j) K2 += gammaUU_2[i][j] * KLL_2[i][j];
-
-    // Again, finding the values to be substracted from position of star 1, that
-    // is below we find the effect of star 2 on star 1
-    double x_p2 = (separation)*c_;
-    double z_p2 = 0.; // set /tilde{t} to zero
+    // Compute the effect of object 2 on object 1 and write into correctionLL2
+    double c2_ = cosh(-rapidity2);
+    double s2_ = sinh(-rapidity2);
+    double x_p2 = (separation)*c2_;
+    double z_p2 = 0.; 
     double y_p2 = -impact_parameter;
     double r_p2 = sqrt(x_p2 * x_p2 + y_p2 * y_p2 + z_p2 * z_p2);
-
-    // Get physical variables needed for the metric
-    double p_p2 = m_1d_sol2.get_A_interp(r_p2);
-    double dp_p2 = m_1d_sol2.get_dA_interp(r_p2);
     double omega_p2 = m_1d_sol2.get_lapse_interp(r_p2);
-    double omega_prime_p2 = m_1d_sol2.get_dlapse_interp(r_p2);
     double psi_p2 = m_1d_sol2.get_psi_interp(r_p2);
-    double psi_prime_p2 = m_1d_sol2.get_dpsi_interp(r_p2);
-    double pc_os_p2 = psi_p2 * psi_p2 * c_ * c_ - omega_p2 * omega_p2 * s_ * s_;
+    double pc_os_p2 = psi_p2 * psi_p2 * c2_ * c2_ - omega_p2 * omega_p2 * s2_ * s2_;
 
-    helferLL2[1][1] = psi_p2 * psi_p2;
-    helferLL2[2][2] = psi_p2 * psi_p2;
-    helferLL2[0][0] = pc_os_p2;
+    correctionLL2[1][1] = psi_p2 * psi_p2;
+    correctionLL2[2][2] = psi_p2 * psi_p2;
+    correctionLL2[0][0] = pc_os_p2;
 
-    // If one uses fixing conformal trick, we need to have the vales of the
-    // metric of star 1 at its centre
+    // Compute the values of the metric of star 1 at its centre
     double r_11 = 0.;
-    double p_11 = m_1d_sol.get_A_interp(r_11);
-    double dp_11 = m_1d_sol.get_dA_interp(r_11);
     double omega_11 = m_1d_sol.get_lapse_interp(r_11);
-    double omega_prime_11 = m_1d_sol.get_dlapse_interp(r_11);
     double psi_11 = m_1d_sol.get_psi_interp(r_11);
-    double psi_prime_11 = m_1d_sol.get_dpsi_interp(r_11);
     double pc_os_11 = psi_11 * psi_11 * cosh(rapidity) * cosh(rapidity) -
                       omega_11 * omega_11 * sinh(rapidity) * sinh(rapidity);
-
-    // If one uses fixing conformal trick, we need to have the vales of the
-    // metric of star 2 at its centre
-    double r_22 = 0.;
-    double p_22 = m_1d_sol2.get_A_interp(r_22);
-    double dp_22 = m_1d_sol2.get_dA_interp(r_22);
-    double omega_22 = m_1d_sol2.get_lapse_interp(r_22);
-    double omega_prime_22 = m_1d_sol2.get_dlapse_interp(r_22);
-    double psi_22 = m_1d_sol2.get_psi_interp(r_22);
-    double psi_prime_22 = m_1d_sol2.get_dpsi_interp(r_22);
-    double pc_os_22 = psi_22 * psi_22 * cosh(-rapidity2) * cosh(-rapidity2) -
-                      omega_22 * omega_22 * sinh(-rapidity2) * sinh(-rapidity2);
-
-    // These are to be filled in with plain supporposed metric components
-    // evaluated at x_A and x_B respectively
-    double superpose_1[3][3] = {{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}};
-    double superpose_2[3][3] = {{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}};
-
-    // Start with plain superposed metrics
-    g_xx = g_xx_1 + g_xx_2 - 1.0;
-    g_yy = g_yy_1 + g_yy_2 - 1.0;
-    g_zz = g_zz_1 + g_zz_2 - 1.0;
 
     // metric components of \gamma_A(x_A)
     double g_zz_11 = psi_11 * psi_11;
     double g_yy_11 = psi_11 * psi_11;
     double g_xx_11 = pc_os_11;
 
+    // Compute the values of the metric of star 2 at its centre
+    double r_22 = 0.;
+    double omega_22 = m_1d_sol2.get_lapse_interp(r_22);
+    double psi_22 = m_1d_sol2.get_psi_interp(r_22);
+    double pc_os_22 = psi_22 * psi_22 * cosh(-rapidity2) * cosh(-rapidity2) -
+                      omega_22 * omega_22 * sinh(-rapidity2) * sinh(-rapidity2);
+
     // metric components of \gamma_B(x_B)
     double g_zz_22 = psi_22 * psi_22;
     double g_yy_22 = psi_22 * psi_22;
     double g_xx_22 = pc_os_22;
 
-    // This  is \gamma_{ij}(x_A) = \gamma_A(x_A) + \gamma_B(x_A) - 1
-    superpose_1[0][0] = g_xx_11 + helferLL2[0][0] - 1.;
-    superpose_1[1][1] = g_yy_11 + helferLL2[1][1] - 1.;
-    superpose_1[2][2] = g_zz_11 + helferLL2[2][2] - 1.;
+    // This is \gamma_{ij}(x_A) = \gamma_A(x_A) + \gamma_B(x_A) - 1
+    superposed_1[0][0] = g_xx_11 + correctionLL2[0][0] - 1.;
+    superposed_1[1][1] = g_yy_11 + correctionLL2[1][1] - 1.;
+    superposed_1[2][2] = g_zz_11 + correctionLL2[2][2] - 1.;
 
     // This  is \gamma_{ij}(x_B) = \gamma_B(x_B) + \gamma_A(x_B) - 1
-    superpose_2[0][0] = g_xx_22 + helferLL[0][0] - 1.;
-    superpose_2[1][1] = g_yy_22 + helferLL[1][1] - 1.;
-    superpose_2[2][2] = g_zz_22 + helferLL[2][2] - 1.;
-
+    superposed_2[0][0] = g_xx_22 + correctionLL[0][0] - 1.;
+    superposed_2[1][1] = g_yy_22 + correctionLL[1][1] - 1.;
+    superposed_2[2][2] = g_zz_22 + correctionLL[2][2] - 1.;
+    
+    // Eq. (A.4) of https://arxiv.org/abs/2212.08023
     double n_power = conformal_power / 12.0;
+    // Conformal factor from plain superposition
+    double chi_plain = pow(gammaLL[0][0] * gammaLL[1][1] * gammaLL[2][2], n_power);
 
-    // This is \chi(x_A)
+    // Now, we correct the conformal factor using Eqs.(19)-(20) of https://arxiv.org/abs/2212.08023 (in the text we use \lambda instead of \chi)
+
+    // This is \chi(x_A) of Eq.(19) 
     double chi_1 =
-        pow(superpose_1[0][0] * superpose_1[1][1] * superpose_1[2][2], n_power);
-    // This is \chi(x_B)
+        pow(superposed_1[0][0] * superposed_1[1][1] * superposed_1[2][2], n_power);
+    // This is \chi(x_B) of Eq.(20) 
     double chi_2 =
-        pow(superpose_2[0][0] * superpose_2[1][1] * superpose_2[2][2], n_power);
+        pow(superposed_2[0][0] * superposed_2[1][1] * superposed_2[2][2], n_power);
 
-    // This is \chi^A(x_A)
+    // This is \chi^A(x_A) of Eq.(19)
     double chi1_1 = pow(g_xx_11 * g_yy_11 * g_zz_11, n_power);
-    // This is \chi^B(x_B)
+    // This is \chi^B(x_B) of Eq.(20)
     double chi2_2 = pow(g_xx_22 * g_yy_22 * g_zz_22, n_power);
 
-    // This is \delta_A
+    // This is \delta_A of Eq.(19)
     double delta_1 = chi1_1 - chi_1;
-    // This is \delta_B
+    // This is \delta_B of Eq.(20)
     double delta_2 = chi2_2 - chi_2;
-
-    chi_plain = pow(g_xx * g_yy * g_zz, n_power);
+    
+    // Initialise weight function calculation
+    WeightFunction weight;
 
     // Find all the profile functions needed
     double profile1 = weight.profile_chi(
         (coords.x - q * separation / (q + 1)) * cosh(rapidity),
-        coords.y + q * impact_parameter / (q + 1.), coords.z, radius_width1);
+        coords.y + q * impact_parameter / (q + 1.), coords.z, radius_width1); // w_A(x)
     double profile2 = weight.profile_chi(
         (coords.x + separation / (q + 1)) * cosh(-rapidity2),
-        coords.y - impact_parameter / (q + 1.), coords.z, radius_width2);
+        coords.y - impact_parameter / (q + 1.), coords.z, radius_width2); // w_B(x)
 
-    double profile_11 = weight.profile_chi(0., 0., 0., radius_width1);
+    double profile_11 = weight.profile_chi(0., 0., 0., radius_width1); // w_A(x_A)
     double argument_xB_xA =
-        (separation / (q + 1)) * (cosh(-rapidity2) + q * cosh(rapidity));
-    double argument_yB_yA = -impact_parameter;
+        (separation / (q + 1)) * (cosh(-rapidity2) + q * cosh(rapidity)); // x_B - x_A
+    double argument_yB_yA = -impact_parameter; // y_B - y_A
     double profile_12 =
-        weight.profile_chi(argument_xB_xA, argument_yB_yA, 0., radius_width1);
+        weight.profile_chi(argument_xB_xA, argument_yB_yA, 0., radius_width1); // w_A(x_B)
 
     double argument_xA_xB =
-        (separation / (q + 1)) * (-q * cosh(rapidity) - cosh(-rapidity2));
-    double argument_yA_yB = impact_parameter;
+        (separation / (q + 1)) * (-q * cosh(rapidity) - cosh(-rapidity2)); // x_A - x_B
+    double argument_yA_yB = impact_parameter; // y_A - y_B
     double profile_21 =
-        weight.profile_chi(argument_xA_xB, argument_yA_yB, 0., radius_width2);
-    double profile_22 = weight.profile_chi(0., 0., 0., radius_width2);
-
+        weight.profile_chi(argument_xA_xB, argument_yA_yB, 0., radius_width2); // w_B(x_A)
+    double profile_22 = weight.profile_chi(0., 0., 0., radius_width2); // w_B(x_B)
+    
+    // h_A and h_B from Eq.(22)
     double value1 = (-profile_21 * delta_2 + profile_22 * delta_1) /
                     (profile_11 * profile_22 - profile_12 * profile_21);
     double value2 = (profile_11 * delta_2 - profile_12 * delta_1) /
                     (profile_11 * profile_22 - profile_12 * profile_21);
-
-    chi_ = chi_plain + profile1 * value1 + profile2 * value2;
-
-    // Now, compute upper and lower components
-    gammaLL[0][0] = g_xx;
-    gammaLL[1][1] = g_yy;
-    gammaLL[2][2] = g_zz;
-    gammaUU[0][0] = 1. / g_xx;
-    gammaUU[1][1] = 1. / g_yy;
-    gammaUU[2][2] = 1. / g_zz;
-
-    vars.chi = pow(chi_, -4.0 / conformal_power);
+    
+    // Correct the conformal factor
+    double chi_corrected = chi_plain + profile1 * value1 + profile2 * value2;
+    vars.chi = pow(chi_corrected, -4.0 / conformal_power);
 
     // Define initial lapse
-    vars.lapse += sqrt(lapse_1 * lapse_1 + lapse_2 * lapse_2 - 1.);
+    vars.lapse += sqrt(star1_vars.lapse * star1_vars.lapse + star2_vars.lapse * star2_vars.lapse - 1.);
 
     // Define initial trace of K and A_ij
     double one_third = 1. / 3.;
     FOR2(i, j)
     vars.h[i][j] = pow(chi_plain, -4.0 / conformal_power) * gammaLL[i][j];
     FOR4(i, j, k, l)
-    KLL[i][j] += gammaLL[i][l] * (gammaUU_1[l][k] * KLL_1[k][j] +
-                                  gammaUU_2[l][k] * KLL_2[k][j]);
+    KLL[i][j] += gammaLL[i][l] * (gammaUU_1[l][k] * star1_vars.KLL[k][j] +
+                                  gammaUU_2[l][k] * star2_vars.KLL[k][j]);
     FOR2(i, j) vars.K += KLL[i][j] * gammaUU[i][j];
     FOR2(i, j)
     vars.A[i][j] = pow(chi_plain, -4.0 / conformal_power) *

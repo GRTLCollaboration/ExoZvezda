@@ -13,7 +13,10 @@
 #include "MatterCCZ4.hpp"
 #include "simd.hpp"
 
-//! Sets a diagnostic field variable to zero outside a set radius (a_radius)
+/*
+ * Sets a diagnostic field variable to zero outside a set radius (a_radius)
+ */
+
 template <class matter_t> class DiagnosticVariablePreconditioner
 {
   public:

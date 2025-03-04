@@ -64,25 +64,25 @@ void BBSEqualMassFixLevel::initialData()
     if (m_verbosity)
         pout() << "BBSEqualMassFixLevel::initialData " << m_level << endl;
 
-    // First initalise a BosonStar object
+    // Initialise initial data object 
     BinaryEqualMassFix boson_star(m_p.bosonstar_params, m_p.bosonstar2_params,
                                   m_p.potential_params, m_dx);
-
-    // Initiate solver for 1D BS solutions
+    
     boson_star.compute_1d_solution(4. * m_p.L);
 
     if (m_level == 0)
     {
         pout() << "Star 1 has A[0] " << boson_star.central_amplitude1
-               << " mass " << boson_star.mass1 << " frequency "
-               << boson_star.frequency1 << " radius " << boson_star.radius1
-               << " and compactness " << boson_star.compactness1 << endl;
-        pout() << "Star 2 has A[0] " << boson_star.central_amplitude2
-               << " mass " << boson_star.mass2 << " frequency "
-               << boson_star.frequency2 << " radius " << boson_star.radius2
-               << " and compactness " << boson_star.compactness2 << endl;
-    }
+        << " mass " << boson_star.mass1 << " frequency "
+        << boson_star.frequency1 << " radius " << boson_star.radius1
+        << " and compactness " << boson_star.compactness1 << endl;
 
+        pout() << "Star 2 has A[0] " << boson_star.central_amplitude2
+        << " mass " << boson_star.mass2 << " frequency "
+        << boson_star.frequency2 << " radius " << boson_star.radius2
+        << " and compactness " << boson_star.compactness2 << endl;  
+    }
+    
     // First set everything to zero, as we do not want undefined values in
     // constraints. Then set initial conditions for a BS.
     BoxLoops::loop(make_compute_pack(SetValue(0.0), boson_star), m_state_new,

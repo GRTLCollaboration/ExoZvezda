@@ -10,19 +10,21 @@
 #include "AlwaysInline.hpp"
 #include "Lagrange.hpp"
 
-// Class for tracking positions by fitting a Gaussian to (1-conformal factor).
-// Widely used for finding boson star positions.
+/*
+ * Class for tracking boson star positions by fitting a Gaussian to (1-conformal factor).
+ */
+
 class StarTracker
 {
   private:
     int m_num_stars; // number of stars
-    std::vector<std::array<double, CH_SPACEDIM>> m_puncture_coords;
+    std::vector<std::array<double, CH_SPACEDIM>> m_puncture_coords; // here we will store the star positions
     std::array<double, CH_SPACEDIM> m_centre;
-    int m_tracking_level; // level (i.e. times) to execute tracking
-    int m_points;         // number of points
-    std::vector<double> m_x_coords;
-    std::vector<double> m_y_coords;
-    std::vector<double> m_z_coords;
+    int m_tracking_level; // levels to execute tracking on
+    int m_points;         // number of points used for tracking
+    std::vector<double> m_x_coords; // array to store x-coords
+    std::vector<double> m_y_coords; // array to store y-coords
+    std::vector<double> m_z_coords; // array to store z-coords
     std::vector<double> m_sigma_vector;     // vector to store the error
     std::vector<double> m_vals_shifted_chi; // vector to store (1-chi)
     double m_width_A;                       // width for fitting around star A
@@ -37,9 +39,9 @@ class StarTracker
     //! The constructor
     StarTracker() : m_interpolator(nullptr) {}
 
-    //! set puncture locations on start (or restart)
+    //! set star locations on start (or restart)
     //! this needs to be done before 'setupAMRObject'
-    //! if the puncture locations are required for Tagging Criteria
+    //! if the stars' locations are required for Tagging Criteria
     void
     initialise_star_tracking(bool a_do_star_track, int a_number_of_stars,
                              const std::vector<std::array<double, CH_SPACEDIM>>
@@ -72,9 +74,11 @@ class StarTracker
 
     void set_up_fitting(int num_star, int fitting_direction);
 
+    // General function for fitting the stars' centres
     double find_centre(int num_star, int fitting_direction);
 
-    void find_max_min(int num_star, int fitting_direction);
+    // Function for finding star positions near merger 
+    void find_centre_merger(int num_star, int fitting_direction);
 
     void update_star_centres(double a_dt);
 

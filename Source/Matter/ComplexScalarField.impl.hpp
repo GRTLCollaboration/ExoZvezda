@@ -11,7 +11,7 @@
 #define COMPLEXSCALARFIELD_IMPL_HPP_
 #include "DimensionDefinitions.hpp"
 
-// Calculate the stress energy tensor elements
+// Calculate the total stress energy tensor elements
 template <class potential_t>
 template <class data_t, template <typename> class vars_t>
 emtensor_t<data_t> ComplexScalarField<potential_t>::compute_emtensor(
@@ -50,7 +50,7 @@ emtensor_t<data_t> ComplexScalarField<potential_t>::compute_emtensor(
     return out;
 }
 
-// Calculate the stress energy tensor elements
+// Calculate the stress energy tensor elements excluding potential
 template <class potential_t>
 template <class data_t, template <typename> class vars_t>
 void ComplexScalarField<potential_t>::emtensor_excl_potential(

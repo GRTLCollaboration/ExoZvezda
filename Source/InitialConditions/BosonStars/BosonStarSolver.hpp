@@ -1,11 +1,19 @@
+/* GRChombo
+ * Copyright 2012 The GRChombo collaboration.
+ * Please refer to LICENSE in GRChombo's root directory.
+ */
 
-#ifndef BOSONSTARSOLUTION_HPP_
-#define BOSONSTARSOLUTION_HPP_
+#ifndef BOSONSTARSOLVER_HPP_
+#define BOSONSTARSOLVER_HPP_
 
 #include "cmath"
 #include <vector>
 
-class BosonStarSolution
+/*
+ * This class constructs 3+1 variables of the BS solution given user-specified parameters. The solution is constructed with the use of the 1D solver.
+ */
+
+class BosonStarSolver
 {
 
   private:
@@ -70,7 +78,7 @@ class BosonStarSolution
     double calculate_radius();
 
   public:
-    BosonStarSolution();
+    BosonStarSolver();
 
     std::vector<double> A;            // scalar field modulus
     std::vector<double> dA;           // scalar field modulus gradient
@@ -98,6 +106,6 @@ class BosonStarSolution
     void main();
 };
 
-#include "BosonStarSolution.impl.hpp"
+#include "BosonStarSolver.impl.hpp"
 
-#endif /* BOSONSTARSOLUTION_HPP_ */
+#endif /* BOSONSTARSOLVER_HPP_ */

@@ -130,10 +130,7 @@ void EMTensorAndFluxes<matter_t>::compute(Cell<data_t> current_cell) const
 
     // inverse Jacobian
     auto J_inv_UL =
-        compute_inverse(J_UL); // the function outputs the transverse of inverse
-
-    /*data_t kroneka[3][3] = {{0.,0.,0.},{0.,0.,0.},{0.,0.,0.}};
-    FOR3(i,j,k) kroneka[i][k] += J_UL2[i][j]*J_inv_UL2[k][j];*/ // checked inverse metric works
+        compute_inverse(J_UL); 
 
     data_t gamma_polar_LL[3][3] = {
         {0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}}; // downstairs indices
@@ -205,59 +202,6 @@ void EMTensorAndFluxes<matter_t>::compute(Cell<data_t> current_cell) const
     data_t Q_phi = 0.; // phi component of em tensors Si
     FOR1(i) Q_phi += -xi[i] * emtensor.Si[i];
 
-    ///////////////
-    // Flux term //
-    ///////////////
-
-    // the polar version with sqrt(sigma) as det
-    // this version needs int F_phi sqrt(sigma) dx^2
-    // we divide sqrt(sigma) by r_xy*r_xyz = r^2 sin(\theta) as the
-    // surface integrator has r^2 sin (\theta) already
-
-    // data_t F_phi = 0.;
-    // data_t S_UL[3][3] = {{0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}};  // S^i_j
-    // FOR3(i, j, k) S_UL[i][j] += gamma_UU[i][k] * emtensor.Sij[k][j]; // S^i_j
-    // data_t S_mixed[3][3] = {
-    //     {0., 0., 0.}, {0., 0., 0.}, {0., 0., 0.}}; // S_ij with i polar j
-    //     cart
-    // FOR3(i, j, k) S_mixed[i][j] += emtensor.Sij[k][j] * J_UL[k][j];
-
-    // FOR1(j)
-    // F_phi += vars.lapse * S_mixed[0][j] * xi[j] /
-    //          sqrt(gamma_polar_LL[0][0]); // why is this LL, should be UU?
-    // FOR1(i)
-    // F_phi += -beta_r * emtensor.Si[i] * xi[i] / sqrt(gamma_polar_UU[0][0]);
-
-    //////////////////////
-    // Flux term again  //
-    //////////////////////
-
-    // the cartesian version with sqrt(-h) as det
-    // this version requires int F sqrt(-h) dx^2
-    // dont forget to divide sqrt(-h) by r_xy*r_xyz = r^2 sintheta as this term
-    // is automatically in the surface integrator
-
-    // data_t F2_phi = 0., N_normsqr = 0.; // angular momentum flux
-    // Tensor<2, data_t, 3> g_UU; // 4-metric but spatial parts only (not this
-    // is
-    //                            // not a proper metric)
-    // FOR2(i, j)
-    // g_UU = gamma_UU[i][j] -
-    //        vars.shift[i] * vars.shift[j] / (vars.lapse * vars.lapse);
-    // FOR2(i, j) N_normsqr += g_UU[i][j] * cart_coords[i] * cart_coords[j];
-    // Tensor<1, data_t, 3> N_cart; // downstaits componnet of radial unit
-    // vector Tensor<1, data_t, 3> N_proj; // upstairs componetnets projected to
-    // Sigma N_cart[0] = x / sqrt(N_normsqr); N_cart[1] = y / sqrt(N_normsqr);
-    // N_cart[2] = z / sqrt(N_normsqr);
-    // N_proj[0] = 0.;
-    // N_proj[1] = 0.;
-    // N_proj[2] = 0.;
-    // FOR2(i, j) N_proj[i] += gamma_UU[i][j] * N_cart[j];
-
-    // FOR2(i, j)
-    // F2_phi += -N_cart[i] * vars.shift[i] * xi[j] * emtensor.Si[j] /
-    // vars.lapse; FOR2(i, j) F2_phi += N_proj[i] * xi[j] * emtensor.Sij[i][j];
-
     /////////////////
     // Flux term  //
     ////////////////
@@ -272,24 +216,6 @@ void EMTensorAndFluxes<matter_t>::compute(Cell<data_t> current_cell) const
     FOR1(i) F3_phi += vars.lapse * Sij_polar[i][2] * gamma_polar_UU[0][i];
     F3_phi += -beta_r * Si_polar[2];
     F3_phi = F3_phi / sqrt(gamma_polar_UU[0][0]);
-
-    /////////////////////////////////////
-    // start source in cartesian
-    /////////////////////////////////////
-
-    // data_t S_phi = 0.;
-
-    // FOR1(i) S_phi += -emtensor.rho * xi[i] * d1.lapse[i];
-    // FOR2(i, j)
-    // S_phi += emtensor.Si[i] *
-    //          (xi[j] * d1.shift[i][j] -
-    //           vars.shift[j] *
-    //               d_xi[j][i]); // assumed d1.shift[i][j] = partial_j beta^i
-    // FOR3(i, j, k)
-    // S_phi += vars.lapse * emtensor.Sij[i][j] * gamma_UU[j][k] * d_xi[k][i];
-    // FOR4(i, j, k, l)
-    // S_phi += vars.lapse * emtensor.Sij[j][k] * gamma_UU[k][i] *
-    //          chris.ULL[j][i][l] * xi[l];
 
     //////////////////
     // Source term //

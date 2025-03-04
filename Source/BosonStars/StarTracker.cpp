@@ -192,7 +192,7 @@ double StarTracker::find_centre(int num_star, int fitting_direction)
 // greater than 1 in a given direction (helps to avoid huge jumps around merger,
 // where fitting will be harder). If this behaviour happens, we simply switch to
 // a "center of mass" version of stars' positions.
-void StarTracker::find_max_min(int num_star, int fitting_direction)
+void StarTracker::find_centre_merger(int num_star, int fitting_direction)
 {
     std::vector<double> a_vector(3);
 
@@ -258,7 +258,7 @@ void StarTracker::update_star_centres(double a_dt)
         }
         else
         {
-            find_max_min(0, 0);
+            find_centre_merger(0, 0);
         }
         double starB_0 = find_centre(1, 0);
         if ((abs(starB_0 - m_puncture_coords[1][0]) / a_dt) < 1.0 &&
@@ -268,7 +268,7 @@ void StarTracker::update_star_centres(double a_dt)
         }
         else
         {
-            find_max_min(1, 0);
+            find_centre_merger(1, 0);
         }
 
         pout() << m_puncture_coords[0][0] << endl;
@@ -285,7 +285,7 @@ void StarTracker::update_star_centres(double a_dt)
         }
         else
         {
-            find_max_min(0, 0);
+            find_centre_merger(0, 0);
         }
         double starA_1 = find_centre(0, 1);
         if (abs((starA_1 - m_puncture_coords[0][1]) / a_dt) < 1.0 &&
@@ -295,7 +295,7 @@ void StarTracker::update_star_centres(double a_dt)
         }
         else
         {
-            find_max_min(0, 1);
+            find_centre_merger(0, 1);
         }
         double starB_0 = find_centre(1, 0);
         if (abs((starB_0 - m_puncture_coords[1][0]) / a_dt) < 1.0 &&
@@ -305,7 +305,7 @@ void StarTracker::update_star_centres(double a_dt)
         }
         else
         {
-            find_max_min(1, 0);
+            find_centre_merger(1, 0);
         }
         double starB_1 = find_centre(1, 1);
         if (abs((starB_1 - m_puncture_coords[1][1]) / a_dt) < 1.0 &&
@@ -315,7 +315,7 @@ void StarTracker::update_star_centres(double a_dt)
         }
         else
         {
-            find_max_min(1, 1);
+            find_centre_merger(1, 1);
         }
     }
 

@@ -7,20 +7,24 @@
 #define BINARYPLAINSUPERPOSITION_HPP_
 
 #include "BosonStarParams.hpp"
-#include "BosonStarSolution.hpp"
+#include "BosonStarSolver.hpp"
+#include "BosonStarHelperFunction.hpp"
 #include "Cell.hpp"
 #include "ComplexPotential.hpp"
 #include "ComplexScalarField.hpp"
 #include "Coordinates.hpp"
 #include "MatterCCZ4.hpp"
 #include "Tensor.hpp"
-#include "UserVariables.hpp" //This files needs NUM_VARS - total no. components
+#include "TensorAlgebra.hpp"
+#include "UserVariables.hpp" 
 #include "VarsTools.hpp"
-#include "parstream.H" //gives pout
+#include "parstream.H" 
 #include "simd.hpp"
 
-//! Class which solves for the initial data for a spherically symmetric boson
-//! star with phi^4 coupling
+/*
+* This class constructs binary initial data following plain superposition.
+*/
+
 class BinaryPlainSuperposition
 {
 
@@ -37,8 +41,8 @@ class BinaryPlainSuperposition
     //! Function to compute the value of all the initial vars on the grid
     template <class data_t> void compute(Cell<data_t> current_cell) const;
 
-    BosonStarSolution m_1d_sol;
-    BosonStarSolution m_1d_sol2;
+    BosonStarSolver m_1d_sol;
+    BosonStarSolver m_1d_sol2;
 
     double central_amplitude1, central_amplitude2;
     double mass1, mass2;
@@ -49,8 +53,8 @@ class BinaryPlainSuperposition
   protected:
     double m_dx;
     BosonStar_params_t m_params_BosonStar;
-    BosonStar_params_t m_params_BosonStar2; //!< The complex scalar field params
-    ComplexPotential::params_t m_params_potential; //!< The potential params
+    BosonStar_params_t m_params_BosonStar2;
+    ComplexPotential::params_t m_params_potential;
 };
 
 #include "BinaryPlainSuperposition.impl.hpp"
