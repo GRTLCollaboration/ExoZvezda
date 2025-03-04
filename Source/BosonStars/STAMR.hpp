@@ -13,11 +13,10 @@
 #include "AHFinder.hpp"
 #endif
 
-/// A child of Chombo's AMR class to interface with tools which require
-/// access to the whole AMR hierarchy, and those of GRAMR
-/**
+/*
  * This object inherits from GRAMR and adds tools required for star spacetimes
  */
+
 class STAMR : public GRAMR
 {
   public:

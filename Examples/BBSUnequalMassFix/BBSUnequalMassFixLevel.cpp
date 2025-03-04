@@ -84,8 +84,8 @@ void BBSUnequalMassFixLevel::initialData()
                << " and compactness " << boson_star.compactness2 << endl;
     }
 
-    // First set everything to zero ... we don't want undefined values in
-    // constraints etc, then set initial conditions for Boson Star
+    // First set everything to zero, as we do not want undefined values in
+    // constraints. Then set initial conditions for a BS.
     BoxLoops::loop(make_compute_pack(SetValue(0.0), boson_star), m_state_new,
                    m_state_new, INCLUDE_GHOST_CELLS, disable_simd());
 

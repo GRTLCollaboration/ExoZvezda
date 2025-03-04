@@ -6,15 +6,17 @@
 #ifndef NOETHERCHARGE_HPP_
 #define NOETHERCHARGE_HPP_
 
-#include "ADMConformalVars.hpp" // needed for CCz4 and matter variables
+#include "ADMConformalVars.hpp"
 #include "Cell.hpp"
 #include "ComplexScalarField.hpp"
 #include "Coordinates.hpp"
 #include "UserVariables.hpp"
 #include "simd.hpp"
 
-//! Calculates the Noether Charge integrand values and the modulus of the
-//! complex scalar field on the grid
+/*
+ *  Calculates the Noether Charge integrand values and the modulus of the complex scalar field on the grid
+ */
+
 class NoetherCharge
 {
     // Need matter variables and chi

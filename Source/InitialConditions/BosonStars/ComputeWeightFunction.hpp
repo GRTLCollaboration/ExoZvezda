@@ -1,10 +1,11 @@
+/* GRChombo
+ * Copyright 2012 The GRChombo collaboration.
+ * Please refer to LICENSE in GRChombo's root directory.
+ */
+
 #ifndef COMPUTEWEIGHTFUNCTION_HPP_
 #define COMPUTEWEIGHTFUNCTION_HPP_
 
-// Chombo includes
-#include "IntVect.H"
-
-// #include "simd.hpp"
 #include "BosonStarParams.hpp"
 #include "Cell.hpp"
 #include "Coordinates.hpp"
@@ -12,7 +13,10 @@
 #include "VarsTools.hpp"
 #include "WeightFunction.hpp"
 #include "simd.hpp"
-#include <array>
+
+/*
+* Class to compute the weight function, useful for visualisation mid run
+*/
 
 class ComputeWeightFunction
 {

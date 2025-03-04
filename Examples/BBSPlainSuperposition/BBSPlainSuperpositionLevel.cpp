@@ -69,7 +69,7 @@ void BBSPlainSuperpositionLevel::initialData()
                                         m_p.bosonstar2_params,
                                         m_p.potential_params, m_dx);
 
-    // Initiate solver for 1D BS solutions
+    // Initialise initial data object 
     boson_star.compute_1d_solution(4. * m_p.L);
 
     if (m_level == 0)
@@ -78,13 +78,15 @@ void BBSPlainSuperpositionLevel::initialData()
                << " mass " << boson_star.mass1 << " frequency "
                << boson_star.frequency1 << " radius " << boson_star.radius1
                << " and compactness " << boson_star.compactness1 << endl;
+               
         pout() << "Star 2 has A[0] " << boson_star.central_amplitude2
                << " mass " << boson_star.mass2 << " frequency "
                << boson_star.frequency2 << " radius " << boson_star.radius2
                << " and compactness " << boson_star.compactness2 << endl;
     }
-    // First set everything to zero ... we don't want undefined values in
-    // constraints etc, then set initial conditions for Boson Star
+
+    // First set everything to zero, as we do not want undefined values in
+    // constraints. Then set initial conditions for a BS.
     BoxLoops::loop(make_compute_pack(SetValue(0.0), boson_star), m_state_new,
                    m_state_new, INCLUDE_GHOST_CELLS, disable_simd());
 

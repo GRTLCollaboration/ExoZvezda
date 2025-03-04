@@ -1,11 +1,30 @@
+/* GRChombo
+ * Copyright 2012 The GRChombo collaboration.
+ * Please refer to LICENSE in GRChombo's root directory.
+ */
+
 #ifndef WEIGHTFUNCTION_HPP_
 #define WEIGHTFUNCTION_HPP_
+
+/*
+* This class defined the weight function needed for unequal-mass fix 
+*/
 
 class WeightFunction
 {
   public:
     WeightFunction() {}
 
+    // Weight function used in https://arxiv.org/abs/2212.08023
+    double profile_chi(double coord_x, double coord_y, double coord_z,
+        double radius_width)
+    {
+        double denom = sqrt(pow(radius_width, 2) + pow(coord_x, 2) +
+             pow(coord_y, 2) + pow(coord_z, 2));
+        return 1. / denom;
+    }   
+
+    // Alternative weight function *UNUSED*
     double compute_weight(double scaledr, int n) const
     {
         double weightfunc;
@@ -49,58 +68,18 @@ class WeightFunction
                                        (1.0) / (2.0) * pow((1 - scaledr), 10) -
                                        (1.0) / (11.0) * pow((1 - scaledr), 11));
             }
-
-            // weightfunc = 4808643120 * ((1.0/16.0) * pow(1-scaledr, 16) -
-            // (15.0/17.0) * pow(1-scaledr, 17) + (35.0/6.0) * pow(1-scaledr,
-            // 18) - (455.0/19.0) * pow(1-scaledr, 19) + (273.0/4.0) *
-            // pow(1-scaledr, 20) - 143.0 * pow(1-scaledr, 21) + (455.0/2.0) *
-            // pow(1-scaledr, 22) - (6435.0/23.0) * pow(1-scaledr, 23) +
-            // (2145.0/8.0) * pow(1-scaledr, 24) - (1001.0/5.0) * pow(1-scaledr,
-            // 25) + (231.0/2.0) * pow(1-scaledr, 26) - (455.0/9.0) *
-            // pow(1-scaledr, 27) + (65.0/4.0) * pow(1-scaledr, 28) -
-            // (105.0/29.0) * pow(1-scaledr, 29) + (1.0/2.0) * pow(1-scaledr,
-            // 30) - (1.0/31.0) * pow(1-scaledr, 31));
         }
 
         else
         {
+            MayDay::Error("You have requested n parameter larger than implemented!");
             weightfunc = 0.0;
         }
 
         return weightfunc;
     }
 
-    double stretching_factor(double coord_x, double coord_y, double alpha_zero)
-    {
-        double sin_half_angle_squared =
-            (1.0 / 2.0) *
-            (1.0 - (coord_x) / (sqrt(pow(coord_x, 2) + pow(coord_y, 2))));
-
-        double stretch =
-            alpha_zero + (1.0 - alpha_zero) * sin_half_angle_squared;
-
-        return stretch;
-    }
-
-    double stretching_factor2(double coord_x, double coord_y, double alpha_zero)
-    {
-        double cos_half_angle_squared =
-            (1.0 / 2.0) *
-            (1.0 + (coord_x) / (sqrt(pow(coord_x, 2) + pow(coord_y, 2))));
-
-        double stretch2 =
-            alpha_zero + (1.0 - alpha_zero) * cos_half_angle_squared;
-
-        return stretch2;
-    }
-
-    double profile_chi(double coord_x, double coord_y, double coord_z,
-                       double radius_width)
-    {
-        double denom = sqrt(pow(radius_width, 2) + pow(coord_x, 2) +
-                            pow(coord_y, 2) + pow(coord_z, 2));
-        return 1. / denom;
-    }
+    
 };
 
 #endif /* WEIGHTFUNCTION_HPP_ */

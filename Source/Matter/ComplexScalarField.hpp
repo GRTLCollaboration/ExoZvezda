@@ -11,11 +11,12 @@
 #include "FourthOrderDerivatives.hpp"
 #include "Tensor.hpp"
 #include "TensorAlgebra.hpp"
-#include "UserVariables.hpp" //This files needs NUM_VARS, total num of components
+#include "UserVariables.hpp" 
 #include "VarsTools.hpp"
 
-//!  Calculates the matter type specific elements such as the EMTensor and
-//   matter evolution
+/*
+ * This class calculates the matter type specific elements for a complex scalar field
+ */
 
 template <class potential_t = ComplexPotential> class ComplexScalarField
 {

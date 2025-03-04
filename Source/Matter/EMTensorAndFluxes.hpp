@@ -13,7 +13,10 @@
 #include "MatterCCZ4.hpp"
 #include "simd.hpp"
 
-//! Calculates the EM tensor and angular momentum flux
+/*
+ * Calculates the EM tensor and angular momentum flux
+ */
+
 template <class matter_t> class EMTensorAndFluxes
 {
   public:
