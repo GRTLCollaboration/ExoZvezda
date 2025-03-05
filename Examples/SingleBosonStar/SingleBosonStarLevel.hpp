@@ -11,7 +11,6 @@
 // Problem specific includes
 #include "ComplexPotential.hpp"
 #include "ComplexScalarField.hpp"
-#include "GRAMR.hpp"
 
 //!  A class for the evolution of a single boson star.
 /*!
