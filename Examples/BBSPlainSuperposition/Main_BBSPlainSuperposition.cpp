@@ -5,7 +5,7 @@
 
 // Chombo includes
 #include "CH_Timer.H"
-#include "parstream.H" //Gives us pout()
+#include "parstream.H"
 
 // System includes
 #include <chrono>

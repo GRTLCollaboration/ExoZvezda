@@ -76,8 +76,8 @@ void BinaryPlainSuperposition::compute(Cell<data_t> current_cell) const
     BosonStarHelperFunction helper;
 
     // Compute star 1 and star 2 variables
-    BosonStarHelperFunction::BS_3d_vars star1_vars = helper.compute_star_vars(coords, rapidity, -separation / 2, impact_parameter / 2, m_1d_sol, phase_offset, false);
-    BosonStarHelperFunction::BS_3d_vars star2_vars = helper.compute_star_vars(coords, -rapidity2, separation / 2, -impact_parameter / 2, m_1d_sol2, 0.0, antiboson);
+    BosonStarHelperFunction::BS_3d_vars star1_vars = helper.compute_star_vars(coords, rapidity,  -q * separation / (q + 1.), q * impact_parameter / (q + 1.), m_1d_sol, phase_offset, false);
+    BosonStarHelperFunction::BS_3d_vars star2_vars = helper.compute_star_vars(coords, -rapidity2, separation / (q + 1.), -impact_parameter / (q + 1.), m_1d_sol2, 0.0, antiboson);
 
     // Superpose shift
     vars.shift[0] += star1_vars.shiftx + star2_vars.shiftx;

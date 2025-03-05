@@ -12,7 +12,7 @@
 #include <array>
 #include <string>
 
-/// This enum gives the index of every variable stored in the grid
+// This enum gives the index of every variable stored in the grid
 enum
 {
 

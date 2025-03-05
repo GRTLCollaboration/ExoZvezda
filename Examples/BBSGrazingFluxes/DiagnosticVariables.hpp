@@ -9,12 +9,12 @@
 // assign an enum to each variable
 enum
 {
-    c_mod_phi, // the complex scalar field modulus
+    c_mod_phi, 
 
     c_Madm,
     c_Jadm,
 
-    c_N, // Noether Charge integrand
+    c_N, 
 
     c_Ham,
 
@@ -25,7 +25,7 @@ enum
     c_Weyl4_Re,
     c_Weyl4_Im,
 
-    c_rho, // stress tensor components
+    c_rho, 
     c_s1,
     c_s2,
     c_s3,
@@ -41,12 +41,6 @@ enum
     c_Fphi_flux,
 
     c_Sphi_source,
-
-    c_weight1,
-    c_weight2,
-
-    c_profile1,
-    c_profile2,
 
     NUM_DIAGNOSTIC_VARS
 };
@@ -83,13 +77,7 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
 
     "Qphi_density",
     "Fphi_flux",
-    "Sphi_source",
-
-    "weight1",
-    "weight2",
-
-    "profile1",
-    "profile2"
+    "Sphi_source"
 
 };
 
