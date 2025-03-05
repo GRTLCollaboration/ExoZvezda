@@ -47,6 +47,7 @@ class SimulationParameters : public SimulationParametersBase
                 true);
         pp.load("BS_solver_niter", bosonstar_params.niter, 17);
         pp.load("BS_mass", bosonstar_params.mass, 1.0);
+        pp.load("BS_rapidity", bosonstar_params.BS_rapidity, 0.0);
 
         pp.load("star_centre", bosonstar_params.star_centre, center);
 
