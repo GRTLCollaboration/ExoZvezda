@@ -11,7 +11,7 @@
 // Problem specific includes
 #include "ComplexPotential.hpp"
 #include "ComplexScalarField.hpp"
-#include "GRAMR.hpp"
+#include "AMR.hpp"
 
 //!  A class for the evolution of a single boson star.
 /*!
@@ -23,8 +23,6 @@ class SingleBosonStarLevel : public GRAMRLevel
     friend class DefaultLevelFactory<SingleBosonStarLevel>;
     // Inherit the contructors from GRAMRLevel
     using GRAMRLevel::GRAMRLevel;
-
-    GRAMR &m_st_amr = dynamic_cast<GRAMR &>(m_gr_amr);
 
     // Typedef for scalar field
     typedef ComplexScalarField<ComplexPotential>
