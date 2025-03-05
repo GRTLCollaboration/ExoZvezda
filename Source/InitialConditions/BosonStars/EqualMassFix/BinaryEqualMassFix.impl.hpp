@@ -98,17 +98,12 @@ void BinaryEqualMassFix::compute(Cell<data_t> current_cell) const
     // to be substracted in the initial data from the position of object 2. This effect is the same for q=1 binary.
     double c_ = cosh(rapidity);
     double s_ = sinh(rapidity);
-    double t_p = (-separation) * s_; // set /tilde{t} to zero
     double x_p = (-separation) * c_;
-    double z_p = 0.; // set /tilde{t} to zero
+    double z_p = 0.; 
     double y_p = impact_parameter;
     double r_p = sqrt(x_p * x_p + y_p * y_p + z_p * z_p);
-    double p_p = m_1d_sol.get_A_interp(r_p);
-    double dp_p = m_1d_sol.get_dA_interp(r_p);
     double omega_p = m_1d_sol.get_lapse_interp(r_p);
-    double omega_prime_p = m_1d_sol.get_dlapse_interp(r_p);
     double psi_p = m_1d_sol.get_psi_interp(r_p);
-    double psi_prime_p = m_1d_sol.get_dpsi_interp(r_p);
     double pc_os_p = psi_p * psi_p * c_ * c_ - omega_p * omega_p * s_ * s_;
 
     helferLL[1][1] = psi_p * psi_p;

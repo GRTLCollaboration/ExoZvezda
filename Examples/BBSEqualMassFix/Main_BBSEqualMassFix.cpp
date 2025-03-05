@@ -5,7 +5,7 @@
 
 // Chombo includes
 #include "CH_Timer.H"
-#include "parstream.H" //Gives us pout()
+#include "parstream.H" 
 
 // System includes
 #include <chrono>
@@ -51,13 +51,6 @@ int runGRChombo(int argc, char *argv[])
         st_amr, sim_params.origin, sim_params.dx, sim_params.boundary_params,
         sim_params.verbosity);
     st_amr.set_interpolator(&interpolator);
-
-    // Add a scheduler to GRAMR which just calls doAnalysis on every AMRLevel
-    // at time 0. It is called later in postTimeStep
-    // RefCountedPtr<CallDoAnalysis> call_do_analysis_ptr(new CallDoAnalysis);
-    // RefCountedPtr<Scheduler> scheduler_ptr(new Scheduler);
-    // scheduler_ptr->schedule(call_do_analysis_ptr, sim_params.max_steps);
-    // st_amr.schedule(scheduler_ptr);
 
 #ifdef USE_AHFINDER
     if (sim_params.AH_activate)

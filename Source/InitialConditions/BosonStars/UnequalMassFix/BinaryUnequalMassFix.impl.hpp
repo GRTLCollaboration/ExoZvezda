@@ -76,7 +76,7 @@ void BinaryUnequalMassFix::compute(Cell<data_t> current_cell) const
     BosonStarHelperFunction helper;
 
     // Compute star 1 and star 2 variables
-    BosonStarHelperFunction::BS_3d_vars star1_vars = helper.compute_star_vars(coords, rapidity, - q * separation / (q + 1.), q * impact_parameter / (q + 1.), m_1d_sol, phase_offset, false);
+    BosonStarHelperFunction::BS_3d_vars star1_vars = helper.compute_star_vars(coords, rapidity, -q * separation / (q + 1.), q * impact_parameter / (q + 1.), m_1d_sol, phase_offset, false);
     BosonStarHelperFunction::BS_3d_vars star2_vars = helper.compute_star_vars(coords, -rapidity2, separation / (q + 1.), -impact_parameter / (q + 1.), m_1d_sol2, 0.0, antiboson);
 
     // Superpose shift

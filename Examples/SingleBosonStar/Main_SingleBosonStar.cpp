@@ -5,7 +5,7 @@
 
 // Chombo includes
 #include "CH_Timer.H"
-#include "parstream.H" //Gives us pout()
+#include "parstream.H" 
 
 // System includes
 #include <chrono>
@@ -21,9 +21,6 @@
 // Problem specific includes:
 #include "SingleBosonStarLevel.hpp"
 
-// Star tracking
-#include "STAMR.hpp"
-
 int runGRChombo(int argc, char *argv[])
 {
     // Load the parameter file and construct the SimulationParameter class
@@ -32,17 +29,7 @@ int runGRChombo(int argc, char *argv[])
     GRParmParse pp(argc - 2, argv + 2, NULL, in_file);
     SimulationParameters sim_params(pp);
 
-    // The line below selects the problem that is simulated
-    // (To simulate a different problem, define a new child of AMRLevel
-    // and an associated LevelFactory)
-    // STAMR st_amr;
-
-    // st_amr.m_star_tracker.initialise_star_tracking(
-    //     sim_params.do_star_track, sim_params.number_of_stars,
-    //     {sim_params.positionA, sim_params.positionB}, sim_params.star_points,
-    //     sim_params.star_track_width_A, sim_params.star_track_width_B,
-    //     sim_params.star_track_direction_of_motion);
-    STAMR st_amr;
+    GRAMR st_amr;
     DefaultLevelFactory<SingleBosonStarLevel> boson_star_level_fact(st_amr,
                                                                     sim_params);
     setupAMRObject(st_amr, boson_star_level_fact);
@@ -52,13 +39,6 @@ int runGRChombo(int argc, char *argv[])
         st_amr, sim_params.origin, sim_params.dx, sim_params.boundary_params,
         sim_params.verbosity);
     st_amr.set_interpolator(&interpolator);
-
-    // Add a scheduler to GRAMR which just calls doAnalysis on every AMRLevel
-    // at time 0. It is called later in postTimeStep
-    // RefCountedPtr<CallDoAnalysis> call_do_analysis_ptr(new CallDoAnalysis);
-    // RefCountedPtr<Scheduler> scheduler_ptr(new Scheduler);
-    // scheduler_ptr->schedule(call_do_analysis_ptr, sim_params.max_steps);
-    // st_amr.schedule(scheduler_ptr);
 
 #ifdef USE_AHFINDER
     if (sim_params.AH_activate)
