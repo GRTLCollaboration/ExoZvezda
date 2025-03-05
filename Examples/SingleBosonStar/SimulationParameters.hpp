@@ -38,6 +38,7 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("central_amplitude_CSF",
                 bosonstar_params.central_amplitude_CSF);
         pp.load("phase", bosonstar_params.phase, 0.0);
+        pp.load("antiboson", bosonstar_params.antiboson, false);
         pp.load("gridpoints", bosonstar_params.gridpoints, 1000000);
         pp.load("BS_solver_psc", bosonstar_params.PSC, 2.0);
         pp.load("BS_solver_omc", bosonstar_params.OMC, 0.5);
