@@ -26,7 +26,6 @@
 #include "ComplexPotential.hpp"
 #include "ComplexScalarField.hpp"
 #include "ComputePack.hpp"
-#include "ComputeWeightFunction.hpp"
 #include "SetValue.hpp"
 
 // For mass extraction
@@ -92,11 +91,6 @@ void BBSUnequalMassFixLevel::initialData()
     fillAllGhosts();
     BoxLoops::loop(GammaCalculator(m_dx), m_state_new, m_state_new,
                    EXCLUDE_GHOST_CELLS, disable_simd());
-
-    BoxLoops::loop(ComputeWeightFunction(m_p.bosonstar_params,
-                                         m_p.bosonstar2_params, m_dx),
-                   m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS,
-                   disable_simd());
 }
 
 // Things to do before outputting a checkpoint file
