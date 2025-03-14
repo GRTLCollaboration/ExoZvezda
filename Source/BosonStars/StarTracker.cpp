@@ -198,12 +198,24 @@ void StarTracker::find_centre_merger(int num_star, int fitting_direction)
 
     set_up_fitting(num_star, fitting_direction);
 
+    if (m_vals_shifted_chi.size() < m_points || 
+    m_x_coords.size() < m_points || 
+    m_y_coords.size() < m_points || 
+    m_z_coords.size() < m_points) 
+    {
+        MayDay::Error("Insufficient data in star tracking!");
+    }
+
     double fmax =
         *max_element(m_vals_shifted_chi.begin(), m_vals_shifted_chi.end());
     double fmin =
         *min_element(m_vals_shifted_chi.begin(), m_vals_shifted_chi.end());
 
-    double weight;
+    if (fmax == fmin) {
+        MayDay::Error("fmax and fmin are equal, and I am dividing by zero!");
+        }
+
+    double weight = 0.0;
     double sum1 = 0.0;
     double sum2 = 0.0;
 
@@ -217,6 +229,10 @@ void StarTracker::find_centre_merger(int num_star, int fitting_direction)
         }
 
         m_puncture_coords[num_star][0] = sum1 / sum2;
+
+        if (sum2 == 0.0) {
+             MayDay::Error("Division by zero detected in find_centre_merger");
+        }
     }
 
     if (fitting_direction == 1)
@@ -224,11 +240,15 @@ void StarTracker::find_centre_merger(int num_star, int fitting_direction)
         for (int i = 0; i < m_points; i++)
         {
             weight = (m_vals_shifted_chi[i] - fmin) / (fmax - fmin);
-            sum1 += m_y_coords[i] * weight;
-            sum2 += weight;
+            sum1 = m_y_coords[i] * weight;
+            sum2 = weight;
         }
 
         m_puncture_coords[num_star][1] = sum1 / sum2;
+
+        if (sum2 == 0.0) {
+            MayDay::Error("Division by zero detected in find_centre_merger");
+       }
     }
 
     if (fitting_direction == 2)
@@ -236,11 +256,15 @@ void StarTracker::find_centre_merger(int num_star, int fitting_direction)
         for (int i = 0; i < m_points; i++)
         {
             weight = (m_vals_shifted_chi[i] - fmin) / (fmax - fmin);
-            sum1 += m_z_coords[i] * weight;
-            sum2 += weight;
+            sum1 = m_z_coords[i] * weight;
+            sum2 = weight;
         }
 
         m_puncture_coords[num_star][2] = sum1 / sum2;
+
+        if (sum2 == 0.0) {
+            MayDay::Error("Division by zero detected in find_centre_merger");
+       }
     }
 }
 
@@ -270,9 +294,6 @@ void StarTracker::update_star_centres(double a_dt)
         {
             find_centre_merger(1, 0);
         }
-
-        pout() << m_puncture_coords[0][0] << endl;
-        pout() << m_puncture_coords[1][0] << endl;
     }
 
     if (m_fitting_direction == "xy")
