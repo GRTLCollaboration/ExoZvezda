@@ -270,9 +270,9 @@ void StarTracker::find_centre_merger(int num_star, int fitting_direction)
 
 // Finally update the centres either using Gaussian fitting procedure or centre
 // of mass calculation.
-void StarTracker::update_star_centres(double a_dt)
+void StarTracker::update_star_centres(double a_dt, std::string a_fitting_direction)
 {
-    if (m_fitting_direction == "x")
+    if (a_fitting_direction == "x")
     {
         double starA_0 = find_centre(0, 0);
         if (abs((starA_0 - m_puncture_coords[0][0]) / a_dt) < 1.0 &&
@@ -296,7 +296,7 @@ void StarTracker::update_star_centres(double a_dt)
         }
     }
 
-    if (m_fitting_direction == "xy")
+    if (a_fitting_direction == "xy")
     {
         double starA_0 = find_centre(0, 0);
         if (abs((starA_0 - m_puncture_coords[0][0]) / a_dt) < 1.0 &&
@@ -340,7 +340,7 @@ void StarTracker::update_star_centres(double a_dt)
         }
     }
 
-    if (m_fitting_direction == "xyz")
+    if (a_fitting_direction == "xyz")
     {
         double starA_0 = find_centre(0, 0);
         m_puncture_coords[0][0] = starA_0;
