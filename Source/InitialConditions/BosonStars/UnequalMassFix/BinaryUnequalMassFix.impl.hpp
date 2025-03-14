@@ -104,11 +104,11 @@ void BinaryUnequalMassFix::compute(Cell<data_t> current_cell) const
      // Compute inverse
      auto gammaUU = compute_inverse_sym(gammaLL);
 
-    // We are now ready to beging using the unequal-mass fix, but we need to calculate a couple of terms
-    Tensor<2, data_t> correctionLL;
-    Tensor<2, data_t> correctionLL2;
-    Tensor<2, data_t> superposed_1; // gamma_{ij}(x_A)
-    Tensor<2, data_t> superposed_2; // gamma_{ij}(x_B) 
+    // We are now ready to start applying the unequal-mass fix, but we need to calculate a couple of terms
+    Tensor<2, data_t> correctionLL; // correction needed for star A
+    Tensor<2, data_t> correctionLL2; // correction needed for star B
+    Tensor<2, data_t> superposed_1; // gamma_{ij}(x_A) from plain superposition
+    Tensor<2, data_t> superposed_2; // gamma_{ij}(x_B) from plain superposition
 
     FOR(i, j){ correctionLL[i][j] = 0.0;
                correctionLL2[i][j] = 0.0;

@@ -80,7 +80,7 @@ class StarTracker
     // Function for finding star positions near merger 
     void find_centre_merger(int num_star, int fitting_direction);
 
-    void update_star_centres(double a_dt);
+    void update_star_centres(double a_dt, std::string a_fitting_direction);
 
     void write_to_dat(std::string a_filename, double a_dt, double a_time,
                       double a_restart_time, bool a_first_step);
