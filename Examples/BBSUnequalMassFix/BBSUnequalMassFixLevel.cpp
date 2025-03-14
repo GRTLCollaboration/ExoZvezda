@@ -311,7 +311,7 @@ void BBSUnequalMassFixLevel::specificPostTimeStep()
             m_st_amr.m_star_tracker.read_old_centre_from_dat(
                 "StarCentres", m_dt, m_time, m_restart_time, first_step);
         }
-        m_st_amr.m_star_tracker.update_star_centres(m_dt);
+        m_st_amr.m_star_tracker.update_star_centres(m_dt, m_p.star_track_direction_of_motion);
         m_st_amr.m_star_tracker.write_to_dat("StarCentres", m_dt, m_time,
                                              m_restart_time, first_step);
     }
