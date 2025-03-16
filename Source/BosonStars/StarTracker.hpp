@@ -18,7 +18,7 @@ class StarTracker
 {
   private:
     int m_num_stars; // number of stars
-    std::vector<std::array<double, CH_SPACEDIM>> m_puncture_coords; // here we will store the star positions
+    std::vector<std::array<double, CH_SPACEDIM>> m_star_coords; // here we will store the star positions
     std::array<double, CH_SPACEDIM> m_centre;
     int m_tracking_level; // levels to execute tracking on
     int m_points;         // number of points used for tracking
@@ -43,7 +43,7 @@ class StarTracker
     //! this needs to be done before 'setupAMRObject'
     //! if the stars' locations are required for Tagging Criteria
     void
-    initialise_star_tracking(bool a_do_star_track, int a_number_of_stars,
+    initialise_star_tracking(int a_number_of_stars,
                              const std::vector<std::array<double, CH_SPACEDIM>>
                                  &a_initial_star_centres,
                              int a_star_points, double a_star_track_width_A,
@@ -63,7 +63,7 @@ class StarTracker
         m_width_B = a_star_track_width_B;
         m_fitting_direction = a_fitting_direction;
 
-        m_puncture_coords = a_initial_star_centres;
+        m_star_coords = a_initial_star_centres;
     }
 
     ALWAYS_INLINE void
@@ -85,19 +85,24 @@ class StarTracker
     void write_to_dat(std::string a_filename, double a_dt, double a_time,
                       double a_restart_time, bool a_first_step);
 
-    void read_old_centre_from_dat(std::string a_filename, double a_dt,
-                                  double a_time, double a_restart_time,
-                                  bool a_first_step);
+    void read_in_star_coords(int a_int_step, double a_current_time);
+    
+    void set_initial_star_coords();
+
+    void restart_star_tracking();
 
      // Execute the tracking and write out
      void execute_tracking(double a_time, double a_restart_time, double a_dt,
         const bool write_punctures = true);
 
     ALWAYS_INLINE const std::vector<std::array<double, CH_SPACEDIM>> &
-    get_puncture_coords() const
+    get_star_coords() const
     {
-        return m_puncture_coords;
+        return m_star_coords;
     }
+
+    // Get a vector of the puncture coords - used for write out
+    std::vector<double> get_star_vector() const;
 };
 
 #endif /* STARTRACKER_HPP_ */
