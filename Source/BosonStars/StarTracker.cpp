@@ -184,6 +184,8 @@ double StarTracker::find_centre(int num_star, int fitting_direction)
             return 0;
         }
     }
+    MayDay::Error("I have failed to apply Gaussian fitting!");
+    
     return 0;
 }
 
@@ -270,9 +272,9 @@ void StarTracker::find_centre_merger(int num_star, int fitting_direction)
 
 // Finally update the centres either using Gaussian fitting procedure or centre
 // of mass calculation.
-void StarTracker::update_star_centres(double a_dt, std::string a_fitting_direction)
+void StarTracker::update_star_centres(double a_dt)
 {
-    if (a_fitting_direction == "x")
+    if (m_fitting_direction == "x")
     {
         double starA_0 = find_centre(0, 0);
         if (abs((starA_0 - m_puncture_coords[0][0]) / a_dt) < 1.0 &&
@@ -296,7 +298,7 @@ void StarTracker::update_star_centres(double a_dt, std::string a_fitting_directi
         }
     }
 
-    if (a_fitting_direction == "xy")
+    if (m_fitting_direction == "xy")
     {
         double starA_0 = find_centre(0, 0);
         if (abs((starA_0 - m_puncture_coords[0][0]) / a_dt) < 1.0 &&
@@ -340,7 +342,7 @@ void StarTracker::update_star_centres(double a_dt, std::string a_fitting_directi
         }
     }
 
-    if (a_fitting_direction == "xyz")
+    if (m_fitting_direction == "xyz")
     {
         double starA_0 = find_centre(0, 0);
         m_puncture_coords[0][0] = starA_0;
@@ -446,4 +448,24 @@ void StarTracker::read_old_centre_from_dat(std::string a_filename, double a_dt,
         MayDay::Error("Array size mismatch, when loading star positions "
                           "from StarCentres.dat file!");
     }
+}
+
+ // Execute the tracking and write out
+ void StarTracker::execute_tracking(double a_time, double a_restart_time, double a_dt,
+    const bool write_punctures)
+{
+    CH_assert(m_interpolator != nullptr); // sanity check
+
+    bool first_step = (a_time == 0.0);
+
+    if (fabs(a_time - a_restart_time) < a_dt * 1.1)
+        {
+            pout() << "Reading star positions from file" << endl;
+            read_old_centre_from_dat(
+                "StarCentres", a_dt, a_time, a_restart_time, first_step);
+        }
+        
+    update_star_centres(a_dt);
+    write_to_dat("StarCentres", a_dt, a_time,
+                                             a_restart_time, first_step);
 }

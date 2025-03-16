@@ -80,7 +80,7 @@ class StarTracker
     // Function for finding star positions near merger 
     void find_centre_merger(int num_star, int fitting_direction);
 
-    void update_star_centres(double a_dt, std::string a_fitting_direction);
+    void update_star_centres(double a_dt);
 
     void write_to_dat(std::string a_filename, double a_dt, double a_time,
                       double a_restart_time, bool a_first_step);
@@ -88,6 +88,10 @@ class StarTracker
     void read_old_centre_from_dat(std::string a_filename, double a_dt,
                                   double a_time, double a_restart_time,
                                   bool a_first_step);
+
+     // Execute the tracking and write out
+     void execute_tracking(double a_time, double a_restart_time, double a_dt,
+        const bool write_punctures = true);
 
     ALWAYS_INLINE const std::vector<std::array<double, CH_SPACEDIM>> &
     get_puncture_coords() const
