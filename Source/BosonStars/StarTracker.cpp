@@ -36,23 +36,23 @@ void StarTracker::set_up_fitting(int num_star, int fitting_direction)
 
         if (fitting_direction == 0)
         {
-            m_x_coords[i] = m_puncture_coords[num_star][0] + delta;
-            m_y_coords[i] = m_puncture_coords[num_star][1];
-            m_z_coords[i] = m_puncture_coords[num_star][2];
+            m_x_coords[i] = m_star_coords[num_star][0] + delta;
+            m_y_coords[i] = m_star_coords[num_star][1];
+            m_z_coords[i] = m_star_coords[num_star][2];
         }
 
         if (fitting_direction == 1)
         {
-            m_x_coords[i] = m_puncture_coords[num_star][0];
-            m_y_coords[i] = m_puncture_coords[num_star][1] + delta;
-            m_z_coords[i] = m_puncture_coords[num_star][2];
+            m_x_coords[i] = m_star_coords[num_star][0];
+            m_y_coords[i] = m_star_coords[num_star][1] + delta;
+            m_z_coords[i] = m_star_coords[num_star][2];
         }
 
         if (fitting_direction == 2)
         {
-            m_x_coords[i] = m_puncture_coords[num_star][0];
-            m_y_coords[i] = m_puncture_coords[num_star][1];
-            m_z_coords[i] = m_puncture_coords[num_star][2] + delta;
+            m_x_coords[i] = m_star_coords[num_star][0];
+            m_y_coords[i] = m_star_coords[num_star][1];
+            m_z_coords[i] = m_star_coords[num_star][2] + delta;
         }
 
         m_sigma_vector[i] = 1.0; // agnostic about the error vector, so set =
@@ -94,7 +94,7 @@ double StarTracker::find_centre(int num_star, int fitting_direction)
     if (fitting_direction == 0)
     {
         a_vector[0] = m_vals_shifted_chi[(m_points - 1) / 2];
-        a_vector[1] = m_puncture_coords[num_star][0];
+        a_vector[1] = m_star_coords[num_star][0];
         if (num_star == 0)
         {
             a_vector[2] = m_width_A / 2;
@@ -126,7 +126,7 @@ double StarTracker::find_centre(int num_star, int fitting_direction)
     if (fitting_direction == 1)
     {
         a_vector[0] = m_vals_shifted_chi[(m_points - 1) / 2];
-        a_vector[1] = m_puncture_coords[num_star][1];
+        a_vector[1] = m_star_coords[num_star][1];
         if (num_star == 0)
         {
             a_vector[2] = m_width_A / 2;
@@ -158,7 +158,7 @@ double StarTracker::find_centre(int num_star, int fitting_direction)
     if (fitting_direction == 2)
     {
         a_vector[0] = m_vals_shifted_chi[(m_points - 1) / 2];
-        a_vector[1] = m_puncture_coords[num_star][2];
+        a_vector[1] = m_star_coords[num_star][2];
         if (num_star == 0)
         {
             a_vector[2] = m_width_A / 2;
@@ -230,7 +230,7 @@ void StarTracker::find_centre_merger(int num_star, int fitting_direction)
             sum2 = sum2 + weight;
         }
 
-        m_puncture_coords[num_star][0] = sum1 / sum2;
+        m_star_coords[num_star][0] = sum1 / sum2;
 
         if (sum2 == 0.0) {
              MayDay::Error("Division by zero detected in find_centre_merger");
@@ -246,7 +246,7 @@ void StarTracker::find_centre_merger(int num_star, int fitting_direction)
             sum2 = weight;
         }
 
-        m_puncture_coords[num_star][1] = sum1 / sum2;
+        m_star_coords[num_star][1] = sum1 / sum2;
 
         if (sum2 == 0.0) {
             MayDay::Error("Division by zero detected in find_centre_merger");
@@ -262,7 +262,7 @@ void StarTracker::find_centre_merger(int num_star, int fitting_direction)
             sum2 = weight;
         }
 
-        m_puncture_coords[num_star][2] = sum1 / sum2;
+        m_star_coords[num_star][2] = sum1 / sum2;
 
         if (sum2 == 0.0) {
             MayDay::Error("Division by zero detected in find_centre_merger");
@@ -277,20 +277,20 @@ void StarTracker::update_star_centres(double a_dt)
     if (m_fitting_direction == "x")
     {
         double starA_0 = find_centre(0, 0);
-        if (abs((starA_0 - m_puncture_coords[0][0]) / a_dt) < 1.0 &&
+        if (abs((starA_0 - m_star_coords[0][0]) / a_dt) < 1.0 &&
             starA_0 != 0)
         {
-            m_puncture_coords[0][0] = starA_0;
+            m_star_coords[0][0] = starA_0;
         }
         else
         {
             find_centre_merger(0, 0);
         }
         double starB_0 = find_centre(1, 0);
-        if ((abs(starB_0 - m_puncture_coords[1][0]) / a_dt) < 1.0 &&
+        if ((abs(starB_0 - m_star_coords[1][0]) / a_dt) < 1.0 &&
             starB_0 != 0)
         {
-            m_puncture_coords[1][0] = starB_0;
+            m_star_coords[1][0] = starB_0;
         }
         else
         {
@@ -301,40 +301,40 @@ void StarTracker::update_star_centres(double a_dt)
     if (m_fitting_direction == "xy")
     {
         double starA_0 = find_centre(0, 0);
-        if (abs((starA_0 - m_puncture_coords[0][0]) / a_dt) < 1.0 &&
+        if (abs((starA_0 - m_star_coords[0][0]) / a_dt) < 1.0 &&
             starA_0 != 0)
         {
-            m_puncture_coords[0][0] = starA_0;
+            m_star_coords[0][0] = starA_0;
         }
         else
         {
             find_centre_merger(0, 0);
         }
         double starA_1 = find_centre(0, 1);
-        if (abs((starA_1 - m_puncture_coords[0][1]) / a_dt) < 1.0 &&
+        if (abs((starA_1 - m_star_coords[0][1]) / a_dt) < 1.0 &&
             starA_1 != 0)
         {
-            m_puncture_coords[0][1] = starA_1;
+            m_star_coords[0][1] = starA_1;
         }
         else
         {
             find_centre_merger(0, 1);
         }
         double starB_0 = find_centre(1, 0);
-        if (abs((starB_0 - m_puncture_coords[1][0]) / a_dt) < 1.0 &&
+        if (abs((starB_0 - m_star_coords[1][0]) / a_dt) < 1.0 &&
             starB_0 != 0)
         {
-            m_puncture_coords[1][0] = starB_0;
+            m_star_coords[1][0] = starB_0;
         }
         else
         {
             find_centre_merger(1, 0);
         }
         double starB_1 = find_centre(1, 1);
-        if (abs((starB_1 - m_puncture_coords[1][1]) / a_dt) < 1.0 &&
+        if (abs((starB_1 - m_star_coords[1][1]) / a_dt) < 1.0 &&
             starB_1 != 0)
         {
-            m_puncture_coords[1][1] = starB_1;
+            m_star_coords[1][1] = starB_1;
         }
         else
         {
@@ -345,127 +345,188 @@ void StarTracker::update_star_centres(double a_dt)
     if (m_fitting_direction == "xyz")
     {
         double starA_0 = find_centre(0, 0);
-        m_puncture_coords[0][0] = starA_0;
+        m_star_coords[0][0] = starA_0;
         double starA_1 = find_centre(0, 1);
-        m_puncture_coords[0][1] = starA_1;
+        m_star_coords[0][1] = starA_1;
         double starA_2 = find_centre(0, 2);
-        m_puncture_coords[0][2] = starA_2;
+        m_star_coords[0][2] = starA_2;
 
         double starB_0 = find_centre(1, 0);
-        m_puncture_coords[1][0] = starB_0;
+        m_star_coords[1][0] = starB_0;
         double starB_1 = find_centre(1, 1);
-        m_puncture_coords[1][1] = starB_1;
+        m_star_coords[1][1] = starB_1;
         double starB_2 = find_centre(1, 2);
-        m_puncture_coords[1][2] = starB_2;
+        m_star_coords[1][2] = starB_2;
     }
 }
 
 // Write all data to designated files
-void StarTracker::write_to_dat(std::string a_filename, double a_dt,
-                               double a_time, double a_restart_time,
-                               bool a_first_step)
-{
-    int size;
-    double eps = 10e-8;
-    std::vector<double> star_coords;
+// void StarTracker::write_to_dat(std::string a_filename, double a_dt,
+//                                double a_time, double a_restart_time,
+//                                bool a_first_step)
+// {
+//     int size;
+//     double eps = 10e-8;
+//     std::vector<double> star_coords;
 
-    SmallDataIO star_centre_file(a_filename, a_dt, a_time, a_restart_time,
-                                 SmallDataIO::APPEND, a_first_step);
+//     SmallDataIO star_centre_file(a_filename, a_dt, a_time, a_restart_time,
+//                                  SmallDataIO::APPEND, a_first_step);
 
-    if (a_time > a_restart_time + eps)
-        star_centre_file.remove_duplicate_time_data();
+//     if (a_time > a_restart_time + eps)
+//         star_centre_file.remove_duplicate_time_data();
 
-    std::vector<string> header_line(3. * m_num_stars);
+//     std::vector<string> header_line(3. * m_num_stars);
 
-    for (int n = 0; n < m_num_stars; n++)
-    {
-        header_line[3 * n] = "x" + to_string(n + 1);
-        header_line[3 * n + 1] = "y" + to_string(n + 1);
-        header_line[3 * n + 2] = "z" + to_string(n + 1);
-    }
+//     for (int n = 0; n < m_num_stars; n++)
+//     {
+//         header_line[3 * n] = "x" + to_string(n + 1);
+//         header_line[3 * n + 1] = "y" + to_string(n + 1);
+//         header_line[3 * n + 2] = "z" + to_string(n + 1);
+//     }
 
-    if (a_time == 0.)
-    {
-        star_centre_file.write_header_line(header_line);
-    }
+//     if (a_time == 0.)
+//     {
+//         star_centre_file.write_header_line(header_line);
+//     }
 
-    size = CH_SPACEDIM * m_num_stars;
-    star_coords.resize(size, 0);
+//     size = CH_SPACEDIM * m_num_stars;
+//     star_coords.resize(size, 0);
 
-    for (int ipuncture = 0; ipuncture < m_num_stars; ++ipuncture)
-    {
-        for (int i = 0; i < CH_SPACEDIM; ++i)
-        {
-            star_coords[CH_SPACEDIM * ipuncture + i] =
-                m_puncture_coords[ipuncture][i];
-        }
-    }
-    star_centre_file.write_time_data_line(star_coords);
-}
+//     for (int ipuncture = 0; ipuncture < m_num_stars; ++ipuncture)
+//     {
+//         for (int i = 0; i < CH_SPACEDIM; ++i)
+//         {
+//             star_coords[CH_SPACEDIM * ipuncture + i] =
+//                 m_star_coords[ipuncture][i];
+//         }
+//     }
+//     star_centre_file.write_time_data_line(star_coords);
+// }
 
 // Read a data line from the previous timestep
-void StarTracker::read_old_centre_from_dat(std::string a_filename, double a_dt,
-                                           double a_time, double a_restart_time,
-                                           bool a_first_step)
+void StarTracker::read_in_star_coords(int a_int_step, double a_current_time)
 {
-    int size;
-    std::vector<double> data_line;
-    std::vector<double> star_coords;
+    bool first_step = false;
+    double dt = (a_current_time / a_int_step);
+    SmallDataIO star_file("StarCentres", dt, a_current_time,
+                               a_current_time, SmallDataIO::APPEND, first_step);
 
-    SmallDataIO star_centre_file(a_filename, a_dt, a_time, a_restart_time,
-                                     SmallDataIO::READ, a_first_step);
-    star_centre_file.get_specific_data_line(data_line, a_time - a_dt);
+    // NB need to give the get function an empty vector to fill
+    std::vector<double> star_vector;
+    pout() << a_current_time << endl;
+    star_file.get_specific_data_line(star_vector, a_current_time);
 
-    bool length_match = data_line.size() == m_num_stars * CH_SPACEDIM;
+    // check the data returned is the right size
+    CH_assert(star_vector.size() % CH_SPACEDIM == 0);
 
-    size = CH_SPACEDIM * m_num_stars;
-    star_coords.resize(size, 0);
+    m_num_stars = star_vector.size() / CH_SPACEDIM;
+    m_star_coords.resize(m_num_stars);
 
-    if (length_match)
+    // remove any duplicate data from the file
+    const bool keep_m_time_data = true;
+    star_file.remove_duplicate_time_data(keep_m_time_data);
+
+    // convert vector to list of coords
+    for (int ipuncture = 0; ipuncture < m_num_stars; ipuncture++)
     {
-        for (int i = 0; i < data_line.size(); i++)
-        {
-            star_coords[i] = data_line[i];
-	        for (int ipuncture = 0; ipuncture < m_num_stars; ++ipuncture)
-	            {
-		            m_puncture_coords[ipuncture][i] = star_coords[CH_SPACEDIM * ipuncture + i];
-		        }
-        }
+        m_star_coords[ipuncture] = {
+            star_vector[ipuncture * CH_SPACEDIM + 0],
+            star_vector[ipuncture * CH_SPACEDIM + 1],
+            star_vector[ipuncture * CH_SPACEDIM + 2]};
+    }
 
-	    pout() << "For Star A I've read position 0 " << m_puncture_coords[0][0] << endl;
-	    pout() << "For Star A I've read position 1 " << m_puncture_coords[0][1] << endl;
-	    pout() << "For Star A I've read position 2 " << m_puncture_coords[0][2] << endl;
-	    pout() << "For Star B I've read position 0 " << m_puncture_coords[1][0] << endl;
-	    pout() << "For Star B I've read position 1 " << m_puncture_coords[1][1] << endl;
-	    pout() << "For Star B I've read position 2 " << m_puncture_coords[1][2] << endl;
+    update_star_centres(dt);
+
+    for (int ipuncture = 0; ipuncture < m_num_stars; ipuncture++)
+    {
+        pout() << "Puncture " << ipuncture
+               << " restarted at : " << m_star_coords[ipuncture][0] << " "
+               << m_star_coords[ipuncture][1] << " "
+               << m_star_coords[ipuncture][2] << endl;
+        pout() << "at time = " << a_current_time << endl;
+    }
+}
+
+void StarTracker::restart_star_tracking()
+{
+    int current_step = m_interpolator->getAMR().s_step;
+
+    if (current_step == 0)
+    {
+        // if it is the first timestep, use the param values
+        // rather than look for the output file, e.g. for when
+        // restart from IC solver checkpoint
+        set_initial_star_coords();
     }
     else
     {
-        for (int i = 0; i < star_coords.size(); i++)
-        {
-            star_coords[i] = NAN;
-        }
-        MayDay::Error("Array size mismatch, when loading star positions "
-                          "from StarCentres.dat file!");
+        pout() << "Starting read_in_punctures " << endl; 
+        // look for the current puncture location in the
+        // puncture output file (it needs to exist!)
+        read_in_star_coords(current_step,
+                          m_interpolator->getAMR().getCurrentTime());
     }
+}
+
+// Set and write initial puncture locations
+void StarTracker::set_initial_star_coords()
+{
+    CH_assert(m_star_coords.size() > 0); // sanity check
+    
+    // now the write out to a new file
+    bool first_step = true;
+    double dt = 1.; // doesn't matter
+    double time = 0.;
+    double restart_time = 0.;
+    SmallDataIO star_centre_file("StarCentres", dt, time, restart_time,
+                               SmallDataIO::APPEND, first_step);
+    std::vector<std::string> header1_strings(CH_SPACEDIM * m_num_stars);
+    for (int ipuncture = 0; ipuncture < m_num_stars; ipuncture++)
+    {
+        std::string idx = std::to_string(ipuncture + 1);
+        header1_strings[CH_SPACEDIM * ipuncture + 0] = "x_" + idx;
+        header1_strings[CH_SPACEDIM * ipuncture + 1] = "y_" + idx;
+        header1_strings[CH_SPACEDIM * ipuncture + 2] = "z_" + idx;
+    }
+    star_centre_file.write_header_line(header1_strings);
+
+    star_centre_file.write_time_data_line(get_star_vector());
 }
 
  // Execute the tracking and write out
  void StarTracker::execute_tracking(double a_time, double a_restart_time, double a_dt,
-    const bool write_punctures)
+    const bool write_data)
 {
     CH_assert(m_interpolator != nullptr); // sanity check
-
-    bool first_step = (a_time == 0.0);
-
-    if (fabs(a_time - a_restart_time) < a_dt * 1.1)
-        {
-            pout() << "Reading star positions from file" << endl;
-            read_old_centre_from_dat(
-                "StarCentres", a_dt, a_time, a_restart_time, first_step);
-        }
-        
+    
     update_star_centres(a_dt);
-    write_to_dat("StarCentres", a_dt, a_time,
-                                             a_restart_time, first_step);
+
+    // print them out
+    if (write_data)
+    {
+        bool first_step = false;
+        SmallDataIO star_file("StarCentres", a_dt, a_time,
+                                   a_restart_time, SmallDataIO::APPEND,
+                                   first_step);
+
+        // use a vector for the write out
+        star_file.write_time_data_line(get_star_vector());
+    }
+}
+
+// Get a vector of the puncture coords - used for write out
+std::vector<double> StarTracker::get_star_vector() const
+{
+    std::vector<double> star_vector;
+    star_vector.resize(m_num_stars * CH_SPACEDIM);
+    for (int ipuncture = 0; ipuncture < m_num_stars; ipuncture++)
+    {
+        star_vector[ipuncture * CH_SPACEDIM + 0] =
+            m_star_coords[ipuncture][0];
+        star_vector[ipuncture * CH_SPACEDIM + 1] =
+            m_star_coords[ipuncture][1];
+        star_vector[ipuncture * CH_SPACEDIM + 2] =
+            m_star_coords[ipuncture][2];
+    }
+    return star_vector;
 }
