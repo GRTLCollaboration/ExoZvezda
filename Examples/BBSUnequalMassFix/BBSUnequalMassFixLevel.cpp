@@ -40,7 +40,7 @@
 #include "NoetherCharge.hpp"
 #include "SmallDataIO.hpp"
 
-// for chombo grid Functions
+// For Chombo grid functions
 #include "AMRReductions.hpp"
 
 // Things to do at each advance step, after the RK4 is calculated
@@ -190,7 +190,7 @@ void BBSUnequalMassFixLevel::specificPostTimeStep()
         at_level_timestep_multiple(
             m_p.extraction_params.min_extraction_level()))
     {
-        CH_TIME("BBSUnequalMassFixLevel::specificPostTimeStep::Weyl4Matter");
+        CH_TIME("BBSUnequalMassFixLevel::specificPostTimeStep::MatterWeyl4");
 
         // Do the extraction on the min extraction level
         if (m_level == m_p.extraction_params.min_extraction_level())
@@ -302,18 +302,11 @@ void BBSUnequalMassFixLevel::specificPostTimeStep()
 
     if (m_p.do_star_track && m_level == m_p.star_track_level)
     {
-        int current_step = m_gr_amr.m_interpolator->getAMR().s_step;
-
-        // at the restart time read from file
-        if (current_step != 0 && fabs(m_time - m_restart_time) < m_dt * 1.1)
-        {
-            pout() << "Reading star positions from file" << endl;
-            m_st_amr.m_star_tracker.read_old_centre_from_dat(
-                "StarCentres", m_dt, m_time, m_restart_time, first_step);
-        }
-        m_st_amr.m_star_tracker.update_star_centres(m_dt, m_p.star_track_direction_of_motion);
-        m_st_amr.m_star_tracker.write_to_dat("StarCentres", m_dt, m_time,
-                                             m_restart_time, first_step);
+	    pout() << "Running a star tracker now" << endl;
+        int coarsest_level = 0;
+        bool write_punctures = at_level_timestep_multiple(coarsest_level);
+        m_st_amr.m_star_tracker.execute_tracking(m_time, m_restart_time,
+                                                 m_dt, write_punctures);
     }
 
 #ifdef USE_AHFINDER
