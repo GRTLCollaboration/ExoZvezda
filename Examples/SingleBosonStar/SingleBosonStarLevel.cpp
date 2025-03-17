@@ -64,7 +64,7 @@ void SingleBosonStarLevel::initialData()
     SingleBosonStar boson_star(m_p.bosonstar_params, m_p.potential_params,
                                m_dx);
 
-    // Initiate solver for 1D BS solutions
+   // Initialise initial data object
     boson_star.compute_1d_solution(4. * m_p.L);
 
     if (m_level == 0)
