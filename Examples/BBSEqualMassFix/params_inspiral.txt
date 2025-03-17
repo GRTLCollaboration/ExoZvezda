@@ -44,7 +44,6 @@ BS_rapidity2 = 0.16865
 BS_impact_parameter = 17.52572 #separation perpendicular to boost, y
 BS_separation = 0.32 #separation parallel to boost, x
 
-# centre of the star - only uncomment if you want star off centre
 star_centre = 512 512 0
 
 # Potential params
