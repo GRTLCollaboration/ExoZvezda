@@ -167,7 +167,7 @@ number_of_stars = 2
 star_points = 7
 star_track_width_A = 3.
 star_track_width_B = 3.
-star_track_centre = 512 512 0 # deafults to L/2 L/2 L/2
+star_track_centre = 512 512 0 # defaults to centre
 star_track_level = 6
 direction_of_motion = "xy"
 
