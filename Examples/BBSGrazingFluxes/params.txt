@@ -1,7 +1,7 @@
 #Params for runtime inputs
 
 ##############################################################
-verbosity = 2
+verbosity = 0
 
 chk_prefix = BosonChk_
 plot_prefix = Bosonp_
@@ -18,16 +18,16 @@ plot_interval = 50
 ##############################################################
 # Set up grid spacings and regrid params
 # NB - the N values need to be multiples of block_factor
-N_full = 32
+N_full = 128
 
 # Length of longest box side, dx_coarsest = L/N(max)
 # NB if non cubic, this determines dx for all sides
-L_full = 64
+L_full = 512
 
 # Regridding
 # Thresholds on the change across a cell which prompts regrid
-regrid_threshold_phi = 1.0
-regrid_threshold_chi = 1.0
+regrid_threshold_phi = 0.25
+regrid_threshold_chi = 0.25
 
 ##############################################################
 # BosonStar Initial data parameters
@@ -40,10 +40,10 @@ BS_solver_verbosity = 1
 
 BS_rapidity = 0.100335
 BS_rapidity2 = 0.100335
-BS_impact_parameter = 1.0 #separation perpendicular to boost, y
-BS_separation = 5. #separation parallel to boost, x
+BS_impact_parameter = 8.0 #separation perpendicular to boost, y
+BS_separation = 80. #separation parallel to boost, x
 
-star_centre = 32 32 0
+star_centre = 256 256 0
 
 # Potential params
 scalar_mass = 1.0
@@ -54,7 +54,7 @@ sigma_solitonic = 0.2
 ##############################################################
 # Level data
 # Maximum number of times you can regrid above coarsest level
-max_level = 1 # There are (max_level+1) grids, so min is zero
+max_level = 7 # There are (max_level+1) grids, so min is zero
 
 # Frequency of regridding at each level
 # Need one for each level, ie max_level+1 items
@@ -88,7 +88,6 @@ vars_parity            = 0 0 4 6 0 5 0    #chi and hij
                          0 0 0 0          #phi and Pi
 
 vars_parity_diagnostic = 0                #modphi
-                         0 0              #ADM mass and J
                          0                #N
                          0 1 2 3          #H,mom constraints
                          0 7              #Weyl4 re im
@@ -105,7 +104,6 @@ vars_asymptotic_values = 1.0 1.0 0.0 0.0 1.0 0.0 1.0 #chi and hij
                          1.0 0.0 0.0 0.0 0.0 0.0 0.0 #lapse shift and B
                          0.0 0.0 0.0 0.0             #phi and Pi (Re and Im)
                          0.0                         #mod_phi
-                         0.0 0.0                     #Madm and Jadm
                          0.0                         #N(oether charge density)
                          0.0 0.0 0.0 0.0             #Ham and Mom
                          0.0 0.0                     #Wely4_Re and Weyl4_Im
@@ -151,26 +149,22 @@ num_plot_vars = 3
 plot_vars = mod_phi chi Ham 
 
 ##############################################################
-# Mass extraction params
-#mass_extraction_center = 256 256 0
-activate_mass_extraction = 1
-num_mass_extraction_radii = 1
-mass_extraction_radii = 10.
-mass_extraction_levels = 1
-num_points_phi_mass = 16
-num_points_theta_mass = 24
-
 # Flux extraction 
 flux_do = true
-
+#flux_extraction_center = 256 256 0 
+num_flux_extraction_radii = 4
+flux_extraction_radii = 20. 40. 60. 80.
+flux_extraction_levels = 1 1 1 1
+num_points_phi_flux = 16
+num_points_theta_flux = 24
 
 # GW extraction params
 #default center to grid center, uncomment to change
 #extraction_center = 0 0 0
 activate_extraction = 1
-num_extraction_radii = 1
-extraction_radii = 20. 
-extraction_levels = 0  
+num_extraction_radii = 7
+extraction_radii = 60. 70. 80. 90. 100. 110. 120. 
+extraction_levels = 1 1 1 1 1 1 1 
 num_points_phi = 48
 num_points_theta = 60
 num_modes = 5
@@ -185,16 +179,16 @@ write_extraction = 0
 do_star_track = true
 number_of_stars = 2
 star_points = 11
-star_track_width_A = 2.
-star_track_width_B = 2.
-star_track_centre = 32 32 0 # deafults to L/2 L/2 L/2
-star_track_level = 1
+star_track_width_A = 3.
+star_track_width_B = 3.
+star_track_centre = 256 256 0 # defaults to centre
+star_track_level = 5
 direction_of_motion = "xy"
 
 ##############################################################
 # Apparent Horizon Finder parameters
 
-AH_activate = 1
+AH_activate = 0
 AH_num_ranks = 20
 AH_num_points_u = 30
 AH_num_points_v = 50
@@ -215,8 +209,8 @@ AH_print_geometry_data = 1
 # AH_re_solve_at_restart = 0
 # AH_stop_if_max_fails = 0
 # AH_expansion_radius_power = 1.
-AH_1_initial_guess = 1.4
-AH_2_initial_guess = 1.4
+AH_1_initial_guess = 1.2
+AH_2_initial_guess = 1.2
 # AH_expansion_radius_power = 1.
 # AH_num_extra_vars = 2
 # AH_extra_vars = chi d1_Ham d2_A11
