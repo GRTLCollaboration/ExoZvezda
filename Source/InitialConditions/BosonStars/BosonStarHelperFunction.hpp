@@ -12,6 +12,12 @@
 #include "MatterCCZ4.hpp"
 #include "Tensor.hpp"
 
+/*
+ * This class constructs a single BS solution in 3D and computes in all the
+ * required 3+1 (metric and scalar) varibales on the grid. We will use this
+ * class to construct binary initial data.
+ */
+
 class BosonStarHelperFunction
 {
   public:

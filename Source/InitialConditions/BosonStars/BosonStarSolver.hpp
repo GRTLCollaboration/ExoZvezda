@@ -32,9 +32,8 @@ class BosonStarSolver
                           // (see https://arxiv.org/abs/2310.05200), otherwise
                           // the scalar field will be set smoothly to zero after
                           // some radius
-    double EIGEN = 0;    // the desired eigenstate, 0 for ground
-    int gridsize;        // number of grid points (10^6 is very good)
-    int adaptive_buffer; // number of gridpoints to intergate more carefully
+    int gridsize;         // number of grid points (10^6 is very good)
+    int adaptive_buffer;  // number of gridpoints to intergate more carefully
     const int adaptive_stepsize_repetitions = 20; // 50; // 0 for no adaptive
     double L, dx;                                 // L, length of domain, dx.
     double omega_ansatz,

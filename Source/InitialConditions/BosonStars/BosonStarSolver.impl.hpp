@@ -16,7 +16,7 @@
 #include <string>
 
 /*
- * This is 1D BS solver based on a shooting method. Isotropic gauge is assumed
+ * This is a 1D BS solver based on a shooting method. Isotropic gauge is assumed
  * and the equations are integarted out using RK4
  */
 
