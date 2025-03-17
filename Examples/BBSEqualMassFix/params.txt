@@ -88,13 +88,9 @@ vars_parity            = 0 0 4 6 0 5 0    #chi and hij
                          0 0 0 0          #phi and Pi
 
 vars_parity_diagnostic = 0                #modphi
-                         0 0              #ADM mass and J
                          0                #N
                          0 1 2 3          #H,mom constraints
                          0 7              #Weyl4 re im
-                         0 1 2 3          #Stresstensor rho s1 s2 s3
-                         0 4 6 0 5 0      #Stresstensor s11 s12 s13 s22 s23 s33
-                         0 0 0 0 0 0 0    #Qphi Fphi Sphi
 
 # if reflective boundaries selected, must set
 # parity of all vars (in order given by UserVariables.hpp)
@@ -105,13 +101,9 @@ vars_asymptotic_values = 1.0 1.0 0.0 0.0 1.0 0.0 1.0 #chi and hij
                          1.0 0.0 0.0 0.0 0.0 0.0 0.0 #lapse shift and B
                          0.0 0.0 0.0 0.0             #phi and Pi (Re and Im)
                          0.0                         #mod_phi
-                         0.0 0.0                     #Madm and Jadm
                          0.0                         #N(oether charge density)
                          0.0 0.0 0.0 0.0             #Ham and Mom
                          0.0 0.0                     #Wely4_Re and Weyl4_Im
-                         0.0 0.0 0.0 0.0             #Stress tensor rho s1 s2 s3
-                         0.0 0.0 0.0 0.0 0.0 0.0     #Stress tensor s11 s12 s13 s22 s23 s33
-                         0.0 0.0 0.0                 #Qphi Fphi Sphi
 
 ##############################################################
 # Set up time steps
@@ -147,26 +139,17 @@ sigma = 0.3
 calculate_noether_charge = 1
 
 # Vars to write to plot files
-num_plot_vars = 9
-plot_vars = Weyl4_Re K rho Ham Mom1 Mom2 Mom3 mod_phi chi
+num_plot_vars = 4
+plot_vars = Ham Mom1 mod_phi chi
 
 ##############################################################
-# Mass extraction params
-mass_extraction_center = 256 256 0
-activate_mass_extraction = 1
-num_mass_extraction_radii = 6
-mass_extraction_radii = 60. 100. 120. 140. 160. 180.
-mass_extraction_levels = 3 2 1 1 1 1
-num_points_phi_mass = 16
-num_points_theta_mass = 24
-
 # GW extraction params
 #default center to grid center, uncomment to change
 #extraction_center = 0 0 0
 activate_extraction = 1
 num_extraction_radii = 7
 extraction_radii = 60. 70. 80. 90. 100. 110. 120. 
-extraction_levels = 3 2 2 2 2 1 1 
+extraction_levels = 1 1 1 1 1 1 1 
 num_points_phi = 48
 num_points_theta = 60
 num_modes = 5
@@ -180,17 +163,17 @@ write_extraction = 0
 
 do_star_track = true
 number_of_stars = 2
-star_points = 11
-star_track_width_A = 2.
-star_track_width_B = 2.
-star_track_centre = 256 256 0 # deafults to L/2 L/2 L/2
+star_points = 7
+star_track_width_A = 3.
+star_track_width_B = 3.
+star_track_centre = 256 256 0 # defaults to center
 star_track_level = 5
 direction_of_motion = "x"
 
 ##############################################################
 # Apparent Horizon Finder parameters
 
-AH_activate = 1
+AH_activate = 0
 AH_num_ranks = 20
 AH_num_points_u = 30
 AH_num_points_v = 50
