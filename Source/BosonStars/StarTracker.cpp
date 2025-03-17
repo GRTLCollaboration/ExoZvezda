@@ -370,7 +370,6 @@ void StarTracker::read_in_star_coords(int a_int_step, double a_current_time)
 
     // NB need to give the get function an empty vector to fill
     std::vector<double> star_vector;
-    pout() << a_current_time << endl;
     star_file.get_specific_data_line(star_vector, a_current_time);
 
     // check the data returned is the right size

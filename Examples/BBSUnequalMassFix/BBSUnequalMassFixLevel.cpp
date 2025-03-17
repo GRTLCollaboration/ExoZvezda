@@ -28,10 +28,6 @@
 #include "ComputePack.hpp"
 #include "SetValue.hpp"
 
-// For mass extraction
-#include "ADMMass.hpp"
-#include "ADMMassExtraction.hpp"
-
 // For GW extraction
 #include "MatterWeyl4.hpp"
 #include "WeylExtraction.hpp"
