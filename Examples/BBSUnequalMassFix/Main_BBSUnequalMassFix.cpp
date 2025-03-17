@@ -37,7 +37,7 @@ int runGRChombo(int argc, char *argv[])
     // and an associated LevelFactory)
     STAMR st_amr;
     
-    if (sim_params.do_star_track == 1)
+    if (sim_params.do_star_track)
     {
     st_amr.m_star_tracker.initialise_star_tracking(
         sim_params.number_of_stars,

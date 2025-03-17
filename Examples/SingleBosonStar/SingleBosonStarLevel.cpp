@@ -31,7 +31,6 @@
 // For mass extraction
 #include "ADMMass.hpp"
 #include "ADMMassExtraction.hpp"
-#include "EMTensor.hpp"
 
 // For Noether Charge calculation
 #include "NoetherCharge.hpp"

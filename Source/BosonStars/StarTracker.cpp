@@ -360,49 +360,6 @@ void StarTracker::update_star_centres(double a_dt)
     }
 }
 
-// Write all data to designated files
-// void StarTracker::write_to_dat(std::string a_filename, double a_dt,
-//                                double a_time, double a_restart_time,
-//                                bool a_first_step)
-// {
-//     int size;
-//     double eps = 10e-8;
-//     std::vector<double> star_coords;
-
-//     SmallDataIO star_centre_file(a_filename, a_dt, a_time, a_restart_time,
-//                                  SmallDataIO::APPEND, a_first_step);
-
-//     if (a_time > a_restart_time + eps)
-//         star_centre_file.remove_duplicate_time_data();
-
-//     std::vector<string> header_line(3. * m_num_stars);
-
-//     for (int n = 0; n < m_num_stars; n++)
-//     {
-//         header_line[3 * n] = "x" + to_string(n + 1);
-//         header_line[3 * n + 1] = "y" + to_string(n + 1);
-//         header_line[3 * n + 2] = "z" + to_string(n + 1);
-//     }
-
-//     if (a_time == 0.)
-//     {
-//         star_centre_file.write_header_line(header_line);
-//     }
-
-//     size = CH_SPACEDIM * m_num_stars;
-//     star_coords.resize(size, 0);
-
-//     for (int ipuncture = 0; ipuncture < m_num_stars; ++ipuncture)
-//     {
-//         for (int i = 0; i < CH_SPACEDIM; ++i)
-//         {
-//             star_coords[CH_SPACEDIM * ipuncture + i] =
-//                 m_star_coords[ipuncture][i];
-//         }
-//     }
-//     star_centre_file.write_time_data_line(star_coords);
-// }
-
 // Read a data line from the previous timestep
 void StarTracker::read_in_star_coords(int a_int_step, double a_current_time)
 {
@@ -439,7 +396,7 @@ void StarTracker::read_in_star_coords(int a_int_step, double a_current_time)
 
     for (int ipuncture = 0; ipuncture < m_num_stars; ipuncture++)
     {
-        pout() << "Puncture " << ipuncture
+        pout() << "Star " << ipuncture
                << " restarted at : " << m_star_coords[ipuncture][0] << " "
                << m_star_coords[ipuncture][1] << " "
                << m_star_coords[ipuncture][2] << endl;
@@ -447,6 +404,7 @@ void StarTracker::read_in_star_coords(int a_int_step, double a_current_time)
     }
 }
 
+// What to do post restart/how to read star coordinates in
 void StarTracker::restart_star_tracking()
 {
     int current_step = m_interpolator->getAMR().s_step;
@@ -460,15 +418,14 @@ void StarTracker::restart_star_tracking()
     }
     else
     {
-        pout() << "Starting read_in_punctures " << endl; 
-        // look for the current puncture location in the
-        // puncture output file (it needs to exist!)
+        // look for the current star location in the
+        // star output file (it needs to exist!)
         read_in_star_coords(current_step,
                           m_interpolator->getAMR().getCurrentTime());
     }
 }
 
-// Set and write initial puncture locations
+// Set and write initial star locations
 void StarTracker::set_initial_star_coords()
 {
     CH_assert(m_star_coords.size() > 0); // sanity check
@@ -514,7 +471,7 @@ void StarTracker::set_initial_star_coords()
     }
 }
 
-// Get a vector of the puncture coords - used for write out
+// Get a vector of the star coords - used for write out
 std::vector<double> StarTracker::get_star_vector() const
 {
     std::vector<double> star_vector;

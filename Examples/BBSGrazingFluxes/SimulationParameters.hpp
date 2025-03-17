@@ -40,6 +40,7 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("central_amplitude_CSF",
                 bosonstar_params.central_amplitude_CSF);
         pp.load("phase", bosonstar_params.phase, 0.0);
+        pp.load("antiboson", bosonstar_params.antiboson, false);
         pp.load("gridpoints", bosonstar_params.gridpoints, 1000000);
         pp.load("BS_solver_psc", bosonstar_params.PSC, 2.0);
         pp.load("BS_solver_omc", bosonstar_params.OMC, 0.5);
@@ -62,7 +63,6 @@ class SimulationParameters : public SimulationParametersBase
         //  Binary Boson Star Parameters
         // ######################################
 
-        pp.load("antiboson", bosonstar_params.antiboson, false);
         pp.load("BS_rapidity", bosonstar_params.BS_rapidity, 0.0);
         pp.load("BS_separation", bosonstar_params.BS_separation, 0.0);
         pp.load("BS_impact_parameter", bosonstar_params.BS_impact_parameter,
@@ -145,8 +145,7 @@ class SimulationParameters : public SimulationParametersBase
                 flux_extraction_params.extraction_center,
                 center);
 
-        // Flux and mass booleans 
-        pp.load("activate_mass_extraction", activate_mass_extraction, 0);
+        // Flux booleans 
         pp.load("flux_do", do_flux_integration, false);
 
         // Do we want to calculate and write the Noether Charge to a file
@@ -163,12 +162,10 @@ class SimulationParameters : public SimulationParametersBase
     BosonStar_params_t bosonstar2_params;
     ComplexPotential::params_t potential_params;
 
-    // Mass extraction
-    int activate_mass_extraction;
+    // Flux extraction
     extraction_params_t flux_extraction_params;
 
     // Fluxes intergaration
-//     extraction_params_t angmomflux_params;
     bool do_flux_integration;
 
     // Do we want to write the Noether Charge to a file

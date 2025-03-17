@@ -19,6 +19,7 @@
 #include "VarsTools.hpp"
 #include "WeightFunction.hpp"
 #include "parstream.H" 
+#include "simd.hpp"
 
 /*
 * This class constructs binary initial data following the method of https://arxiv.org/abs/2212.08023. This is generalisation of Helfer's trick/equal-mass fix. May be used for binaries of arbitrary mass ratio as well as equal-mass binaries.
