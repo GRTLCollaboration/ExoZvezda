@@ -65,7 +65,7 @@ void BBSGrazingFluxesLevel::initialData()
     if (m_verbosity)
         pout() << "BBSGrazingFluxesLevel::initialData " << m_level << endl;
 
-    // First initalise a BosonStar object
+    // Initialise initial data object
     BinaryEqualMassFix boson_star(m_p.bosonstar_params, m_p.bosonstar2_params,
                                   m_p.potential_params, m_dx);
 
