@@ -26,8 +26,9 @@ class SimulationParameters : public SimulationParametersBase
     void readParams(GRParmParse &pp)
     {
         pout() << "---------------------------------" << endl;
-        pout() << "Hello! You are running a boson star binary and testing fluxes'!"
-               << endl;
+        pout()
+            << "Hello! You are running a boson star binary and testing fluxes'!"
+            << endl;
 
         // Gravitional constant
         pp.load("G_Newton", G_Newton, 1.0);
@@ -126,7 +127,7 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("regrid_threshold_phi", regrid_threshold_phi);
         pp.load("regrid_threshold_chi", regrid_threshold_chi);
 
-        // Flux extraction parameters 
+        // Flux extraction parameters
         pp.load("flux_write_extraction",
                 flux_extraction_params.write_extraction, false);
         pp.load("num_flux_extraction_radii",
@@ -142,10 +143,9 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("num_points_theta_flux",
                 flux_extraction_params.num_points_theta, 4);
         pp.load("flux_extraction_center",
-                flux_extraction_params.extraction_center,
-                center);
+                flux_extraction_params.extraction_center, center);
 
-        // Flux booleans 
+        // Flux booleans
         pp.load("flux_do", do_flux_integration, false);
 
         // Do we want to calculate and write the Noether Charge to a file

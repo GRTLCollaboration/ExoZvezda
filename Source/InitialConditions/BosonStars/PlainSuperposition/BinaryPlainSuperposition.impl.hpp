@@ -4,17 +4,17 @@
  */
 
 #if !defined(BINARYPLAINSUPERPOSITION_HPP_)
-#error                                                                         
-    "This file should only be included through BinaryPlainSuperposition.impl.hpp"
+#error
+"This file should only be included through BinaryPlainSuperposition.impl.hpp"
 #endif
 
 #ifndef BINARYPLAINSUPERPOSITION_IMPL_HPP_
 #define BINARYPLAINSUPERPOSITION_IMPL_HPP_
 
-inline BinaryPlainSuperposition::BinaryPlainSuperposition(
-    BosonStar_params_t a_params_BosonStar,
-    BosonStar_params_t a_params_BosonStar2,
-    ComplexPotential::params_t a_params_potential, double a_dx)
+    inline BinaryPlainSuperposition::BinaryPlainSuperposition(
+        BosonStar_params_t a_params_BosonStar,
+        BosonStar_params_t a_params_BosonStar2,
+        ComplexPotential::params_t a_params_potential, double a_dx)
     : m_dx(a_dx), m_params_BosonStar(a_params_BosonStar),
       m_params_BosonStar2(a_params_BosonStar2),
       m_params_potential(a_params_potential)
@@ -48,13 +48,14 @@ void BinaryPlainSuperposition::compute_1d_solution(const double max_r)
     }
     catch (std::exception &exception)
     {
-        MayDay::Error("Yikes! I cannot compute the 1d solution in BinaryPlainSuperposition.impl.hpp file.");
+        MayDay::Error("Yikes! I cannot compute the 1d solution in "
+                      "BinaryPlainSuperposition.impl.hpp file.");
     }
 }
 
 template <class data_t>
 void BinaryPlainSuperposition::compute(Cell<data_t> current_cell) const
-{   
+{
     using namespace TensorAlgebra;
     MatterCCZ4<ComplexScalarField<>>::Vars<data_t> vars;
     current_cell.load_vars(vars);
@@ -76,24 +77,30 @@ void BinaryPlainSuperposition::compute(Cell<data_t> current_cell) const
     BosonStarHelperFunction helper;
 
     // Compute star 1 and star 2 variables
-    BosonStarHelperFunction::BS_3d_vars star1_vars = helper.compute_star_vars(coords, rapidity,  -q * separation / (q + 1.), q * impact_parameter / (q + 1.), m_1d_sol, phase_offset, false);
-    BosonStarHelperFunction::BS_3d_vars star2_vars = helper.compute_star_vars(coords, -rapidity2, separation / (q + 1.), -impact_parameter / (q + 1.), m_1d_sol2, 0.0, antiboson);
+    BosonStarHelperFunction::BS_3d_vars star1_vars = helper.compute_star_vars(
+        coords, rapidity, -q * separation / (q + 1.),
+        q * impact_parameter / (q + 1.), m_1d_sol, phase_offset, false);
+    BosonStarHelperFunction::BS_3d_vars star2_vars = helper.compute_star_vars(
+        coords, -rapidity2, separation / (q + 1.), -impact_parameter / (q + 1.),
+        m_1d_sol2, 0.0, antiboson);
 
     // Superpose shift
     vars.shift[0] += star1_vars.shiftx + star2_vars.shiftx;
-    
+
     // Superpose scalar vars
     vars.phi_Re += star1_vars.phi_Re + star2_vars.phi_Re;
     vars.phi_Im += star1_vars.phi_Im + star2_vars.phi_Im;
     vars.Pi_Re += star1_vars.Pi_Re + star2_vars.Pi_Re;
     vars.Pi_Im += star1_vars.Pi_Im + star2_vars.Pi_Im;
-    
+
     // Compute inverse metrics for star 1 and star 2
     auto gammaUU_1 = compute_inverse_sym(star1_vars.gLL);
     auto gammaUU_2 = compute_inverse_sym(star2_vars.gLL);
 
-    Tensor<2, data_t> gammaLL, KLL; // to store superposed metric and extrinsic curvature
-    FOR (i, j){
+    Tensor<2, data_t> gammaLL,
+        KLL; // to store superposed metric and extrinsic curvature
+    FOR(i, j)
+    {
         gammaLL[i][j] = 0.0;
         KLL[i][j] = 0.0;
     }
@@ -110,7 +117,8 @@ void BinaryPlainSuperposition::compute(Cell<data_t> current_cell) const
     vars.chi = pow(gammaLL[0][0] * gammaLL[1][1] * gammaLL[2][2], -1. / 3.);
 
     // Define initial lapse
-    vars.lapse += sqrt(star1_vars.lapse * star1_vars.lapse + star2_vars.lapse * star2_vars.lapse - 1.);
+    vars.lapse += sqrt(star1_vars.lapse * star1_vars.lapse +
+                       star2_vars.lapse * star2_vars.lapse - 1.);
 
     // Define initial trace of K and A_ij
     double one_third = 1. / 3.;

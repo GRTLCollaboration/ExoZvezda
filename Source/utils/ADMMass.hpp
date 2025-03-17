@@ -41,7 +41,7 @@ class ADMMass
     }
 
     template <class data_t> void compute(Cell<data_t> current_cell) const
-    {   
+    {
         // Load the required vars
         const auto vars = current_cell.template load_vars<Vars>();
         const auto d1 = m_deriv.template diff1<Diff1Vars>(current_cell);
@@ -54,12 +54,12 @@ class ADMMass
 
         Tensor<1, data_t> x = {coords.x, coords.y, coords.z};
 
-        // Normal to the surface 
-        Tensor<1, data_t> dS = {coords.x/r, coords.y/r, coords.z/r};
-        
+        // Normal to the surface
+        Tensor<1, data_t> dS = {coords.x / r, coords.y / r, coords.z / r};
+
         // ADM mass
         data_t Madm = 0.0;
-        
+
         FOR4(i, j, k, l)
         {
             Madm += dS[i] / (16. * M_PI) * h_UU[j][k] * h_UU[i][l] *

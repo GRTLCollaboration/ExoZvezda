@@ -144,9 +144,9 @@ void BBSUnequalMassFixLevel::specificEvalRHS(GRLevelData &a_soln,
     ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
     BoxLoops::loop(MatterCCZ4RHS<ComplexScalarFieldWithPotential>(
-        complex_scalar_field, m_p.ccz4_params, m_dx, m_p.sigma,
-      m_p.formulation, m_p.G_Newton),
-    a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
+                       complex_scalar_field, m_p.ccz4_params, m_dx, m_p.sigma,
+                       m_p.formulation, m_p.G_Newton),
+                   a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
 }
 
 // Things to do at ODE update, after soln + rhs
@@ -169,13 +169,13 @@ void BBSUnequalMassFixLevel::specificPostTimeStep()
     fillAllGhosts();
     ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
-    
-    BoxLoops::loop(
-        MatterWeyl4<ComplexScalarFieldWithPotential>(
-            complex_scalar_field, m_p.extraction_params.extraction_center, m_dx,
-            m_p.formulation, m_p.G_Newton), m_state_new, m_state_diagnostics,
-            EXCLUDE_GHOST_CELLS);
-        
+
+    BoxLoops::loop(MatterWeyl4<ComplexScalarFieldWithPotential>(
+                       complex_scalar_field,
+                       m_p.extraction_params.extraction_center, m_dx,
+                       m_p.formulation, m_p.G_Newton),
+                   m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+
     BoxLoops::loop(MatterConstraints<ComplexScalarFieldWithPotential>(
                        complex_scalar_field, m_dx, m_p.G_Newton, c_Ham,
                        Interval(c_Mom1, c_Mom3)),
@@ -276,11 +276,11 @@ void BBSUnequalMassFixLevel::specificPostTimeStep()
 
     if (m_p.do_star_track && m_level == m_p.star_track_level)
     {
-	    pout() << "Running a star tracker now" << endl;
+        pout() << "Running a star tracker now" << endl;
         int coarsest_level = 0;
         bool write_star_coords = at_level_timestep_multiple(coarsest_level);
-        m_st_amr.m_star_tracker.execute_tracking(m_time, m_restart_time,
-                                                 m_dt, write_star_coords);
+        m_st_amr.m_star_tracker.execute_tracking(m_time, m_restart_time, m_dt,
+                                                 write_star_coords);
     }
 
 #ifdef USE_AHFINDER

@@ -9,9 +9,9 @@
 // assign an enum to each variable
 enum
 {
-    c_mod_phi, 
+    c_mod_phi,
 
-    c_N, 
+    c_N,
 
     c_Ham,
 
@@ -33,13 +33,9 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
 
     "N",
 
-    "Ham",
-    "Mom1",
-    "Mom2",
-    "Mom3",
+    "Ham",      "Mom1",    "Mom2", "Mom3",
 
-    "Weyl4_Re",
-    "Weyl4_Im"
+    "Weyl4_Re", "Weyl4_Im"
 
 };
 

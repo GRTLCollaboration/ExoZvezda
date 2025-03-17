@@ -64,7 +64,7 @@ void SingleBosonStarLevel::initialData()
     SingleBosonStar boson_star(m_p.bosonstar_params, m_p.potential_params,
                                m_dx);
 
-   // Initialise initial data object
+    // Initialise initial data object
     boson_star.compute_1d_solution(4. * m_p.L);
 
     if (m_level == 0)
@@ -169,7 +169,8 @@ void SingleBosonStarLevel::specificPostTimeStep()
                    m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 
     if (m_p.activate_mass_extraction == 1 &&
-        at_level_timestep_multiple(m_p.mass_extraction_params.min_extraction_level()))
+        at_level_timestep_multiple(
+            m_p.mass_extraction_params.min_extraction_level()))
     {
         if (m_verbosity)
         {
@@ -181,11 +182,12 @@ void SingleBosonStarLevel::specificPostTimeStep()
         // Do the extraction on the min extraction level
         if (m_level == m_p.mass_extraction_params.min_extraction_level())
         {
-        // Now refresh the interpolator and do the interpolation
-        m_gr_amr.m_interpolator->refresh();
-        ADMMassExtraction mass_extraction(m_p.mass_extraction_params, m_dt,
-                                          m_time, first_step, m_restart_time);
-        mass_extraction.execute_query(m_gr_amr.m_interpolator);
+            // Now refresh the interpolator and do the interpolation
+            m_gr_amr.m_interpolator->refresh();
+            ADMMassExtraction mass_extraction(m_p.mass_extraction_params, m_dt,
+                                              m_time, first_step,
+                                              m_restart_time);
+            mass_extraction.execute_query(m_gr_amr.m_interpolator);
         }
     }
 

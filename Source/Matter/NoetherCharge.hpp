@@ -14,7 +14,8 @@
 #include "simd.hpp"
 
 /*
- *  Calculates the Noether Charge integrand values and the modulus of the complex scalar field on the grid
+ *  Calculates the Noether Charge integrand values and the modulus of the
+ * complex scalar field on the grid
  */
 
 class NoetherCharge

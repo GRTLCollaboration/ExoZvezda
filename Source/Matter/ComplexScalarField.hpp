@@ -11,11 +11,12 @@
 #include "FourthOrderDerivatives.hpp"
 #include "Tensor.hpp"
 #include "TensorAlgebra.hpp"
-#include "UserVariables.hpp" 
+#include "UserVariables.hpp"
 #include "VarsTools.hpp"
 
 /*
- * This class calculates the matter type specific elements for a complex scalar field
+ * This class calculates the matter type specific elements for a complex scalar
+ * field
  */
 
 template <class potential_t = ComplexPotential> class ComplexScalarField

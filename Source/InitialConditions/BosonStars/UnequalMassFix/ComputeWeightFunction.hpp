@@ -15,8 +15,8 @@
 #include "simd.hpp"
 
 /*
-* Class to compute the weight function, useful for visualisation mid run
-*/
+ * Class to compute the weight function, useful for visualisation mid run
+ */
 
 class ComputeWeightFunction
 {

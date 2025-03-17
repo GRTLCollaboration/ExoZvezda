@@ -15,7 +15,9 @@
 
 //! This class tags cells based on three criteria - the
 //! value of the second derivs, the extraction regions
-//! and the puncture 'horizons'. There are no horizon for BSs, but within a certain radius of the star, we will aim to place a box around it. Use of 'horizon' here is not to be taken literally.
+//! and the puncture 'horizons'. There are no horizon for BSs, but within a
+//! certain radius of the star, we will aim to place a box around it. Use of
+//! 'horizon' here is not to be taken literally.
 class BosonChiPunctureExtractionTaggingCriterion
 {
   protected:
@@ -124,7 +126,10 @@ class BosonChiPunctureExtractionTaggingCriterion
                 min(m_horizon_max_levels[0], m_horizon_max_levels[1]);
 
             if (puncture_separation >
-                (m_puncture_radii[1]/2. + m_puncture_radii[0]/2.)) //you may want to also try a puncture_separation > (m_puncture_radii[1] + m_puncture_radii[0])
+                (m_puncture_radii[1] / 2. +
+                 m_puncture_radii[0] /
+                     2.)) // you may want to also try a puncture_separation >
+                          // (m_puncture_radii[1] + m_puncture_radii[0])
             {
                 // punctures still far enough apart so tag around each one
                 // separately
@@ -191,7 +196,9 @@ class BosonChiPunctureExtractionTaggingCriterion
             // if punctures are close enough together tag cells at the
             // center of mass for the remnant
             if (puncture_separation <
-                m_puncture_radii[0]/2. + m_puncture_radii[1]/2. + m_buffer) //you may want to also try a puncture_separation > (m_puncture_radii[1] + m_puncture_radii[0])
+                m_puncture_radii[0] / 2. + m_puncture_radii[1] / 2. +
+                    m_buffer) // you may want to also try a puncture_separation
+                              // > (m_puncture_radii[1] + m_puncture_radii[0])
             {
                 std::array<double, CH_SPACEDIM> center_of_mass;
                 FOR1(idir)

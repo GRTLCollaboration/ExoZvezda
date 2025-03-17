@@ -6,9 +6,9 @@
 #ifndef SINGLEBOSONSTAR_HPP_
 #define SINGLEBOSONSTAR_HPP_
 
+#include "BosonStarHelperFunction.hpp"
 #include "BosonStarParams.hpp"
 #include "BosonStarSolver.hpp"
-#include "BosonStarHelperFunction.hpp"
 #include "Cell.hpp"
 #include "ComplexPotential.hpp"
 #include "ComplexScalarField.hpp"
@@ -16,14 +16,14 @@
 #include "MatterCCZ4.hpp"
 #include "Tensor.hpp"
 #include "TensorAlgebra.hpp"
-#include "UserVariables.hpp" 
+#include "UserVariables.hpp"
 #include "VarsTools.hpp"
-#include "parstream.H" 
+#include "parstream.H"
 #include "simd.hpp"
 
 /*
-* This class constructs binary initial data for a single BS
-*/
+ * This class constructs binary initial data for a single BS
+ */
 
 class SingleBosonStar
 {
@@ -45,7 +45,7 @@ class SingleBosonStar
 
   protected:
     double m_dx;
-    BosonStar_params_t m_params_BosonStar; 
+    BosonStar_params_t m_params_BosonStar;
     ComplexPotential::params_t m_params_potential;
 };
 

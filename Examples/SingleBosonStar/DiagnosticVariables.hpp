@@ -9,12 +9,12 @@
 // assign an enum to each variable
 enum
 {
-    c_mod_phi, 
+    c_mod_phi,
 
     c_Madm,
     c_Jadm,
 
-    c_N, 
+    c_N,
 
     c_Ham,
 
@@ -31,14 +31,11 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
 
     "mod_phi",
 
-    "Madm",
-    "Jadm",
+    "Madm",    "Jadm",
 
     "N",
 
-    "Ham",
-    "Mom1",
-    "Mom2",
+    "Ham",     "Mom1", "Mom2",
     "Mom3"
 
 };

@@ -92,8 +92,7 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("num_points_theta_mass",
                 mass_extraction_params.num_points_theta, 4);
         pp.load("mass_extraction_center",
-                mass_extraction_params.extraction_center,
-                center);
+                mass_extraction_params.extraction_center, center);
 
         // Do we want to calculate and write the Noether Charge to a file
         pp.load("calculate_noether_charge", calculate_noether_charge, false);

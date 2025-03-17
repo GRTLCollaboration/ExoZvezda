@@ -7,8 +7,8 @@
 #define WEIGHTFUNCTION_HPP_
 
 /*
-* This class defined the weight function needed for unequal-mass fix 
-*/
+ * This class defined the weight function needed for unequal-mass fix
+ */
 
 class WeightFunction
 {
@@ -17,12 +17,12 @@ class WeightFunction
 
     // Weight function used in https://arxiv.org/abs/2212.08023
     double profile_chi(double coord_x, double coord_y, double coord_z,
-        double radius_width)
+                       double radius_width)
     {
         double denom = sqrt(pow(radius_width, 2) + pow(coord_x, 2) +
-             pow(coord_y, 2) + pow(coord_z, 2));
+                            pow(coord_y, 2) + pow(coord_z, 2));
         return 1. / denom;
-    }   
+    }
 
     // Alternative weight function *UNUSED*
     double compute_weight(double scaledr, int n) const
@@ -72,14 +72,13 @@ class WeightFunction
 
         else
         {
-            MayDay::Error("You have requested n parameter larger than implemented!");
+            MayDay::Error(
+                "You have requested n parameter larger than implemented!");
             weightfunc = 0.0;
         }
 
         return weightfunc;
     }
-
-    
 };
 
 #endif /* WEIGHTFUNCTION_HPP_ */

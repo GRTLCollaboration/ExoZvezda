@@ -16,8 +16,9 @@
 #include <string>
 
 /*
-* This is 1D BS solver based on a shooting method. Isotropic gauge is assumed and the equations are integarted out using RK4
-*/
+ * This is 1D BS solver based on a shooting method. Isotropic gauge is assumed
+ * and the equations are integarted out using RK4
+ */
 
 BosonStarSolver::BosonStarSolver() {}
 
@@ -63,10 +64,11 @@ void BosonStarSolver::main()
         OM_INF = omega[gridsize - 1];
 
         if (enable_matching)
-            {
+        {
             rk4_match(matching_index, omega_true);
-            }
-        else{
+        }
+        else
+        {
             rk4_asymp(matching_index, false, omega_true);
         }
 
@@ -421,7 +423,7 @@ void BosonStarSolver::rk4(const double ww_)
 // radius in order to find correct asymptotic behaviour. It will give an error,
 // if the radius reached is below 8e7.
 void BosonStarSolver::rk4_asymp(const int iter, const bool adaptive,
-                                  const double ww_)
+                                const double ww_)
 {
     double o1 = 0, o2 = 0, o3 = 0, o4 = 0, s1 = 0, s2 = 0, s3 = 0, s4 = 0,
            r1 = 0, r2 = 0, r3 = 0, r4 = 0; // for RK steps
@@ -512,45 +514,49 @@ void BosonStarSolver::rk4_asymp(const int iter, const bool adaptive,
 }
 
 // Matches the solution to the correct asymptotics at index iter
-void BosonStarSolver::rk4_match(const int iter,
-                                  const double ww_)
+void BosonStarSolver::rk4_match(const int iter, const double ww_)
 {
-    double o1 = 0, o2 = 0, o3 = 0, o4 = 0, s1 = 0, s2 = 0, s3 = 0, s4 = 0, r1 = 0, r2 = 0, r3 = 0, r4 = 0;
+    double o1 = 0, o2 = 0, o3 = 0, o4 = 0, s1 = 0, s2 = 0, s3 = 0, s4 = 0,
+           r1 = 0, r2 = 0, r3 = 0, r4 = 0;
     double r, dr;
     double c1, c2;
     double Amp, eta, mass, om0, epsilon;
-                                
+
     om0 = pow(1 / omega[iter], 2);
     mass = -psi[iter] * dpsi[iter] * radius_array[iter] * radius_array[iter];
     epsilon = mass * (1 - 2 * ww_) / sqrt(1 - ww_ / om0);
-                                
+
     r = radius_array[iter];
-    
-    // Coefficients using for matching the asymptotics 
+
+    // Coefficients using for matching the asymptotics
     c1 = A[iter] * pow(r, 1 + epsilon) * exp(r * sqrt(1 - ww_ / om0));
     c2 = dA[iter] * pow(r, 1 + epsilon) * exp(r * sqrt(1 - ww_ / om0));
-                                
+
     if (BS_verbosity)
     {
         pout() << "Constant A " << c1 << endl;
         pout() << "Constant B " << c2 << endl;
     }
-                                
+
     for (int i = iter + 1; i < gridsize; ++i)
     {
         dr = radius_array[i] - radius_array[i - 1];
-                                
+
         // 1st RK step
         r = radius_array[i - 1];
         om0 = pow(1 / omega[i - 1], 2);
-        mass = -psi[i - 1] * dpsi[i - 1] * radius_array[i - 1] * radius_array[i - 1];
+        mass = -psi[i - 1] * dpsi[i - 1] * radius_array[i - 1] *
+               radius_array[i - 1];
         epsilon = mass * (1 - 2 * ww_) / sqrt(1 - ww_ / om0);
         Amp = c1 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
         eta = c2 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
-        o1 = dr * OMEGA_RHS(r, Amp, eta, psi[i - 1], dpsi[i - 1], omega[i - 1], ww_);
-        s1 = dr * PSI_RHS(r, Amp, eta, psi[i - 1], dpsi[i - 1], omega[i - 1], ww_);
-        r1 = dr * DPSI_RHS(r, Amp, eta, psi[i - 1], dpsi[i - 1], omega[i - 1], ww_);
-                                
+        o1 = dr *
+             OMEGA_RHS(r, Amp, eta, psi[i - 1], dpsi[i - 1], omega[i - 1], ww_);
+        s1 = dr *
+             PSI_RHS(r, Amp, eta, psi[i - 1], dpsi[i - 1], omega[i - 1], ww_);
+        r1 = dr *
+             DPSI_RHS(r, Amp, eta, psi[i - 1], dpsi[i - 1], omega[i - 1], ww_);
+
         // 2nd RK step
         r = radius_array[i - 1] + 0.5 * dr;
         om0 = pow(1 / (omega[i - 1] + o1 / 2.), 2);
@@ -558,10 +564,13 @@ void BosonStarSolver::rk4_match(const int iter,
         epsilon = mass * (1 - 2 * ww_) / sqrt(1 - ww_ / om0);
         Amp = c1 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
         eta = c2 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
-        o2 = dr * OMEGA_RHS(r, Amp, eta, psi[i - 1] + s1 / 2., dpsi[i - 1] + r1 / 2., omega[i - 1] + o1 / 2., ww_);
-        s2 = dr * PSI_RHS(r, Amp, eta, psi[i - 1] + s1 / 2., dpsi[i - 1] + r1 / 2., omega[i - 1] + o1 / 2., ww_);
-        r2 = dr * DPSI_RHS(r, Amp, eta, psi[i - 1] + s1 / 2., dpsi[i - 1] + r1 / 2., omega[i - 1] + o1 / 2., ww_);
-                                
+        o2 = dr * OMEGA_RHS(r, Amp, eta, psi[i - 1] + s1 / 2.,
+                            dpsi[i - 1] + r1 / 2., omega[i - 1] + o1 / 2., ww_);
+        s2 = dr * PSI_RHS(r, Amp, eta, psi[i - 1] + s1 / 2.,
+                          dpsi[i - 1] + r1 / 2., omega[i - 1] + o1 / 2., ww_);
+        r2 = dr * DPSI_RHS(r, Amp, eta, psi[i - 1] + s1 / 2.,
+                           dpsi[i - 1] + r1 / 2., omega[i - 1] + o1 / 2., ww_);
+
         // 3rd RK step
         r = radius_array[i - 1] + 0.5 * dr;
         om0 = pow(1 / (omega[i - 1] + o2 / 2.), 2);
@@ -569,10 +578,13 @@ void BosonStarSolver::rk4_match(const int iter,
         epsilon = mass * (1 - 2 * ww_) / sqrt(1 - ww_ / om0);
         Amp = c1 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
         eta = c2 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
-        o3 = dr * OMEGA_RHS(r, Amp, eta, psi[i - 1] + s2 / 2., dpsi[i - 1] + r2 / 2., omega[i - 1] + o2 / 2., ww_);
-        s3 = dr * PSI_RHS(r, Amp, eta, psi[i - 1] + s2 / 2., dpsi[i - 1] + r2 / 2., omega[i - 1] + o2 / 2., ww_);
-        r3 = dr * DPSI_RHS(r, Amp, eta, psi[i - 1] + s2 / 2., dpsi[i - 1] + r2 / 2., omega[i - 1] + o2 / 2., ww_);
-                                
+        o3 = dr * OMEGA_RHS(r, Amp, eta, psi[i - 1] + s2 / 2.,
+                            dpsi[i - 1] + r2 / 2., omega[i - 1] + o2 / 2., ww_);
+        s3 = dr * PSI_RHS(r, Amp, eta, psi[i - 1] + s2 / 2.,
+                          dpsi[i - 1] + r2 / 2., omega[i - 1] + o2 / 2., ww_);
+        r3 = dr * DPSI_RHS(r, Amp, eta, psi[i - 1] + s2 / 2.,
+                           dpsi[i - 1] + r2 / 2., omega[i - 1] + o2 / 2., ww_);
+
         // 4th RK step
         r = radius_array[i];
         om0 = pow(1 / (omega[i - 1] + o3), 2);
@@ -580,10 +592,13 @@ void BosonStarSolver::rk4_match(const int iter,
         epsilon = mass * (1 - 2 * ww_) / sqrt(1 - ww_ / om0);
         Amp = c1 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
         eta = c2 * exp(-r * sqrt(1 - ww_ / om0)) * pow(r, -1 - epsilon);
-        o4 = dr * OMEGA_RHS(r, Amp, eta, psi[i - 1] + s3, dpsi[i - 1] + r3, omega[i - 1] + o3, ww_);
-        s4 = dr * PSI_RHS(r, Amp, eta, psi[i - 1] + s3, dpsi[i - 1] + r3, omega[i - 1] + o3, ww_);
-        r4 = dr * DPSI_RHS(r, Amp, eta, psi[i - 1] + s3, dpsi[i - 1] + r3, omega[i - 1] + o3, ww_);
-                                
+        o4 = dr * OMEGA_RHS(r, Amp, eta, psi[i - 1] + s3, dpsi[i - 1] + r3,
+                            omega[i - 1] + o3, ww_);
+        s4 = dr * PSI_RHS(r, Amp, eta, psi[i - 1] + s3, dpsi[i - 1] + r3,
+                          omega[i - 1] + o3, ww_);
+        r4 = dr * DPSI_RHS(r, Amp, eta, psi[i - 1] + s3, dpsi[i - 1] + r3,
+                           omega[i - 1] + o3, ww_);
+
         // Update variables
         psi[i] = psi[i - 1] + (s1 + 2. * s2 + 2. * s3 + s4) / 6.;
         dpsi[i] = dpsi[i - 1] + (r1 + 2. * r2 + 2. * r3 + r4) / 6.;
@@ -599,18 +614,17 @@ void BosonStarSolver::rk4_match(const int iter,
 
 // RHS for BS amplitude
 double BosonStarSolver::A_RHS(const double x, const double A, const double DA,
-                                const double PSI, const double DPSI,
-                                const double OM, const double ww_)
+                              const double PSI, const double DPSI,
+                              const double OM, const double ww_)
 {
     double RHS = DA;
     return RHS;
 }
 
 // RHS for the derivative of the BS amplitude
-double BosonStarSolver::DA_RHS(const double x, const double A,
-                                 const double DA, const double PSI,
-                                 const double DPSI, const double OM,
-                                 const double ww_)
+double BosonStarSolver::DA_RHS(const double x, const double A, const double DA,
+                               const double PSI, const double DPSI,
+                               const double OM, const double ww_)
 {
     double r = ((x == 0.) ? eps : x);
     double DOM = OMEGA_RHS(x, A, DA, PSI, DPSI, OM, ww_);
@@ -619,10 +633,9 @@ double BosonStarSolver::DA_RHS(const double x, const double A,
 }
 
 // RHS for the conformal factor
-double BosonStarSolver::PSI_RHS(const double x, const double A,
-                                  const double DA, const double PSI,
-                                  const double DPSI, const double OM,
-                                  const double ww_)
+double BosonStarSolver::PSI_RHS(const double x, const double A, const double DA,
+                                const double PSI, const double DPSI,
+                                const double OM, const double ww_)
 {
     double RHS = DPSI;
     return RHS;
@@ -630,9 +643,9 @@ double BosonStarSolver::PSI_RHS(const double x, const double A,
 
 // RHS for the derivative of the conformal factor
 double BosonStarSolver::DPSI_RHS(const double x, const double A,
-                                   const double DA, const double PSI,
-                                   const double DPSI, const double OM,
-                                   const double ww_)
+                                 const double DA, const double PSI,
+                                 const double DPSI, const double OM,
+                                 const double ww_)
 {
     double r = ((x == 0.) ? eps : x);
     return 0.5 * DPSI * DPSI / PSI - 2. * DPSI / r -
@@ -643,9 +656,9 @@ double BosonStarSolver::DPSI_RHS(const double x, const double A,
 
 // RHS for the lapse
 double BosonStarSolver::OMEGA_RHS(const double x, const double A,
-                                    const double DA, const double PSI,
-                                    const double DPSI, const double OM,
-                                    const double ww_)
+                                  const double DA, const double PSI,
+                                  const double DPSI, const double OM,
+                                  const double ww_)
 {
     double r = ((x == 0.) ? eps : x);
     return (OM / (x * DPSI + PSI)) *

@@ -6,24 +6,27 @@
 #ifndef BINARYUNEQUALMASSFIX_HPP_
 #define BINARYUNEQUALMASSFIX_HPP_
 
+#include "BosonStarHelperFunction.hpp"
 #include "BosonStarParams.hpp"
 #include "BosonStarSolver.hpp"
-#include "BosonStarHelperFunction.hpp"
 #include "Cell.hpp"
 #include "ComplexPotential.hpp"
 #include "ComplexScalarField.hpp"
 #include "Coordinates.hpp"
 #include "MatterCCZ4.hpp"
 #include "Tensor.hpp"
-#include "UserVariables.hpp" 
+#include "UserVariables.hpp"
 #include "VarsTools.hpp"
 #include "WeightFunction.hpp"
-#include "parstream.H" 
+#include "parstream.H"
 #include "simd.hpp"
 
 /*
-* This class constructs binary initial data following the method of https://arxiv.org/abs/2212.08023. This is generalisation of Helfer's trick/equal-mass fix. May be used for binaries of arbitrary mass ratio as well as equal-mass binaries.
-*/
+ * This class constructs binary initial data following the method of
+ * https://arxiv.org/abs/2212.08023. This is generalisation of Helfer's
+ * trick/equal-mass fix. May be used for binaries of arbitrary mass ratio as
+ * well as equal-mass binaries.
+ */
 
 class BinaryUnequalMassFix
 {
@@ -53,7 +56,7 @@ class BinaryUnequalMassFix
   protected:
     double m_dx;
     BosonStar_params_t m_params_BosonStar;
-    BosonStar_params_t m_params_BosonStar2; 
+    BosonStar_params_t m_params_BosonStar2;
     ComplexPotential::params_t m_params_potential;
 };
 
