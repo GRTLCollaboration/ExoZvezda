@@ -37,9 +37,9 @@ class BosonStarSolver
     const int adaptive_stepsize_repetitions = 20; // 50; // 0 for no adaptive
     double L, dx;                                 // L, length of domain, dx.
     double omega_ansatz,
-        omega_true; // ansatz of omega, square of BS frequency (note! here we
-                    // work with squares, so don't forget to take a square root
-                    // when finding the right value)
+        omega_true; // ansatz of omega, BS frequency squared (note! here we
+                    // work with squared values, so don't forget to take a
+                    // square root when finding the right value)
     double OM_INF, PSI_INF; // asymptotics of the lapse and conformal factpr
     int matching_index;     // integer where growing mode becomes relevant
     double eps = 10e-20;    // some very small number
