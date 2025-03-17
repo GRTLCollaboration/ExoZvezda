@@ -730,8 +730,7 @@ double BosonStarSolver::get_A_interp(const double r) const
         MayDay::Error("FArrayBox domain exceeding star radius!");
     }
 
-    // do the cubic spline, from mathematica script written by Robin
-    // (rc634@cam.ac.uk)
+    // do the cubic spline, from mathematica script written by Robin Croft
     interpolated_value =
         (1. / 48.) *
         (f1 * (-3. + 2. * a + 12. * a * a - 8. * a * a * a) +
@@ -760,8 +759,7 @@ double BosonStarSolver::get_dA_interp(const double r) const
         MayDay::Error("FArrayBox domain exceeding star radius!");
     }
 
-    // do the cubic spline, from mathematica script written by Robin
-    // (rc634@cam.ac.uk)
+    // do the cubic spline, from mathematica script written by Robin Croft
     interpolated_value =
         (1. / 48.) *
         (f1 * (-3. + 2. * a + 12. * a * a - 8. * a * a * a) +
@@ -790,8 +788,7 @@ double BosonStarSolver::get_lapse_interp(const double r) const
         MayDay::Error("FArrayBox domain exceeding star radius!");
     }
 
-    // do the cubic spline, from mathematica script written by Robin
-    // (rc634@cam.ac.uk)
+    // do the cubic spline, from mathematica script written by Robin Croft
     interpolated_value =
         (1. / 48.) *
         (f1 * (-3. + 2. * a + 12. * a * a - 8. * a * a * a) +
@@ -820,8 +817,7 @@ double BosonStarSolver::get_psi_interp(const double r) const
         MayDay::Error("FArrayBox domain exceeding star radius!");
     }
 
-    // do the cubic spline, from mathematica script written by Robin
-    // (rc634@cam.ac.uk)
+    // do the cubic spline, from mathematica script written by Robin Croft
     interpolated_value =
         (1. / 48.) *
         (f1 * (-3. + 2. * a + 12. * a * a - 8. * a * a * a) +
@@ -851,8 +847,7 @@ double BosonStarSolver::get_dpsi_interp(const double r) const
         MayDay::Error("FArrayBox domain exceeding star radius!");
     }
 
-    // do the cubic spline, from mathematica script written by Robin
-    // (rc634@cam.ac.uk)
+    // do the cubic spline, from mathematica script written by Robin Croft
     interpolated_value =
         (1. / 48.) *
         (f1 * (-3. + 2. * a + 12. * a * a - 8. * a * a * a) +
@@ -882,7 +877,7 @@ double BosonStarSolver::get_dlapse_interp(const double r) const
     }
 
     // do the cubic spline (for gradient now), from mathematica script written
-    // by Robin (rc634@cam.ac.uk)
+    // by Robin Croft
     interpolated_value =
         (1. / (24. * dx)) *
         ((f1 - 27. * f2 + 27. * f3 - f4) + 12. * a * (f1 - f2 - f3 + f4) -

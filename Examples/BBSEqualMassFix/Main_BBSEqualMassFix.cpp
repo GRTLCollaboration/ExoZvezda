@@ -37,11 +37,15 @@ int runGRChombo(int argc, char *argv[])
     // and an associated LevelFactory)
     STAMR st_amr;
 
+    if (sim_params.do_star_track)
+    {
     st_amr.m_star_tracker.initialise_star_tracking(
-        sim_params.do_star_track, sim_params.number_of_stars,
+        sim_params.number_of_stars,
         {sim_params.positionA, sim_params.positionB}, sim_params.star_points,
         sim_params.star_track_width_A, sim_params.star_track_width_B,
         sim_params.star_track_direction_of_motion);
+    }
+
     DefaultLevelFactory<BBSEqualMassFixLevel> boson_star_level_fact(st_amr,
                                                                     sim_params);
     setupAMRObject(st_amr, boson_star_level_fact);
@@ -51,6 +55,10 @@ int runGRChombo(int argc, char *argv[])
         st_amr, sim_params.origin, sim_params.dx, sim_params.boundary_params,
         sim_params.verbosity);
     st_amr.set_interpolator(&interpolator);
+
+    // must be after interpolator is set
+    if (sim_params.do_star_track)
+        st_amr.m_star_tracker.restart_star_tracking();
 
 #ifdef USE_AHFINDER
     if (sim_params.AH_activate)

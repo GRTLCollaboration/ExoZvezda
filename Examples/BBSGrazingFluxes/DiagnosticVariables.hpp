@@ -11,9 +11,6 @@ enum
 {
     c_mod_phi, 
 
-    c_Madm,
-    c_Jadm,
-
     c_N, 
 
     c_Ham,
@@ -50,9 +47,6 @@ namespace DiagnosticVariables
 static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
 
     "mod_phi",
-
-    "Madm",
-    "Jadm",
 
     "N",
 

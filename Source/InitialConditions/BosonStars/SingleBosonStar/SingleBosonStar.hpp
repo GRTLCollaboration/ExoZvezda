@@ -19,6 +19,7 @@
 #include "UserVariables.hpp" 
 #include "VarsTools.hpp"
 #include "parstream.H" 
+#include "simd.hpp"
 
 /*
 * This class constructs binary initial data for a single BS

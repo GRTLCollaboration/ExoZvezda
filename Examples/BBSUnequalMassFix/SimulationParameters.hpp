@@ -41,6 +41,7 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("central_amplitude_CSF",
                 bosonstar_params.central_amplitude_CSF);
         pp.load("phase", bosonstar_params.phase, 0.0);
+        pp.load("antiboson", bosonstar_params.antiboson, false);
         pp.load("gridpoints", bosonstar_params.gridpoints, 400000);
         pp.load("BS_solver_psc", bosonstar_params.PSC, 2.0);
         pp.load("BS_solver_omc", bosonstar_params.OMC, 0.5);
@@ -63,7 +64,6 @@ class SimulationParameters : public SimulationParametersBase
         //  Binary Boson Star Parameters
         // ######################################
 
-        pp.load("antiboson", bosonstar_params.antiboson, false);
         pp.load("BS_rapidity", bosonstar_params.BS_rapidity, 0.0);
         pp.load("BS_separation", bosonstar_params.BS_separation, 0.0);
         pp.load("BS_impact_parameter", bosonstar_params.BS_impact_parameter,
@@ -131,26 +131,6 @@ class SimulationParameters : public SimulationParametersBase
         pp.load("regrid_threshold_phi", regrid_threshold_phi);
         pp.load("regrid_threshold_chi", regrid_threshold_chi);
 
-        // Mass extraction
-        pp.load("activate_mass_extraction", activate_mass_extraction, 0);
-        pp.load("mass_write_extraction",
-                mass_extraction_params.write_extraction, false);
-        pp.load("num_mass_extraction_radii",
-                mass_extraction_params.num_extraction_radii, 1);
-        pp.load("mass_extraction_levels",
-                mass_extraction_params.extraction_levels,
-                mass_extraction_params.num_extraction_radii, 0);
-        pp.load("mass_extraction_radii",
-                mass_extraction_params.extraction_radii,
-                mass_extraction_params.num_extraction_radii, 0.1);
-        pp.load("num_points_phi_mass", mass_extraction_params.num_points_phi,
-                2);
-        pp.load("num_points_theta_mass",
-                mass_extraction_params.num_points_theta, 4);
-        pp.load("mass_extraction_center",
-                mass_extraction_params.extraction_center,
-                center);
-
         // Do we want to calculate and write the Noether Charge to a file
         pp.load("calculate_noether_charge", calculate_noether_charge, false);
     }
@@ -164,10 +144,6 @@ class SimulationParameters : public SimulationParametersBase
     BosonStar_params_t bosonstar_params;
     BosonStar_params_t bosonstar2_params;
     ComplexPotential::params_t potential_params;
-
-    // Mass extraction
-    int activate_mass_extraction;
-    extraction_params_t mass_extraction_params;
 
     // Do we want to write the Noether Charge to a file
     bool calculate_noether_charge;

@@ -19,6 +19,7 @@
 #include "UserVariables.hpp" 
 #include "VarsTools.hpp"
 #include "parstream.H" 
+#include "simd.hpp"
 
 /*
 * This class constructs binary initial data following the method of https://arxiv.org/abs/2108.11995. This will be referred to as Thomas Helfer trick or equal-mass fix. Only valid for equal-mass (q=1) binaries!

@@ -27,7 +27,7 @@ class BosonStarSolver
     double sigma;      // self-interaction term for solitonic stars
     bool solitonic;    // false for mini/repulsive star, true for solitonic star
     bool BS_verbosity; // outputs more messages whilst finding the solution
-    bool enable_matching; // whether to enable matching to the BS asymptotics,
+    bool enable_matching; // whether to enable matching to the BS asymptotics (see https://arxiv.org/abs/2310.05200),
                           // otherwise the scalar field will be set smoothly to
                           // zero after some radius
     double EIGEN = 0;     // the desired eigenstate, 0 for ground

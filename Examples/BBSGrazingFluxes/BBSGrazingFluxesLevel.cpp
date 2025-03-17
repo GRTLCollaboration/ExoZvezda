@@ -320,20 +320,11 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
 
     if (m_p.do_star_track && m_level == m_p.star_track_level)
     {
-        pout() << "Running a star tracker now" << endl;
-        int current_step = m_gr_amr.m_interpolator->getAMR().s_step;
-
-        // at the restart time read from file
-        if (current_step != 0 && fabs(m_time - m_restart_time) < m_dt * 1.1)
-        {
-            pout() << "Reading star positions from file" << endl;
-            m_st_amr.m_star_tracker.read_old_centre_from_dat(
-                "StarCentres", m_dt, m_time, m_restart_time, first_step);
-        }
-        m_st_amr.m_star_tracker.update_star_centres(m_dt);
-        m_st_amr.m_star_tracker.write_to_dat("StarCentres", m_dt, m_time,
-                                             m_restart_time, first_step);
-    }
+	    pout() << "Running a star tracker now" << endl;
+        int coarsest_level = 0;
+        bool write_star_coords = at_level_timestep_multiple(coarsest_level);
+        m_st_amr.m_star_tracker.execute_tracking(m_time, m_restart_time,
+                                                 m_dt, write_star_coords);
 
 #ifdef USE_AHFINDER
     if (m_p.AH_activate && m_level == m_p.AH_params.level_to_run)

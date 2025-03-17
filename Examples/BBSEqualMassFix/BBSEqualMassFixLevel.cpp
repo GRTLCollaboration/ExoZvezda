@@ -28,10 +28,6 @@
 #include "ComputePack.hpp"
 #include "SetValue.hpp"
 
-// For mass extraction
-#include "ADMMass.hpp"
-#include "ADMMassExtraction.hpp"
-
 // For GW extraction
 #include "MatterWeyl4.hpp"
 #include "WeylExtraction.hpp"
@@ -40,7 +36,7 @@
 #include "NoetherCharge.hpp"
 #include "SmallDataIO.hpp"
 
-// For Chombo grid Functions
+// For Chombo grid functions
 #include "AMRReductions.hpp"
 
 // Things to do at each advance step, after the RK4 is calculated
@@ -166,20 +162,17 @@ void BBSEqualMassFixLevel::specificPostTimeStep()
 
     bool first_step = (m_time == 0.0);
 
-    // First compute the Weyl4 & ADM mass integrand values on the grid +
+    // First compute the Weyl4 +
     // constraints
     fillAllGhosts();
     ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
 
-    auto weyl4_adm_compute_pack = make_compute_pack(
+    BoxLoops::loop(
         MatterWeyl4<ComplexScalarFieldWithPotential>(
             complex_scalar_field, m_p.extraction_params.extraction_center, m_dx,
-            m_p.formulation, m_p.G_Newton),
-        ADMMass(m_p.center, m_dx));
-
-    BoxLoops::loop(weyl4_adm_compute_pack, m_state_new, m_state_diagnostics,
-                   EXCLUDE_GHOST_CELLS);
+            m_p.formulation, m_p.G_Newton), m_state_new, m_state_diagnostics,
+            EXCLUDE_GHOST_CELLS);
 
     BoxLoops::loop(MatterConstraints<ComplexScalarFieldWithPotential>(
                        complex_scalar_field, m_dx, m_p.G_Newton, c_Ham,
@@ -208,28 +201,6 @@ void BBSEqualMassFixLevel::specificPostTimeStep()
             WeylExtraction gw_extraction(m_p.extraction_params, m_dt, m_time,
                                          first_step, m_restart_time);
             gw_extraction.execute_query(m_gr_amr.m_interpolator);
-        }
-    }
-
-    // ADM mass
-    if (m_p.activate_mass_extraction == 1 &&
-        at_level_timestep_multiple(m_p.mass_extraction_params.min_extraction_level()))
-    {
-        if (m_verbosity)
-        {
-            pout() << "BBSEqualMassFixLevel::specificPostTimeStep:"
-                      " Extracting mass."
-                   << endl;
-        }
-
-        // Do the extraction on the min extraction level
-        if (m_level == m_p.mass_extraction_params.min_extraction_level())
-        {
-        // Now refresh the interpolator and do the interpolation
-        m_gr_amr.m_interpolator->refresh();
-        ADMMassExtraction mass_extraction(m_p.mass_extraction_params, m_dt,
-                                          m_time, first_step, m_restart_time);
-        mass_extraction.execute_query(m_gr_amr.m_interpolator);
         }
     }
 
@@ -304,19 +275,11 @@ void BBSEqualMassFixLevel::specificPostTimeStep()
 
     if (m_p.do_star_track && m_level == m_p.star_track_level)
     {
-    pout() << "Running a star tracker now" << endl;
-    int current_step = m_gr_amr.m_interpolator->getAMR().s_step;
-
-    // at the restart time read from file
-	if (current_step != 0 && fabs(m_time - m_restart_time) < m_dt * 1.1)
-        {
-	    pout() << "Reading star positions from file" << endl;
-        m_st_amr.m_star_tracker.read_old_centre_from_dat(
-                "StarCentres", m_dt, m_time, m_restart_time, first_step);
-        }
-        m_st_amr.m_star_tracker.update_star_centres(m_dt);
-        m_st_amr.m_star_tracker.write_to_dat("StarCentres", m_dt, m_time,
-                                             m_restart_time, first_step);
+	    pout() << "Running a star tracker now" << endl;
+        int coarsest_level = 0;
+        bool write_star_coords = at_level_timestep_multiple(coarsest_level);
+        m_st_amr.m_star_tracker.execute_tracking(m_time, m_restart_time,
+                                                 m_dt, write_star_coords);
     }
 
 #ifdef USE_AHFINDER
