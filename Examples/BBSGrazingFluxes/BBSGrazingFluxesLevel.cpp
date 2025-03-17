@@ -325,6 +325,7 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
         bool write_star_coords = at_level_timestep_multiple(coarsest_level);
         m_st_amr.m_star_tracker.execute_tracking(m_time, m_restart_time,
                                                  m_dt, write_star_coords);
+    }
 
 #ifdef USE_AHFINDER
     if (m_p.AH_activate && m_level == m_p.AH_params.level_to_run)
