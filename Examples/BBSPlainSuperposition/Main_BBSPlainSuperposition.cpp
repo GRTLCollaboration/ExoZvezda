@@ -39,11 +39,12 @@ int runGRChombo(int argc, char *argv[])
 
     if (sim_params.do_star_track)
     {
-    st_amr.m_star_tracker.initialise_star_tracking(
-        sim_params.number_of_stars,
-        {sim_params.positionA, sim_params.positionB}, sim_params.star_points,
-        sim_params.star_track_width_A, sim_params.star_track_width_B,
-        sim_params.star_track_direction_of_motion);
+        st_amr.m_star_tracker.initialise_star_tracking(
+            sim_params.number_of_stars,
+            {sim_params.positionA, sim_params.positionB},
+            sim_params.star_points, sim_params.star_track_width_A,
+            sim_params.star_track_width_B,
+            sim_params.star_track_direction_of_motion);
     }
     DefaultLevelFactory<BBSPlainSuperpositionLevel> boson_star_level_fact(
         st_amr, sim_params);
@@ -79,8 +80,7 @@ int runGRChombo(int argc, char *argv[])
     std::chrono::time_point<Clock> start_time = Clock::now();
 
     // Add a scheduler to call specificPostTimeStep on every AMRLevel at t=0
-    auto task = [](GRAMRLevel *level)
-    {
+    auto task = [](GRAMRLevel *level) {
         if (level->time() == 0.)
             level->specificPostTimeStep();
     };

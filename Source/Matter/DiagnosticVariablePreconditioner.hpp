@@ -24,11 +24,10 @@ template <class matter_t> class DiagnosticVariablePreconditioner
     using Vars = typename MatterCCZ4<matter_t>::template Vars<data_t>;
 
     //! Constructor
-    DiagnosticVariablePreconditioner(const matter_t &a_matter, const double dx,
-                            const double a_L,
-                            const std::array<double, CH_SPACEDIM> a_centre,
-                            const int a_c_var1 = -1, const int a_c_var2 = -1,
-                            const double a_radius = 0.)
+    DiagnosticVariablePreconditioner(
+        const matter_t &a_matter, const double dx, const double a_L,
+        const std::array<double, CH_SPACEDIM> a_centre, const int a_c_var1 = -1,
+        const int a_c_var2 = -1, const double a_radius = 0.)
         : m_matter(a_matter), m_deriv(dx), m_dx(dx), m_L(a_L),
           m_centre(a_centre), m_c_var1(a_c_var1), m_c_var2(a_c_var2),
           m_radius(a_radius)

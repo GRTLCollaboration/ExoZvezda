@@ -7,7 +7,8 @@
 #define COMPLEXPOTENTIAL_HPP_
 
 /*
- * Complex potential used for boson stars. Here you can choose from (i) mini, (ii) repulsive and (iii) solitonic potentials
+ * Complex potential used for boson stars. Here you can choose from (i) mini,
+ * (ii) repulsive and (iii) solitonic potentials
  */
 
 class ComplexPotential
@@ -16,9 +17,10 @@ class ComplexPotential
     struct params_t
     {
         double scalar_mass; // mass of the scalar field
-        double phi4_coeff; // self-interaction constant in \varphi^4 potential
-        bool solitonic; // boolean on whether to use a solitonic potential?
-        double sigma_solitonic; // self-interaction constant for a solitonic potential 
+        double phi4_coeff;  // self-interaction constant in \varphi^4 potential
+        bool solitonic;     // boolean on whether to use a solitonic potential?
+        double sigma_solitonic; // self-interaction constant for a solitonic
+                                // potential
     };
 
   private:
@@ -41,8 +43,8 @@ class ComplexPotential
         if (!m_params
                  .solitonic) // if the star is not solitonic, make lambda star
         {
-            // The potential value at \varphi (note the convention with factors of
-            // 1/2 m^2 |\varphi|^2 + lambda/2 |\varphi|^4)
+            // The potential value at \varphi (note the convention with factors
+            // of 1/2 m^2 |\varphi|^2 + lambda/2 |\varphi|^4)
             V_of_modulus_phi_squared =
                 m_params.scalar_mass * m_params.scalar_mass *
                     modulus_phi_squared +
@@ -57,8 +59,8 @@ class ComplexPotential
         }
         else // else star is solitonic
         {
-            // The potential value at \varphi (note the convention with factors of
-            // 1/2 m^2 |\varphi|^2 * (1 - \frac{2|\varphi|^2}{\sigma^2})^2)
+            // The potential value at \varphi (note the convention with factors
+            // of 1/2 m^2 |\varphi|^2 * (1 - \frac{2|\varphi|^2}{\sigma^2})^2)
             V_of_modulus_phi_squared = m_params.scalar_mass *
                                        m_params.scalar_mass *
                                        modulus_phi_squared *
@@ -66,7 +68,7 @@ class ComplexPotential
                                                     (m_params.sigma_solitonic *
                                                      m_params.sigma_solitonic),
                                            2);
-            
+
             // Again, the gradient below
             dVdmodulus_phi_squared =
                 m_params.scalar_mass * m_params.scalar_mass *

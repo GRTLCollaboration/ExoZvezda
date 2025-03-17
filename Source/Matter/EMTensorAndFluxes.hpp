@@ -25,13 +25,13 @@ template <class matter_t> class EMTensorAndFluxes
 
     //! Constructor
     EMTensorAndFluxes(const matter_t &a_matter, const double dx,
-                          const double a_L,
-                          const std::array<double, CH_SPACEDIM> a_centre,
-                          const int a_c_rho = -1, const int a_c_Fphi_flux = -1,
-                          const int a_c_Sphi_source = -1,
-                          const int a_c_Qphi_density = -1,
-                          const Interval a_c_Si = Interval(),
-                          const Interval a_c_Sij = Interval());
+                      const double a_L,
+                      const std::array<double, CH_SPACEDIM> a_centre,
+                      const int a_c_rho = -1, const int a_c_Fphi_flux = -1,
+                      const int a_c_Sphi_source = -1,
+                      const int a_c_Qphi_density = -1,
+                      const Interval a_c_Si = Interval(),
+                      const Interval a_c_Sij = Interval());
 
     template <class data_t> void compute(Cell<data_t> current_cell) const;
 

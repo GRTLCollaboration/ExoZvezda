@@ -11,21 +11,23 @@
 #include "Lagrange.hpp"
 
 /*
- * Class for tracking boson star positions by fitting a Gaussian to (1-conformal factor).
+ * Class for tracking boson star positions by fitting a Gaussian to (1-conformal
+ * factor).
  */
 
 class StarTracker
 {
   private:
     int m_num_stars; // number of stars
-    std::vector<std::array<double, CH_SPACEDIM>> m_star_coords; // here we will store the star positions
+    std::vector<std::array<double, CH_SPACEDIM>>
+        m_star_coords; // here we will store the star positions
     std::array<double, CH_SPACEDIM> m_centre;
-    int m_tracking_level; // levels to execute tracking on
-    int m_points;         // number of points used for tracking
-    std::vector<double> m_x_coords; // array to store x-coords
-    std::vector<double> m_y_coords; // array to store y-coords
-    std::vector<double> m_z_coords; // array to store z-coords
-    std::vector<double> m_sigma_vector;     // vector to store the error
+    int m_tracking_level;               // levels to execute tracking on
+    int m_points;                       // number of points used for tracking
+    std::vector<double> m_x_coords;     // array to store x-coords
+    std::vector<double> m_y_coords;     // array to store y-coords
+    std::vector<double> m_z_coords;     // array to store z-coords
+    std::vector<double> m_sigma_vector; // vector to store the error
     std::vector<double> m_vals_shifted_chi; // vector to store (1-chi)
     double m_width_A;                       // width for fitting around star A
     double m_width_B;                       // width for fitting around star B
@@ -77,7 +79,7 @@ class StarTracker
     // General function for fitting the stars' centres
     double find_centre(int num_star, int fitting_direction);
 
-    // Function for finding star positions near merger 
+    // Function for finding star positions near merger
     void find_centre_merger(int num_star, int fitting_direction);
 
     void update_star_centres(double a_dt);
@@ -86,14 +88,14 @@ class StarTracker
                       double a_restart_time, bool a_first_step);
 
     void read_in_star_coords(int a_int_step, double a_current_time);
-    
+
     void set_initial_star_coords();
 
     void restart_star_tracking();
 
-     // Execute the tracking and write out
-     void execute_tracking(double a_time, double a_restart_time, double a_dt,
-        const bool write_punctures = true);
+    // Execute the tracking and write out
+    void execute_tracking(double a_time, double a_restart_time, double a_dt,
+                          const bool write_punctures = true);
 
     ALWAYS_INLINE const std::vector<std::array<double, CH_SPACEDIM>> &
     get_star_coords() const

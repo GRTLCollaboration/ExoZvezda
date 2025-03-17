@@ -60,25 +60,25 @@ void BBSEqualMassFixLevel::initialData()
     if (m_verbosity)
         pout() << "BBSEqualMassFixLevel::initialData " << m_level << endl;
 
-    // Initialise initial data object 
+    // Initialise initial data object
     BinaryEqualMassFix boson_star(m_p.bosonstar_params, m_p.bosonstar2_params,
                                   m_p.potential_params, m_dx);
-    
+
     boson_star.compute_1d_solution(4. * m_p.L);
 
     if (m_level == 0)
     {
         pout() << "Star 1 has A[0] " << boson_star.central_amplitude1
-        << " mass " << boson_star.mass1 << " frequency "
-        << boson_star.frequency1 << " radius " << boson_star.radius1
-        << " and compactness " << boson_star.compactness1 << endl;
+               << " mass " << boson_star.mass1 << " frequency "
+               << boson_star.frequency1 << " radius " << boson_star.radius1
+               << " and compactness " << boson_star.compactness1 << endl;
 
         pout() << "Star 2 has A[0] " << boson_star.central_amplitude2
-        << " mass " << boson_star.mass2 << " frequency "
-        << boson_star.frequency2 << " radius " << boson_star.radius2
-        << " and compactness " << boson_star.compactness2 << endl;  
+               << " mass " << boson_star.mass2 << " frequency "
+               << boson_star.frequency2 << " radius " << boson_star.radius2
+               << " and compactness " << boson_star.compactness2 << endl;
     }
-    
+
     // First set everything to zero, as we do not want undefined values in
     // constraints. Then set initial conditions for a BS.
     BoxLoops::loop(make_compute_pack(SetValue(0.0), boson_star), m_state_new,
@@ -142,9 +142,9 @@ void BBSEqualMassFixLevel::specificEvalRHS(GRLevelData &a_soln,
     ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
     BoxLoops::loop(MatterCCZ4RHS<ComplexScalarFieldWithPotential>(
-        complex_scalar_field, m_p.ccz4_params, m_dx, m_p.sigma,
-      m_p.formulation, m_p.G_Newton),
-  a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
+                       complex_scalar_field, m_p.ccz4_params, m_dx, m_p.sigma,
+                       m_p.formulation, m_p.G_Newton),
+                   a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
 }
 
 // Things to do at ODE update, after soln + rhs
@@ -168,11 +168,11 @@ void BBSEqualMassFixLevel::specificPostTimeStep()
     ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
 
-    BoxLoops::loop(
-        MatterWeyl4<ComplexScalarFieldWithPotential>(
-            complex_scalar_field, m_p.extraction_params.extraction_center, m_dx,
-            m_p.formulation, m_p.G_Newton), m_state_new, m_state_diagnostics,
-            EXCLUDE_GHOST_CELLS);
+    BoxLoops::loop(MatterWeyl4<ComplexScalarFieldWithPotential>(
+                       complex_scalar_field,
+                       m_p.extraction_params.extraction_center, m_dx,
+                       m_p.formulation, m_p.G_Newton),
+                   m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 
     BoxLoops::loop(MatterConstraints<ComplexScalarFieldWithPotential>(
                        complex_scalar_field, m_dx, m_p.G_Newton, c_Ham,
@@ -275,11 +275,11 @@ void BBSEqualMassFixLevel::specificPostTimeStep()
 
     if (m_p.do_star_track && m_level == m_p.star_track_level)
     {
-	    pout() << "Running a star tracker now" << endl;
+        pout() << "Running a star tracker now" << endl;
         int coarsest_level = 0;
         bool write_star_coords = at_level_timestep_multiple(coarsest_level);
-        m_st_amr.m_star_tracker.execute_tracking(m_time, m_restart_time,
-                                                 m_dt, write_star_coords);
+        m_st_amr.m_star_tracker.execute_tracking(m_time, m_restart_time, m_dt,
+                                                 write_star_coords);
     }
 
 #ifdef USE_AHFINDER

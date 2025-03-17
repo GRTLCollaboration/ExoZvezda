@@ -10,7 +10,8 @@
 #include <vector>
 
 /*
- * This class constructs 3+1 variables of the BS solution given user-specified parameters. The solution is constructed with the use of the 1D solver.
+ * This class constructs 3+1 variables of the BS solution given user-specified
+ * parameters. The solution is constructed with the use of the 1D solver.
  */
 
 class BosonStarSolver
@@ -27,12 +28,13 @@ class BosonStarSolver
     double sigma;      // self-interaction term for solitonic stars
     bool solitonic;    // false for mini/repulsive star, true for solitonic star
     bool BS_verbosity; // outputs more messages whilst finding the solution
-    bool enable_matching; // whether to enable matching to the BS asymptotics (see https://arxiv.org/abs/2310.05200),
-                          // otherwise the scalar field will be set smoothly to
-                          // zero after some radius
-    double EIGEN = 0;     // the desired eigenstate, 0 for ground
-    int gridsize;         // number of grid points (10^6 is very good)
-    int adaptive_buffer;  // number of gridpoints to intergate more carefully
+    bool enable_matching; // whether to enable matching to the BS asymptotics
+                          // (see https://arxiv.org/abs/2310.05200), otherwise
+                          // the scalar field will be set smoothly to zero after
+                          // some radius
+    double EIGEN = 0;    // the desired eigenstate, 0 for ground
+    int gridsize;        // number of grid points (10^6 is very good)
+    int adaptive_buffer; // number of gridpoints to intergate more carefully
     const int adaptive_stepsize_repetitions = 20; // 50; // 0 for no adaptive
     double L, dx;                                 // L, length of domain, dx.
     double omega_ansatz,

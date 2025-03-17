@@ -6,9 +6,9 @@
 #ifndef BINARYEQUALMASSFIX_HPP_
 #define BINARYEQUALMASSFIX_HPP_
 
+#include "BosonStarHelperFunction.hpp"
 #include "BosonStarParams.hpp"
 #include "BosonStarSolver.hpp"
-#include "BosonStarHelperFunction.hpp"
 #include "Cell.hpp"
 #include "ComplexPotential.hpp"
 #include "ComplexScalarField.hpp"
@@ -16,14 +16,16 @@
 #include "MatterCCZ4.hpp"
 #include "Tensor.hpp"
 #include "TensorAlgebra.hpp"
-#include "UserVariables.hpp" 
+#include "UserVariables.hpp"
 #include "VarsTools.hpp"
-#include "parstream.H" 
+#include "parstream.H"
 #include "simd.hpp"
 
 /*
-* This class constructs binary initial data following the method of https://arxiv.org/abs/2108.11995. This will be referred to as Thomas Helfer trick or equal-mass fix. Only valid for equal-mass (q=1) binaries!
-*/
+ * This class constructs binary initial data following the method of
+ * https://arxiv.org/abs/2108.11995. This will be referred to as Thomas Helfer
+ * trick or equal-mass fix. Only valid for equal-mass (q=1) binaries!
+ */
 
 class BinaryEqualMassFix
 {
@@ -52,8 +54,8 @@ class BinaryEqualMassFix
   protected:
     double m_dx;
     BosonStar_params_t m_params_BosonStar;
-    BosonStar_params_t m_params_BosonStar2; 
-    ComplexPotential::params_t m_params_potential; 
+    BosonStar_params_t m_params_BosonStar2;
+    ComplexPotential::params_t m_params_potential;
 };
 
 #include "BinaryEqualMassFix.impl.hpp"

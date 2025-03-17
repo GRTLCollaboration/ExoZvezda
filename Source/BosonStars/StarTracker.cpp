@@ -185,7 +185,7 @@ double StarTracker::find_centre(int num_star, int fitting_direction)
         }
     }
     MayDay::Error("I have failed to apply Gaussian fitting!");
-    
+
     return 0;
 }
 
@@ -200,10 +200,8 @@ void StarTracker::find_centre_merger(int num_star, int fitting_direction)
 
     set_up_fitting(num_star, fitting_direction);
 
-    if (m_vals_shifted_chi.size() < m_points || 
-    m_x_coords.size() < m_points || 
-    m_y_coords.size() < m_points || 
-    m_z_coords.size() < m_points) 
+    if (m_vals_shifted_chi.size() < m_points || m_x_coords.size() < m_points ||
+        m_y_coords.size() < m_points || m_z_coords.size() < m_points)
     {
         MayDay::Error("Insufficient data in star tracking!");
     }
@@ -213,9 +211,10 @@ void StarTracker::find_centre_merger(int num_star, int fitting_direction)
     double fmin =
         *min_element(m_vals_shifted_chi.begin(), m_vals_shifted_chi.end());
 
-    if (fmax == fmin) {
+    if (fmax == fmin)
+    {
         MayDay::Error("fmax and fmin are equal, and I am dividing by zero!");
-        }
+    }
 
     double weight = 0.0;
     double sum1 = 0.0;
@@ -232,8 +231,9 @@ void StarTracker::find_centre_merger(int num_star, int fitting_direction)
 
         m_star_coords[num_star][0] = sum1 / sum2;
 
-        if (sum2 == 0.0) {
-             MayDay::Error("Division by zero detected in find_centre_merger");
+        if (sum2 == 0.0)
+        {
+            MayDay::Error("Division by zero detected in find_centre_merger");
         }
     }
 
@@ -248,9 +248,10 @@ void StarTracker::find_centre_merger(int num_star, int fitting_direction)
 
         m_star_coords[num_star][1] = sum1 / sum2;
 
-        if (sum2 == 0.0) {
+        if (sum2 == 0.0)
+        {
             MayDay::Error("Division by zero detected in find_centre_merger");
-       }
+        }
     }
 
     if (fitting_direction == 2)
@@ -264,9 +265,10 @@ void StarTracker::find_centre_merger(int num_star, int fitting_direction)
 
         m_star_coords[num_star][2] = sum1 / sum2;
 
-        if (sum2 == 0.0) {
+        if (sum2 == 0.0)
+        {
             MayDay::Error("Division by zero detected in find_centre_merger");
-       }
+        }
     }
 }
 
@@ -277,8 +279,7 @@ void StarTracker::update_star_centres(double a_dt)
     if (m_fitting_direction == "x")
     {
         double starA_0 = find_centre(0, 0);
-        if (abs((starA_0 - m_star_coords[0][0]) / a_dt) < 1.0 &&
-            starA_0 != 0)
+        if (abs((starA_0 - m_star_coords[0][0]) / a_dt) < 1.0 && starA_0 != 0)
         {
             m_star_coords[0][0] = starA_0;
         }
@@ -287,8 +288,7 @@ void StarTracker::update_star_centres(double a_dt)
             find_centre_merger(0, 0);
         }
         double starB_0 = find_centre(1, 0);
-        if ((abs(starB_0 - m_star_coords[1][0]) / a_dt) < 1.0 &&
-            starB_0 != 0)
+        if ((abs(starB_0 - m_star_coords[1][0]) / a_dt) < 1.0 && starB_0 != 0)
         {
             m_star_coords[1][0] = starB_0;
         }
@@ -301,8 +301,7 @@ void StarTracker::update_star_centres(double a_dt)
     if (m_fitting_direction == "xy")
     {
         double starA_0 = find_centre(0, 0);
-        if (abs((starA_0 - m_star_coords[0][0]) / a_dt) < 1.0 &&
-            starA_0 != 0)
+        if (abs((starA_0 - m_star_coords[0][0]) / a_dt) < 1.0 && starA_0 != 0)
         {
             m_star_coords[0][0] = starA_0;
         }
@@ -311,8 +310,7 @@ void StarTracker::update_star_centres(double a_dt)
             find_centre_merger(0, 0);
         }
         double starA_1 = find_centre(0, 1);
-        if (abs((starA_1 - m_star_coords[0][1]) / a_dt) < 1.0 &&
-            starA_1 != 0)
+        if (abs((starA_1 - m_star_coords[0][1]) / a_dt) < 1.0 && starA_1 != 0)
         {
             m_star_coords[0][1] = starA_1;
         }
@@ -321,8 +319,7 @@ void StarTracker::update_star_centres(double a_dt)
             find_centre_merger(0, 1);
         }
         double starB_0 = find_centre(1, 0);
-        if (abs((starB_0 - m_star_coords[1][0]) / a_dt) < 1.0 &&
-            starB_0 != 0)
+        if (abs((starB_0 - m_star_coords[1][0]) / a_dt) < 1.0 && starB_0 != 0)
         {
             m_star_coords[1][0] = starB_0;
         }
@@ -331,8 +328,7 @@ void StarTracker::update_star_centres(double a_dt)
             find_centre_merger(1, 0);
         }
         double starB_1 = find_centre(1, 1);
-        if (abs((starB_1 - m_star_coords[1][1]) / a_dt) < 1.0 &&
-            starB_1 != 0)
+        if (abs((starB_1 - m_star_coords[1][1]) / a_dt) < 1.0 && starB_1 != 0)
         {
             m_star_coords[1][1] = starB_1;
         }
@@ -365,8 +361,8 @@ void StarTracker::read_in_star_coords(int a_int_step, double a_current_time)
 {
     bool first_step = false;
     double dt = (a_current_time / a_int_step);
-    SmallDataIO star_file("StarCentres", dt, a_current_time,
-                               a_current_time, SmallDataIO::APPEND, first_step);
+    SmallDataIO star_file("StarCentres", dt, a_current_time, a_current_time,
+                          SmallDataIO::APPEND, first_step);
 
     // NB need to give the get function an empty vector to fill
     std::vector<double> star_vector;
@@ -385,10 +381,9 @@ void StarTracker::read_in_star_coords(int a_int_step, double a_current_time)
     // convert vector to list of coords
     for (int ipuncture = 0; ipuncture < m_num_stars; ipuncture++)
     {
-        m_star_coords[ipuncture] = {
-            star_vector[ipuncture * CH_SPACEDIM + 0],
-            star_vector[ipuncture * CH_SPACEDIM + 1],
-            star_vector[ipuncture * CH_SPACEDIM + 2]};
+        m_star_coords[ipuncture] = {star_vector[ipuncture * CH_SPACEDIM + 0],
+                                    star_vector[ipuncture * CH_SPACEDIM + 1],
+                                    star_vector[ipuncture * CH_SPACEDIM + 2]};
     }
 
     update_star_centres(dt);
@@ -420,7 +415,7 @@ void StarTracker::restart_star_tracking()
         // look for the current star location in the
         // star output file (it needs to exist!)
         read_in_star_coords(current_step,
-                          m_interpolator->getAMR().getCurrentTime());
+                            m_interpolator->getAMR().getCurrentTime());
     }
 }
 
@@ -428,14 +423,14 @@ void StarTracker::restart_star_tracking()
 void StarTracker::set_initial_star_coords()
 {
     CH_assert(m_star_coords.size() > 0); // sanity check
-    
+
     // now the write out to a new file
     bool first_step = true;
     double dt = 1.; // doesn't matter
     double time = 0.;
     double restart_time = 0.;
     SmallDataIO star_centre_file("StarCentres", dt, time, restart_time,
-                               SmallDataIO::APPEND, first_step);
+                                 SmallDataIO::APPEND, first_step);
     std::vector<std::string> header1_strings(CH_SPACEDIM * m_num_stars);
     for (int ipuncture = 0; ipuncture < m_num_stars; ipuncture++)
     {
@@ -449,21 +444,20 @@ void StarTracker::set_initial_star_coords()
     star_centre_file.write_time_data_line(get_star_vector());
 }
 
- // Execute the tracking and write out
- void StarTracker::execute_tracking(double a_time, double a_restart_time, double a_dt,
-    const bool write_data)
+// Execute the tracking and write out
+void StarTracker::execute_tracking(double a_time, double a_restart_time,
+                                   double a_dt, const bool write_data)
 {
     CH_assert(m_interpolator != nullptr); // sanity check
-    
+
     update_star_centres(a_dt);
 
     // print them out
     if (write_data)
     {
         bool first_step = false;
-        SmallDataIO star_file("StarCentres", a_dt, a_time,
-                                   a_restart_time, SmallDataIO::APPEND,
-                                   first_step);
+        SmallDataIO star_file("StarCentres", a_dt, a_time, a_restart_time,
+                              SmallDataIO::APPEND, first_step);
 
         // use a vector for the write out
         star_file.write_time_data_line(get_star_vector());
@@ -477,12 +471,9 @@ std::vector<double> StarTracker::get_star_vector() const
     star_vector.resize(m_num_stars * CH_SPACEDIM);
     for (int ipuncture = 0; ipuncture < m_num_stars; ipuncture++)
     {
-        star_vector[ipuncture * CH_SPACEDIM + 0] =
-            m_star_coords[ipuncture][0];
-        star_vector[ipuncture * CH_SPACEDIM + 1] =
-            m_star_coords[ipuncture][1];
-        star_vector[ipuncture * CH_SPACEDIM + 2] =
-            m_star_coords[ipuncture][2];
+        star_vector[ipuncture * CH_SPACEDIM + 0] = m_star_coords[ipuncture][0];
+        star_vector[ipuncture * CH_SPACEDIM + 1] = m_star_coords[ipuncture][1];
+        star_vector[ipuncture * CH_SPACEDIM + 2] = m_star_coords[ipuncture][2];
     }
     return star_vector;
 }

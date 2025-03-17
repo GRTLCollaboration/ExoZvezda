@@ -6,9 +6,9 @@
 #ifndef BINARYPLAINSUPERPOSITION_HPP_
 #define BINARYPLAINSUPERPOSITION_HPP_
 
+#include "BosonStarHelperFunction.hpp"
 #include "BosonStarParams.hpp"
 #include "BosonStarSolver.hpp"
-#include "BosonStarHelperFunction.hpp"
 #include "Cell.hpp"
 #include "ComplexPotential.hpp"
 #include "ComplexScalarField.hpp"
@@ -16,14 +16,14 @@
 #include "MatterCCZ4.hpp"
 #include "Tensor.hpp"
 #include "TensorAlgebra.hpp"
-#include "UserVariables.hpp" 
+#include "UserVariables.hpp"
 #include "VarsTools.hpp"
-#include "parstream.H" 
+#include "parstream.H"
 #include "simd.hpp"
 
 /*
-* This class constructs binary initial data following plain superposition.
-*/
+ * This class constructs binary initial data following plain superposition.
+ */
 
 class BinaryPlainSuperposition
 {

@@ -34,7 +34,8 @@ void SingleBosonStar::compute_1d_solution(const double max_r)
     }
     catch (std::exception &exception)
     {
-        MayDay::Error("Yikes! I cannot compute the 1d solution in SingleBosonStar.impl.hpp file.");
+        MayDay::Error("Yikes! I cannot compute the 1d solution in "
+                      "SingleBosonStar.impl.hpp file.");
     }
 }
 
@@ -57,7 +58,8 @@ void SingleBosonStar::compute(Cell<data_t> current_cell) const
     BosonStarHelperFunction helper;
 
     // Compute star 1 and star 2 variables
-    BosonStarHelperFunction::BS_3d_vars star1_vars = helper.compute_star_vars(coords, rapidity, 0., 0., m_1d_sol, phase_offset, antiboson);
+    BosonStarHelperFunction::BS_3d_vars star1_vars = helper.compute_star_vars(
+        coords, rapidity, 0., 0., m_1d_sol, phase_offset, antiboson);
 
     // Lapse and shift
     vars.lapse = star1_vars.lapse;
@@ -73,14 +75,17 @@ void SingleBosonStar::compute(Cell<data_t> current_cell) const
     auto gammaUU = compute_inverse_sym(star1_vars.gLL);
 
     // Define initial conformal factor
-    vars.chi = pow(star1_vars.gLL[0][0] * star1_vars.gLL[1][1] * star1_vars.gLL[2][2], -1. / 3.);
+    vars.chi =
+        pow(star1_vars.gLL[0][0] * star1_vars.gLL[1][1] * star1_vars.gLL[2][2],
+            -1. / 3.);
 
     // Define initial trace of K and A_ij
     double one_third = 1. / 3.;
     FOR2(i, j) vars.h[i][j] = vars.chi * star1_vars.gLL[i][j];
     FOR2(i, j) vars.K = star1_vars.KLL[i][j] * gammaUU[i][j];
     FOR2(i, j)
-    vars.A[i][j] = vars.chi * (star1_vars.KLL[i][j] - one_third * vars.K * star1_vars.gLL[i][j]);
+    vars.A[i][j] = vars.chi * (star1_vars.KLL[i][j] -
+                               one_third * vars.K * star1_vars.gLL[i][j]);
 
     current_cell.store_vars(vars);
 }

@@ -32,10 +32,10 @@
 #include "MatterWeyl4.hpp"
 #include "WeylExtraction.hpp"
 
-// For flux integration 
+// For flux integration
 #include "AngMomFlux.hpp"
-#include "EMTensorAndFluxes.hpp"
 #include "DiagnosticVariablePreconditioner.hpp"
+#include "EMTensorAndFluxes.hpp"
 
 // For Noether Charge calculation
 #include "NoetherCharge.hpp"
@@ -107,12 +107,14 @@ void BBSGrazingFluxesLevel::preCheckpointLevel()
                               complex_scalar_field,
                               m_p.extraction_params.extraction_center, m_dx,
                               m_p.formulation, m_p.G_Newton),
-                              MatterConstraints<ComplexScalarFieldWithPotential>(
+                          MatterConstraints<ComplexScalarFieldWithPotential>(
                               complex_scalar_field, m_dx, m_p.G_Newton, c_Ham,
                               Interval(c_Mom1, c_Mom3)),
-                              EMTensorAndFluxes<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.flux_extraction_params.extraction_center,
-                                c_rho, c_Fphi_flux, c_Sphi_source, c_Qphi_density, Interval(c_s1,c_s3),
-                             Interval(c_s11,c_s33)),
+                          EMTensorAndFluxes<ComplexScalarFieldWithPotential>(
+                              complex_scalar_field, m_dx, m_p.L,
+                              m_p.flux_extraction_params.extraction_center,
+                              c_rho, c_Fphi_flux, c_Sphi_source, c_Qphi_density,
+                              Interval(c_s1, c_s3), Interval(c_s11, c_s33)),
                           NoetherCharge()),
         m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 }
@@ -133,16 +135,19 @@ void BBSGrazingFluxesLevel::prePlotLevel()
                           MatterConstraints<ComplexScalarFieldWithPotential>(
                               complex_scalar_field, m_dx, m_p.G_Newton, c_Ham,
                               Interval(c_Mom1, c_Mom3)),
-                          EMTensorAndFluxes<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.flux_extraction_params.extraction_center,
-                            c_rho, c_Fphi_flux, c_Sphi_source, c_Qphi_density, Interval(c_s1,c_s3), Interval(c_s11,c_s33)),
+                          EMTensorAndFluxes<ComplexScalarFieldWithPotential>(
+                              complex_scalar_field, m_dx, m_p.L,
+                              m_p.flux_extraction_params.extraction_center,
+                              c_rho, c_Fphi_flux, c_Sphi_source, c_Qphi_density,
+                              Interval(c_s1, c_s3), Interval(c_s11, c_s33)),
                           NoetherCharge()),
         m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 }
 
 // Things to do in RHS update, at each RK4 step
 void BBSGrazingFluxesLevel::specificEvalRHS(GRLevelData &a_soln,
-                                           GRLevelData &a_rhs,
-                                           const double a_time)
+                                            GRLevelData &a_rhs,
+                                            const double a_time)
 {
     // Enforce trace free A_ij and positive chi and alpha
     BoxLoops::loop(make_compute_pack(TraceARemoval(), PositiveChiAndAlpha()),
@@ -152,15 +157,15 @@ void BBSGrazingFluxesLevel::specificEvalRHS(GRLevelData &a_soln,
     ComplexPotential potential(m_p.potential_params);
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
     BoxLoops::loop(MatterCCZ4RHS<ComplexScalarFieldWithPotential>(
-        complex_scalar_field, m_p.ccz4_params, m_dx, m_p.sigma,
-      m_p.formulation, m_p.G_Newton),
-  a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
+                       complex_scalar_field, m_p.ccz4_params, m_dx, m_p.sigma,
+                       m_p.formulation, m_p.G_Newton),
+                   a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
 }
 
 // Things to do at ODE update, after soln + rhs
 void BBSGrazingFluxesLevel::specificUpdateODE(GRLevelData &a_soln,
-                                             const GRLevelData &a_rhs,
-                                             Real a_dt)
+                                              const GRLevelData &a_rhs,
+                                              Real a_dt)
 {
     // Enforce trace free A_ij
     BoxLoops::loop(TraceARemoval(), a_soln, a_soln, INCLUDE_GHOST_CELLS);
@@ -179,9 +184,10 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
     ComplexScalarFieldWithPotential complex_scalar_field(potential);
 
     BoxLoops::loop(MatterWeyl4<ComplexScalarFieldWithPotential>(
-        complex_scalar_field, m_p.extraction_params.extraction_center, m_dx,
-        m_p.formulation, m_p.G_Newton), m_state_new, m_state_diagnostics,
-                   EXCLUDE_GHOST_CELLS);
+                       complex_scalar_field,
+                       m_p.extraction_params.extraction_center, m_dx,
+                       m_p.formulation, m_p.G_Newton),
+                   m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
 
     BoxLoops::loop(MatterConstraints<ComplexScalarFieldWithPotential>(
                        complex_scalar_field, m_dx, m_p.G_Newton, c_Ham,
@@ -283,48 +289,54 @@ void BBSGrazingFluxesLevel::specificPostTimeStep()
     }
 
     // Flux calculation
-    if (m_p.do_flux_integration && at_level_timestep_multiple(m_p.flux_extraction_params.min_extraction_level()))
-    {  
-        BoxLoops::loop(EMTensorAndFluxes<ComplexScalarFieldWithPotential>(complex_scalar_field, m_dx, m_p.L, m_p.flux_extraction_params.extraction_center,
-            c_rho, c_Fphi_flux, c_Sphi_source, c_Qphi_density, Interval(c_s1,c_s3),
-                             Interval(c_s11,c_s33)),  m_state_new,
-                             m_state_diagnostics, EXCLUDE_GHOST_CELLS);
-    
+    if (m_p.do_flux_integration &&
+        at_level_timestep_multiple(
+            m_p.flux_extraction_params.min_extraction_level()))
+    {
+        BoxLoops::loop(EMTensorAndFluxes<ComplexScalarFieldWithPotential>(
+                           complex_scalar_field, m_dx, m_p.L,
+                           m_p.flux_extraction_params.extraction_center, c_rho,
+                           c_Fphi_flux, c_Sphi_source, c_Qphi_density,
+                           Interval(c_s1, c_s3), Interval(c_s11, c_s33)),
+                       m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+
         // Do the extraction on the min extraction level
         if (m_level == m_p.flux_extraction_params.min_extraction_level())
         {
- 
+
             AMRReductions<VariableType::diagnostic> amr_reductions(m_gr_amr);
-     
+
             double S_phi_integral = amr_reductions.sum(c_Sphi_source);
             double Q_phi_integral = amr_reductions.sum(c_Qphi_density);
             SmallDataIO source_density_file("AngMomSourceDensity", m_dt, m_time,
-                m_restart_time, SmallDataIO::APPEND,
-                first_step);
+                                            m_restart_time, SmallDataIO::APPEND,
+                                            first_step);
 
-                source_density_file.remove_duplicate_time_data();
+            source_density_file.remove_duplicate_time_data();
             if (first_step)
             {
-                source_density_file.write_header_line({
-                "Q (density)", "S (source)"});
+                source_density_file.write_header_line(
+                    {"Q (density)", "S (source)"});
             }
-            source_density_file.write_time_data_line({Q_phi_integral, S_phi_integral});
+            source_density_file.write_time_data_line(
+                {Q_phi_integral, S_phi_integral});
 
-        // Refresh the interpolator and do the interpolation
-        m_gr_amr.m_interpolator->refresh();
-        // setup and perform the angular momentum flux integral
-        AngMomFlux ang_mom_flux(m_p.flux_extraction_params,m_time,m_dt,m_restart_time,first_step);
-        ang_mom_flux.run(m_gr_amr.m_interpolator);
+            // Refresh the interpolator and do the interpolation
+            m_gr_amr.m_interpolator->refresh();
+            // setup and perform the angular momentum flux integral
+            AngMomFlux ang_mom_flux(m_p.flux_extraction_params, m_time, m_dt,
+                                    m_restart_time, first_step);
+            ang_mom_flux.run(m_gr_amr.m_interpolator);
         }
     }
 
     if (m_p.do_star_track && m_level == m_p.star_track_level)
     {
-	    pout() << "Running a star tracker now" << endl;
+        pout() << "Running a star tracker now" << endl;
         int coarsest_level = 0;
         bool write_star_coords = at_level_timestep_multiple(coarsest_level);
-        m_st_amr.m_star_tracker.execute_tracking(m_time, m_restart_time,
-                                                 m_dt, write_star_coords);
+        m_st_amr.m_star_tracker.execute_tracking(m_time, m_restart_time, m_dt,
+                                                 write_star_coords);
     }
 
 #ifdef USE_AHFINDER

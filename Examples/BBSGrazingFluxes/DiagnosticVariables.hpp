@@ -9,9 +9,9 @@
 // assign an enum to each variable
 enum
 {
-    c_mod_phi, 
+    c_mod_phi,
 
-    c_N, 
+    c_N,
 
     c_Ham,
 
@@ -22,7 +22,7 @@ enum
     c_Weyl4_Re,
     c_Weyl4_Im,
 
-    c_rho, 
+    c_rho,
     c_s1,
     c_s2,
     c_s3,
