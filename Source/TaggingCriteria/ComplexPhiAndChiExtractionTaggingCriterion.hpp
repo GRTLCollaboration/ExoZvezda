@@ -15,6 +15,10 @@
 #include "SimulationParametersBase.hpp"
 #include "Tensor.hpp"
 
+/* Tagging based on derivs of \chi and
+\varphi
+*/
+
 class ComplexPhiAndChiExtractionTaggingCriterion
 {
   protected:
@@ -74,8 +78,11 @@ class ComplexPhiAndChiExtractionTaggingCriterion
                                         d1.Pi_Im[idir] * d1.Pi_Im[jdir]);
             data_t abs_d1d1_phi_ij = abs(d1.phi_Re[idir] * d1.phi_Re[jdir] +
                                          d1.phi_Im[idir] * d1.phi_Im[jdir]);
-            d2_phi_ratio += mod_d2_Pi_ij / (abs_d1d1_Pi_ij + 1e-5) +
-                            mod_d2_phi_ij / (abs_d1d1_phi_ij + 1e-5);
+            d2_phi_ratio +=
+                mod_d2_Pi_ij / (abs_d1d1_Pi_ij + 1e-5) +
+                mod_d2_phi_ij / (abs_d1d1_phi_ij +
+                                 1e-5); // add small number in denominators to
+                                        // avoid division by zero
             d2_chi_ratio += d2chi.chi[idir][jdir] * d2chi.chi[idir][jdir] /
                             (1e-2 + abs(d1chi.chi[idir] * d1chi.chi[jdir]));
         }

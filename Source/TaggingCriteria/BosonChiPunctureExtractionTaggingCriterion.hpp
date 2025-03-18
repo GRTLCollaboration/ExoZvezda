@@ -13,11 +13,16 @@
 #include "SphericalExtraction.hpp"
 #include "Tensor.hpp"
 
-//! This class tags cells based on three criteria - the
-//! value of the second derivs, the extraction regions
-//! and the puncture 'horizons'. There are no horizon for BSs, but within a
-//! certain radius of the star, we will aim to place a box around it. Use of
-//! 'horizon' here is not to be taken literally.
+/* This class tags cells based on three criteria - the
+ value of the second derivs, the extraction regions
+ and the puncture 'horizons'. There are no horizon for BSs, but within a
+ certain radius of the star, we will aim to place a box around it. Use of
+ 'horizon' here is not to be taken literally.
+
+ This tagging follows the implementation/idea of Miren Radia, see Section of
+ https://arxiv.org/abs/2112.10567
+
+ */
 class BosonChiPunctureExtractionTaggingCriterion
 {
   protected:

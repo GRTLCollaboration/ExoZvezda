@@ -11,6 +11,9 @@
 #include "FourthOrderDerivatives.hpp"
 #include "Tensor.hpp"
 
+/* Tagging based on derivs of \chi, \varphi and K
+ */
+
 class ComplexPhiAndKTaggingCriterion
 {
   protected:

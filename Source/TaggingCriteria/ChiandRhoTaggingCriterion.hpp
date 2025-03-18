@@ -13,6 +13,10 @@
 #include "FourthOrderDerivatives.hpp"
 #include "Tensor.hpp"
 
+/* Tagging based on derivs of \chi and
+\rho
+*/
+
 class ChiandRhoTaggingCriterion
 {
   protected:
