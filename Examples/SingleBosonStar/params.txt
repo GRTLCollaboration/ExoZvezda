@@ -46,7 +46,7 @@ star_centre = 256 0 0
 scalar_mass = 1.0
 phi4_coeff = 0.0
 solitonic = true # if false, the next line is irrelevant. Make true for a solitonic potential
-sigma_solitonic = 0.2 
+sigma_solitonic = 0.2
 
 ##############################################################
 # Level data
@@ -150,14 +150,14 @@ num_mass_extraction_radii = 6
 mass_extraction_radii = 60. 100. 120. 140. 160. 180.
 mass_extraction_levels = 1 1 1 1 1 1
 num_points_phi_mass = 16
-num_points_theta_mass = 24
+num_points_theta_mass = 25
 
 ##############################################################
 # Apparent Horizon Finder parameters
 
 AH_activate = 0
 AH_num_ranks = 20
-AH_num_points_u = 30
+AH_num_points_u = 31
 AH_num_points_v = 50
 # AH_solve_interval = 1
 # AH_print_interval = 1
