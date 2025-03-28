@@ -182,7 +182,7 @@ direction_of_motion = "x"
 # Apparent Horizon Finder parameters
 
 AH_activate = 0
-AH_num_ranks = 20
+AH_num_ranks = 31
 AH_num_points_u = 31
 AH_num_points_v = 50
 # AH_solve_interval = 1
