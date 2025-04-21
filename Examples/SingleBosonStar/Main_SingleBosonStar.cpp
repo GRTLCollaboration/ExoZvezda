@@ -29,7 +29,7 @@ int runGRChombo(int argc, char *argv[])
     GRParmParse pp(argc - 2, argv + 2, NULL, in_file);
     SimulationParameters sim_params(pp);
 
-    GRAMR st_amr;
+    STAMR st_amr;
     DefaultLevelFactory<SingleBosonStarLevel> boson_star_level_fact(st_amr,
                                                                     sim_params);
     setupAMRObject(st_amr, boson_star_level_fact);
