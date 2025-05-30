@@ -627,7 +627,7 @@ double BosonStarSolver::DA_RHS(const double x, const double A, const double DA,
                                const double OM, const double ww_)
 {
     double r = ((x == 0.) ? eps : x);
-    double origin_fac = ((x == 0.) ? (1. / 3.) : 1.); //accounts for limit r->0
+    double origin_fac = ((x < eps) ? (1. / 3.) : 1.); //accounts for limit r->0
 
     double DOM = OMEGA_RHS(x, A, DA, PSI, DPSI, OM, ww_);
     return origin_fac * (A * PSI * PSI * (DV(A) - ww_ / (OM * OM)) -
@@ -650,7 +650,7 @@ double BosonStarSolver::DPSI_RHS(const double x, const double A,
                                  const double ww_)
 {
     double r = ((x == 0.) ? eps : x);
-    double origin_fac = ((x == 0.) ? (1. / 3.) : 1.); //accounts for limit r->0
+    double origin_fac = ((x < eps) ? (1. / 3.) : 1.); //accounts for limit r->0
     return origin_fac * (0.5 * DPSI * DPSI / PSI - 2. * DPSI / r -
            2. * M_PI * PSI *
                (PSI * PSI * V(A) + DA * DA +
