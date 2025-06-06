@@ -627,11 +627,19 @@ double BosonStarSolver::DA_RHS(const double x, const double A, const double DA,
                                const double OM, const double ww_)
 {
     double r = ((x == 0.) ? eps : x);
-    double origin_fac = ((x < eps) ? (1. / 3.) : 1.); //accounts for limit r->0
-
     double DOM = OMEGA_RHS(x, A, DA, PSI, DPSI, OM, ww_);
-    return origin_fac * (A * PSI * PSI * (DV(A) - ww_ / (OM * OM)) -
-           DA * (DOM / OM + DPSI / PSI + 2. / r));
+    //expansion at r = 0 for use at innermost gridpoint
+    if (x < eps)
+    {
+        return A * PSI * PSI * (DV(A) - ww_ / (OM * OM)) / 3.;
+    }
+    
+    //ordinary RHS returned everywhere else
+    else 
+    {
+        return A * PSI * PSI * (DV(A) - ww_ / (OM * OM)) -
+               DA * (DOM / OM + DPSI / PSI + 2. / r);
+    }
 }
 
 // RHS for the conformal factor
@@ -648,13 +656,24 @@ double BosonStarSolver::DPSI_RHS(const double x, const double A,
                                  const double DA, const double PSI,
                                  const double DPSI, const double OM,
                                  const double ww_)
-{
+{   
     double r = ((x == 0.) ? eps : x);
-    double origin_fac = ((x < eps) ? (1. / 3.) : 1.); //accounts for limit r->0
-    return origin_fac * (0.5 * DPSI * DPSI / PSI - 2. * DPSI / r -
-           2. * M_PI * PSI *
+    //expansion at r = 0 for use at innermost gridpoint
+    if (x < eps)
+    {
+        return (2. * M_PI * PSI *
+               (PSI * PSI * V(A) +
+                ww_ * A * A * PSI * PSI / (OM * OM))) / 3.;
+               
+    }
+    //ordinary RHS returned everywhere else
+    else
+    {
+        return 0.5 * DPSI * DPSI / PSI - 2. * DPSI / r -
+               2. * M_PI * PSI *
                (PSI * PSI * V(A) + DA * DA +
-                ww_ * A * A * PSI * PSI / (OM * OM)));
+                ww_ * A * A * PSI * PSI / (OM * OM));
+    }
 }
 
 // RHS for the lapse
