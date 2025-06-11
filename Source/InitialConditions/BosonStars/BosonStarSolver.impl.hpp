@@ -661,7 +661,7 @@ double BosonStarSolver::DPSI_RHS(const double x, const double A,
     //expansion at r = 0 for use at innermost gridpoint
     if (x < eps)
     {
-        return (2. * M_PI * PSI *
+        return (-2. * M_PI * PSI *
                (PSI * PSI * V(A) +
                 ww_ * A * A * PSI * PSI / (OM * OM))) / 3.;
                
