@@ -1,5 +1,7 @@
 # ExoZvezda
 
+[![DOI](https://zenodo.org/badge/868938321.svg)](https://doi.org/10.5281/zenodo.23403432)
+
 ExoZvezda is an open-source code for performing simulations of exotic compact objects, based on the publicly available 
 3+1 numerical relativity code [GRChombo](https://github.com/GRChombo/GRChombo). It inherits all of the capabilities of the main code and is developed and maintained by a collaboration of numerical relativists with a wide range of research interests, from early universe cosmology to astrophysics and mathematical general relativity. 
 
@@ -16,8 +18,18 @@ We welcome feedback, bug reports, and contributions. Please consult the [wiki]([
 ExoZvezda is licensed under the BSD 3-Clause License. Please see LICENSE for details.
 
 ## Citation
-If you use ExoZvezda as part of a paper, please cite the following publications:
-
+If you use ExoZvezda as part of a paper, please cite the following publications and software releases:
+```
+@software{GRTLCollaboration:2026eza,
+    author = {GRTLCollaboration},
+    title = {ExoZvezda: An open-source code for evolutions of exotic compact objects},
+    year = 2026,
+    publisher = {Zenodo},
+    version = {v1.0.0},
+    doi = {10.5281/zenodo.23403433},
+    url = {https://doi.org/10.5281/zenodo.23403432}
+}
+```
 ```
 @article{Helfer:2021brt,
     author = "Helfer, Thomas and Sperhake, Ulrich and Croft, Robin and Radia, Miren and Ge, Bo-Xuan and Lim, Eugene A.",
